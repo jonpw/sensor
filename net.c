@@ -37,6 +37,7 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
 /** @file
  *
  * @defgroup iot_sdk_app_mqtt_client main.c
@@ -48,7 +49,7 @@
  *        Value of 0 or 1 is published as data for the topic based on LED is turned ON or OFF
  *        on button press.
  */
-
+ 
 #include <stdbool.h>
 #include <stdint.h>
 #include "boards.h"
@@ -86,73 +87,19 @@
 #include "icmp6_api.h"
 #include "dns6_api.h"
 
-typedef enum
-{
-    STATE_NET_IDLE = 0,
-    STATE_NET_IFDOWN,
-    STATE_NET_IFUP
-} app_state_t;
-
-APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
 static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static ipv6_addr_t            m_hostname_address;                                                   /**< IPv6 address of given hostname. */
 static uint32_t               m_echo_req_retry_count;                                               /**< Number of echo request retransmission. */
-static display_state_t        m_display_state = LEDS_INACTIVE;                                      /**< Board LED display state. */
-static volatile app_state_t   m_app_state = APP_STATE_IDLE;                                         /**< State of application state machine. */
-
-#define SCHED_MAX_EVENT_DATA_SIZE           16                                                      /**< Maximum size of scheduler events. */
-#define SCHED_QUEUE_SIZE                    192                                                     /**< Maximum number of events in the scheduler queue. */
-
-#define LED_ONE                             BSP_LED_0_MASK
-#define LED_TWO                             BSP_LED_1_MASK
-#define LED_THREE                           BSP_LED_2_MASK
-#define LED_FOUR                            BSP_LED_3_MASK
-#define ALL_APP_LED                        (BSP_LED_0_MASK | BSP_LED_1_MASK | \
-                                            BSP_LED_2_MASK | BSP_LED_3_MASK)                        /**< Define used for simultaneous operation of all application LEDs. */
-
-#ifdef COMMISSIONING_ENABLED
-#define ERASE_BUTTON_PIN_NO                 BSP_BUTTON_3                                            /**< Button used to erase commissioning settings. */
-#endif // COMMISSIONING_ENABLED
-
-#define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
-#define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */
 
 #define DEAD_BEEF                           0xDEADBEEF                                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
-#define APP_ENABLE_LOGS                     1                                                       /**< Enable logs in the application. */
-
-#if (APP_ENABLE_LOGS == 1)
-
-#define APPL_LOG  NRF_LOG_INFO
-#define APPL_DUMP NRF_LOG_RAW_HEXDUMP_INFO
-#define APPL_ADDR IPV6_ADDRESS_LOG
-
-#else // APP_ENABLE_LOGS
-
-#define APPL_LOG(...)
-#define APPL_DUMP(...)
-#define APPL_ADDR(...)
-
-#endif // APP_ENABLE_LOGS
-
-APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< System Timer used to service CoAP and LWIP periodically. */
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 static ipv6_medium_instance_t               m_ipv6_medium;
-static mqtt_client_t                        m_app_mqtt_client;                                      /**< MQTT Client instance reference provided by the MQTT module. */
-static const char                           m_client_id[] = "nrfPublisher";                         /**< Unique MQTT client identifier. */
-static display_state_t                      m_display_state = LEDS_INACTIVE;                        /**< Board LED display state. */
-static bool                                 m_led_state  = false;                                   /**< LED state. This is the topic being published by the example MQTT client. */
 static app_mqtt_state_t                     m_connection_state = APP_MQTT_STATE_IDLE;               /**< MQTT Connection state. */
 static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
-static uint16_t                             m_message_counter = 1;                                  /**< Message counter used to generated message ids for MQTT messages. */
-
-#ifdef COMMISSIONING_ENABLED
-static bool                                 m_power_off_on_failure = false;
-static bool                                 m_identity_mode_active;
-#endif // COMMISSIONING_ENABLED
 
 /**@brief Function for initializing IP stack.
  *
@@ -174,9 +121,6 @@ static void ip_stack_init(void)
 
     // Initialize LwIP stack driver.
     err_code = nrf_driver_init();
-    APP_ERROR_CHECK(err_code);
-
-    err_code = mqtt_init();
     APP_ERROR_CHECK(err_code);
 }
 
@@ -267,11 +211,6 @@ static void iot_timer_init(void)
 void nrf_driver_interface_up(iot_interface_t const * p_interface)
 {
     UNUSED_PARAMETER(p_interface);
-
-#ifdef COMMISSIONING_ENABLED
-    commissioning_joining_mode_timer_ctrl(JOINING_MODE_TIMER_STOP_RESET);
-#endif // COMMISSIONING_ENABLED
-
     APPL_LOG ("IPv6 Interface Up.");
 
     sys_check_timeouts();
@@ -284,11 +223,6 @@ void nrf_driver_interface_up(iot_interface_t const * p_interface)
 void nrf_driver_interface_down(iot_interface_t const * p_interface)
 {
     UNUSED_PARAMETER(p_interface);
-
-#ifdef COMMISSIONING_ENABLED
-    commissioning_joining_mode_timer_ctrl(JOINING_MODE_TIMER_START);
-#endif // COMMISSIONING_ENABLED
-
     APPL_LOG ("IPv6 Interface Down.");
 
     m_display_state = LEDS_IPV6_IF_DOWN;
@@ -335,45 +269,6 @@ static void on_ipv6_medium_error(ipv6_medium_error_t * p_ipv6_medium_error)
     // Do something.
 }
 
-
-#ifdef COMMISSIONING_ENABLED
-void commissioning_id_mode_cb(mode_control_cmd_t control_command)
-{
-    switch (control_command)
-    {
-        case CMD_IDENTITY_MODE_ENTER:
-        {
-            LEDS_OFF(LED_THREE | LED_FOUR);
-            m_identity_mode_active = true;
-
-            break;
-        }
-        case CMD_IDENTITY_MODE_EXIT:
-        {
-            m_identity_mode_active = false;
-            LEDS_OFF((LED_THREE | LED_FOUR));
-
-            break;
-        }
-        default:
-        {
-
-            break;
-        }
-    }
-}
-
-
-void commissioning_power_off_cb(bool power_off_on_failure)
-{
-    m_power_off_on_failure = power_off_on_failure;
-
-    APPL_LOG("Commissioning: do power_off on failure: %s.",
-             m_power_off_on_failure ? "true" : "false");
-}
-#endif // COMMISSIONING_ENABLED
-
-
 /**@brief Function for initializing the nrf log module.
  */
 static void log_init(void)
@@ -393,13 +288,6 @@ int net_init(void)
     uint32_t err_code;
 
     // Common initialize.
-    log_init();
-    scheduler_init();
-
-    leds_init();
-    timers_init();
-    iot_timer_init();
-    button_init();
 
     static ipv6_medium_init_params_t ipv6_medium_init_params;
     memset(&ipv6_medium_init_params, 0x00, sizeof(ipv6_medium_init_params));
@@ -433,7 +321,7 @@ int net_init(void)
 
 
     // Start execution.
-    connectable_mode_enter();
+    //connectable_mode_enter();
 
 }
 

@@ -71,10 +71,8 @@
 
 #define APP_RTR_SOLICITATION_DELAY      1000                                                        /**< Time before host sends an initial solicitation in ms. */
 
-#define DEAD_BEEF                       0xDEADBEEF                                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define MAX_LENGTH_FILENAME             128                                                         /**< Max length of filename to copy for the debug error handler. */
 
-#define APP_HOSTNAME                    "example.com"                                               /**< Host name to perform DNS resolution and Echo Ping. */
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
 #define APP_DNS_SERVER_PORT             0x0035                                                      /**< UDP Port number of DNS Server. */
 #define APP_DNS_SERVER_ADDR             {{0x20, 0x01, 0x48, 0x60, 0x48, 0x60, 0x00, 0x00, \
@@ -85,17 +83,16 @@
 /**@brief Application's state. */
 typedef enum
 {
-    APP_STATE_IDLE = 0,
-    APP_STATE_QUERYING,
-    APP_STATE_RESOLVING
-} app_state_t;
+    DNS_STATE_IDLE = 0,
+    DNS_STATE_QUERYING,
+    DNS_STATE_RESOLVING
+} dns_state_t;
 
 static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static ipv6_addr_t            m_hostname_address;                                                   /**< IPv6 address of given hostname. */
-static display_state_t        m_display_state = LEDS_INACTIVE;                                      /**< Board LED display state. */
-static volatile app_state_t   m_app_state = APP_STATE_IDLE;                                         /**< State of application state machine. */
+static volatile dns_state_t   m_dns_state = DNS_STATE_IDLE;                                         /**< State of application state machine. */
 
 /**@brief Addresses used in sample application. */
 static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x00, 0x00,
@@ -106,16 +103,16 @@ static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x0
 
 void static dns_lookup(const char * p_hostname)
 {
-    APPL_LOG("Start button has been pushed.");
+    APPL_LOG("DNS lookup for hostname: %s", p_hostname);
 
     // Change application state in case being in IDLE state.
-    if (m_app_state == APP_STATE_IDLE)
+    if (m_dns_state == DNS_STATE_IDLE)
     {
-        m_app_state = APP_STATE_QUERYING;
+        m_dns_state = DNS_STATE_QUERYING;
 
         err_code = dns6_query(APP_HOSTNAME, app_dns_handler);
         APP_ERROR_CHECK(err_code);
-        m_app_state = APP_STATE_RESOLVING;
+        m_dns_state = DNS_STATE_RESOLVING;
     }
 }
 
@@ -130,8 +127,9 @@ static void app_dns_handler(uint32_t      process_result,
                             uint16_t      addr_count)
 {
     uint32_t index;
+    app_state_event_t state_update = STATE_EVENT_NONE;
 
-    if (m_app_state != APP_STATE_RESOLVING)
+    if (m_dns_state != DNS_STATE_RESOLVING)
     {
         // Exit if it's not in resolving state.
         return;
@@ -152,24 +150,22 @@ static void app_dns_handler(uint32_t      process_result,
             {
                 memcpy(m_hostname_address.u8, p_addr[0].u8, IPV6_ADDR_SIZE);
 
-                // Change application state.
-                m_app_state = APP_STATE_IDLE;
-
+                app_state_update = STATE_EVENT_DNS_DONE;
+                err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
+                APP_ERROR_CHECK(err_code);
+                m_dns_state = DNS_STATE_IDLE;
             }
         }
     }
     else
     {
         // Start application state machine from beginning.
-        // TODO: handle DNS lookup failure
-        m_app_state = APP_STATE_IDLE;
+        app_state_update = STATE_EVENT_DNS_FAIL;
+        err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
+        APP_ERROR_CHECK(err_code);
+        m_dns_state = DNS_STATE_IDLE;
     }
 }
-
-    static const iot_timer_client_t list_of_clients[] =
-    {
-
-        {dns6_timeout_process,    SEC_TO_MILLISEC(DNS6_RETRANSMISSION_INTERVAL)},
 
 /**@brief Function for initializing IP stack.
  *

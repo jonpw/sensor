@@ -87,13 +87,7 @@
 #define SCHED_MAX_EVENT_DATA_SIZE           16                                                      /**< Maximum size of scheduler events. */
 #define SCHED_QUEUE_SIZE                    192                                                     /**< Maximum number of events in the scheduler queue. */
 
-#define START_BUTTON_PIN_NO             BSP_BUTTON_0                                                /**< Button used to start application state machine. */
-#define STOP_BUTTON_PIN_NO              BSP_BUTTON_1                                                /**< Button used to stop application state machine. */
-#ifdef COMMISSIONING_ENABLED
-#define ERASE_BUTTON_PIN_NO             BSP_BUTTON_3                                                /**< Button used to erase commissioning settings. */
-#endif // COMMISSIONING_ENABLED
-
-#define APP_STATE_INTERVAL              APP_TIMER_TICKS(1500)                                       /**< Interval for executing application state machine. */
+#define STATE_APP_INTERVAL              APP_TIMER_TICKS(1500)                                       /**< Interval for executing application state machine. */
 
 #define APP_RTR_SOLICITATION_DELAY      1000                                                        /**< Time before host sends an initial solicitation in ms. */
 
@@ -113,15 +107,27 @@
 /**@brief Application's state. */
 typedef enum
 {
-    APP_STATE_IDLE = 0,
-    APP_STATE_CONNECTABLE,  // waiting for BT+IPSP connection and negotiation [return here if ip disconnected]
-    APP_STATE_CONNECTED,    // ip interface is up
-    APP_STATE_BROKER_QUERYING,  // going to send request to DNS server [return here on mqtt disconnect?]
-    APP_STATE_BROKER_RESOLVING, // got the DNS response, processing
-    APP_STATE_BROKER_CONNECTING,    // connection request sent to broker, waiting for callback
-    APP_STATE_ACTIVE_IDLE,           // waiting for button presses
-    APP_STATE_NFC                   // NFC operations (field is present - operations suspended)
+    STATE_APP_IDLE = 0,
+    STATE_APP_CONNECTABLE,  // waiting for BT+IPSP connection and negotiation [return here if ip disconnected]
+    STATE_APP_CONNECTED,    // ip interface is up
+    STATE_APP_BROKER_QUERYING,  // going to send request to DNS server [return here on mqtt disconnect?]
+    STATE_APP_MQTT_CONNECTING,
+    STATE_APP_ACTIVE_IDLE,           // waiting for button presses
+    STATE_APP_NFC,                   // NFC operations (field is present - operations suspended)
+    STATE_APP_FAULT                 // catch state
 } app_state_t;
+
+typedef enum
+{
+    STATE_EVENT_NONE = 0,
+    STATE_EVENT_DNSOK,
+    STATE_EVENT_MQTT_CONNECT,
+    STATE_EVENT_MQTT_DISCONNECT,
+    STATE_EVENT_SOFT_RESET,
+    STATE_EVENT_GO,
+    STATE_EVENT_CONNECTED,
+    STATE_EVENT_NFC
+} app_state_event_t;
 
 /**@brief LED's indication state. */
 typedef enum
@@ -135,17 +141,27 @@ typedef enum
     LEDS_NFC
 } display_state_t;
 
+typedef enum
+{
+    BUTTON_TYPE_NONE = 0,
+    BUTTON_TYPE_PUBLISH,
+    BUTTON_TYPE_PUBLISH_TILT
+} button_type_t;
+
+typedef enum
 typedef struct
 {
     button_type_t type = BUTTON_TYPE_PUBLISH,
-    char[] name 
-    /* data */
+    uint8_t pin,
+    uint8_t number,
+    mqtt_topic_t topic
 } button_config_t;
+
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
 
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
-static volatile app_state_t   m_app_state = APP_STATE_IDLE;                                         /**< State of application state machine. */
+static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
 
 #define APP_ENABLE_LOGS                     1                                                       /**< Enable logs in the application. */
 
@@ -168,12 +184,6 @@ static display_state_t                      m_display_state = LEDS_INACTIVE;    
 static bool                                 m_led_state  = false;                                   /**< LED state. This is the topic being published by the example MQTT client. */
 static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
-static uint16_t                             m_message_counter = 1;                                  /**< Message counter used to generated message ids for MQTT messages. */
-
-#ifdef COMMISSIONING_ENABLED
-static bool                                 m_power_off_on_failure = false;
-static bool                                 m_identity_mode_active;
-#endif // COMMISSIONING_ENABLED
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -231,7 +241,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         }
         else
         {
-            LEDS_OFF(LED_THREE);
+            LEDS_OFF(LED_R);
             m_do_ind_err = false;
             m_ind_err_count = 0;
         }
@@ -246,26 +256,30 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         }
         case LEDS_CONNECTABLE_MODE:
         {
-            LEDS_INVERT(LED_ONE);
-            LEDS_OFF(LED_TWO);
+            LEDS_INVERT(LED_B);
+            LEDS_OFF(LED_R);
+            LEDS_OFF(LED_G);
             break;
         }
         case LEDS_IPV6_IF_DOWN:
         {
-            LEDS_INVERT(LED_TWO);
-            LEDS_OFF(LED_ONE);
+            LEDS_ON(LED_B);
+            LEDS_OFF(LED_R);
+            LEDS_OFF(LED_G);
             break;
         }
         case LEDS_IPV6_IF_UP:
         {
-            LEDS_ON(LED_ONE);
-            LEDS_OFF(LED_TWO);
+            LEDS_INVERT(LED_G);
+            LEDS_OFF(LED_R);
+            LEDS_OFF(LED_B);
             break;
         }
         case LEDS_CONNECTED_TO_BROKER:
         {
-            LEDS_ON(LED_TWO);
-            LEDS_OFF(LED_ONE);
+            LEDS_ON(LED_G);
+            LEDS_OFF(LED_R);
+            LEDS_OFF(LED_B);
             break;
         }
         default:
@@ -281,32 +295,81 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
     {
         switch (pin_no)
         {
-
             case BSP_BUTTON_0:
             {
-                mqtt_publish_button(0, PUBSTATE_PRESSED);
+                mqtt_publish_message_t pubmsg =
+                {
+                    .topic = 
+                    {
+                        .p_utf_str = (*uint8_t)TOPIC_BUTTON_1;
+                        .p_utf_str = strlen(TOPIC_BUTTON_1);
+                    }
+                    .payload =
+                    {
+                        .p_bin_str = (*uint8_t)MSG_BUTTON_PRESSED;
+                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
+                    }
+                }
+                app_mqtt_publish(&pubmsg);
                 break;
             }
             case BSP_BUTTON_1:
             {
-                if (m_connection_state == APP_MQTT_STATE_CONNECTED)
+                mqtt_publish_message_t pubmsg =
                 {
-                    app_mqtt_publish(!m_led_state);
+                    .topic = 
+                    {
+                        .p_utf_str = (*uint8_t)TOPIC_BUTTON_2;
+                        .p_utf_str = strlen(TOPIC_BUTTON_2);
+                    }
+                    .payload =
+                    {
+                        .p_bin_str = (*uint8_t)MSG_BUTTON_PRESSED;
+                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
+                    }
                 }
+                app_mqtt_publish(&pubmsg);
                 break;
             }
             case BSP_BUTTON_2:
             {
-                if (m_connection_state == APP_MQTT_STATE_CONNECTED)
+                mqtt_publish_message_t pubmsg =
                 {
-                    UNUSED_VARIABLE(mqtt_disconnect(&m_app_mqtt_client));
+                    .topic = 
+                    {
+                        .p_utf_str = (*uint8_t)TOPIC_BUTTON_3;
+                        .p_utf_str = strlen(TOPIC_BUTTON_3);
+                    }
+                    .payload =
+                    {
+                        .p_bin_str = (*uint8_t)MSG_BUTTON_PRESSED;
+                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
+                    }
                 }
+                app_mqtt_publish(&pubmsg);
                 break;
             }
+            case BSP_BUTTON_3:
+            {
+                mqtt_publish_message_t pubmsg =
+                {
+                    .topic = 
+                    {
+                        .p_utf_str = (uint8_t *)TOPIC_BUTTON_4;
+                        .p_utf_str = strlen(TOPIC_BUTTON_4);
+                    }
+                    .payload =
+                    {
+                        .p_bin_str = (uint8_t *)MSG_BUTTON_PRESSED;
+                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
+                    }
+                }
+                app_mqtt_publish(&pubmsg);
+                break;
+            }            
             default:
                 break;
         }
-        
     }
 }
 
@@ -320,9 +383,7 @@ static void button_init(void)
         {BSP_BUTTON_0,        false, BUTTON_PULL, button_event_handler},
         {BSP_BUTTON_1,        false, BUTTON_PULL, button_event_handler},
         {BSP_BUTTON_2,        false, BUTTON_PULL, button_event_handler},
-#ifdef COMMISSIONING_ENABLED
-        {ERASE_BUTTON_PIN_NO, false, BUTTON_PULL, button_event_handler}
-#endif // COMMISSIONING_ENABLED
+        {BSP_BUTTON_3,        false, BUTTON_PULL, button_event_handler},
     };
 
     #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(50)
@@ -393,9 +454,6 @@ static void iot_timer_init(void)
         {system_timer_callback,   LWIP_SYS_TICK_MS},
         {blink_timeout_handler,   LED_BLINK_INTERVAL_MS},
         {dns6_timeout_process,    SEC_TO_MILLISEC(DNS6_RETRANSMISSION_INTERVAL)},
-#ifdef COMMISSIONING_ENABLED
-        {commissioning_time_tick, SEC_TO_MILLISEC(COMMISSIONING_TICK_INTERVAL_SEC)}
-#endif // COMMISSIONING_ENABLED
     };
 
     // The list of IoT Timer clients is declared as a constant.
@@ -426,6 +484,70 @@ static void log_init(void)
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
+// app_state_update called when events occur that should update the main app state
+// sub-states should be updated before calling this
+void app_state_update(app_state_event_t * p_event_data, uint16_t event_size)
+{
+
+    if (m_app_state == STATE_APP_IDLE)
+    {
+        if (p_event_data->evt_type == STATE_EVENT_GO)
+        {
+            net_init(); // -> mqtt + dns init
+            nfc_init();
+            m_app_state = STATE_APP_STARTING;
+        }
+    } else if (m_app_state == STATE_APP_CONNECTABLE)
+    {
+        if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
+        {
+            dns_lookup(...);
+            m_app_state = STATE_APP_DNS_LOOKUP;
+        }
+    } else if (m_app_state == STATE_APP_BROKER_QUERYING)
+    {
+        if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
+        {
+            mqtt_begin(); // todo: should we pass a param for the dns result?
+            m_app_state = STATE_APP_MQTT_CONNECTING;
+        }
+    } else if (m_app_state == STATE_APP_MQTT_CONNECTING)
+    {
+        if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECTED)
+        {
+            // todo: should we handle initial pubs here?
+            m_app_state = STATE_APP_ACTIVE_IDLE;
+        }
+    } else if (m_app_state == STATE_APP_ACTIVE_IDLE)
+    {
+        if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
+            {
+                //todo: reconnect or wait a bit?
+                m_app_state = STATE_APP_FAULT;
+            }
+        else if (p_event_data->evt_type == STATE_EVENT_CONNECTION_LOST)
+        {
+            //todo: reconnect? 
+            m_app_state = STATE_APP_FAULT;
+        }
+
+    } else if (m_app_state == STATE_APP_NFC)
+    {
+        if (p_event_data->evt_type == STATE_EVENT_NFC_RESUME)
+            {
+                //todo: reconnect or wait a bit?
+                m_app_state = STATE_APP_FAULT;
+            }
+        else if (p_event_data->evt_type == STATE_EVENT_NFC_RESET)
+        {
+            // 
+            app_mqtt_stop();
+            net_stop();
+            m_app_state 
+        }
+    }
+
+}
 
 /**
  * @brief Function for application main entry.
@@ -442,9 +564,6 @@ int main(void)
     timers_init();
     iot_timer_init();
     button_init();
-
-    net_init(); // -> mqtt + dns init
-    nfc_init();
 
     // Enter main loop.
     for (;;)

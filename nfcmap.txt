@@ -1,0 +1,24 @@
+{
+"SSID": "",
+"key": "",
+
+"access key": "",
+"name": "",
+
+"broker": "",
+"port": "",
+"qos": "",
+"topic-type": "logical|physical", // e.g. /node/654321/temperature vs /<user>/<name>/temperature
+
+"trigger-type": "interval|triggered|burst|interrupt",
+"interval": "{seconds}"",
+"trigger-topic": "{mqtt topic}",
+
+
+
+"b1dir: "",
+"b1behaviour": "",
+"b2dir: "",
+"b3dir: "",
+"b4dir": ""
+}
