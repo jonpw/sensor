@@ -133,7 +133,7 @@ static void app_dns_handler(uint32_t      process_result,
                 memcpy(m_hostname_address.u8, p_addr[0].u8, IPV6_ADDR_SIZE);
 
                 app_state_event_data_t state_update;
-                state_update.evt_type = STATE_EVENT_DNS_DONE;
+                state_update.evt_type = STATE_EVENT_DNS_OK;
 
                 err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);
