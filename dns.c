@@ -67,18 +67,12 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-#define APP_STATE_INTERVAL              APP_TIMER_TICKS(1500)                                       /**< Interval for executing application state machine. */
-
-#define APP_RTR_SOLICITATION_DELAY      1000                                                        /**< Time before host sends an initial solicitation in ms. */
-
-#define MAX_LENGTH_FILENAME             128                                                         /**< Max length of filename to copy for the debug error handler. */
+#include "dns.h"
 
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
 #define APP_DNS_SERVER_PORT             0x0035                                                      /**< UDP Port number of DNS Server. */
 #define APP_DNS_SERVER_ADDR             {{0x20, 0x01, 0x48, 0x60, 0x48, 0x60, 0x00, 0x00, \
                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x88}}          /**< IPv6 address of Google's DNS Server. */
-
-#define APP_MAX_ECHO_REQUEST_RTR        3                                                           /**< Maximum echo request retransmission before application goes back to querying state. */
 
 /**@brief Application's state. */
 typedef enum

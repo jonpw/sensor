@@ -84,6 +84,9 @@
 #include "iot_common.h"
 #include "ipv6_api.h"
 
+// project's includes
+#include "dns.h"
+
 #define SCHED_MAX_EVENT_DATA_SIZE           16                                                      /**< Maximum size of scheduler events. */
 #define SCHED_QUEUE_SIZE                    192                                                     /**< Maximum number of events in the scheduler queue. */
 
@@ -94,23 +97,30 @@
 #define DEAD_BEEF                       0xDEADBEEF                                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define MAX_LENGTH_FILENAME             128                                                         /**< Max length of filename to copy for the debug error handler. */
 
-#define LED_ONE                             BSP_LED_0_MASK
-#define LED_TWO                             BSP_LED_1_MASK
-#define LED_THREE                           BSP_LED_2_MASK
-#define LED_FOUR                            BSP_LED_3_MASK
+#define LED_R                             BSP_LED_0_MASK
+#define LED_G                             BSP_LED_1_MASK
+#define LED_B                             BSP_LED_2_MASK
 #define ALL_APP_LED                        (BSP_LED_0_MASK | BSP_LED_1_MASK | \
-                                            BSP_LED_2_MASK | BSP_LED_3_MASK)                        /**< Define used for simultaneous operation of all application LEDs. */
+                                            BSP_LED_2_MASK )                        /**< Define used for simultaneous operation of all application LEDs. */
 
 #define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
 #define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */
+
+#define MSG_BUTTON_PRESSED "pressed"
+
+#define TOPIC_BUTTON_1  "button/1/event"
+#define TOPIC_BUTTON_2  "button/2/event"
+#define TOPIC_BUTTON_3  "button/3/event"
+#define TOPIC_BUTTON_4  "button/4/event"
 
 /**@brief Application's state. */
 typedef enum
 {
     STATE_APP_IDLE = 0,
+    STATE_APP_STARTING,
     STATE_APP_CONNECTABLE,  // waiting for BT+IPSP connection and negotiation [return here if ip disconnected]
     STATE_APP_CONNECTED,    // ip interface is up
-    STATE_APP_BROKER_QUERYING,  // going to send request to DNS server [return here on mqtt disconnect?]
+    STATE_APP_DNS_LOOKUP,  // going to send request to DNS server [return here on mqtt disconnect?]
     STATE_APP_MQTT_CONNECTING,
     STATE_APP_ACTIVE_IDLE,           // waiting for button presses
     STATE_APP_NFC,                   // NFC operations (field is present - operations suspended)
@@ -120,13 +130,16 @@ typedef enum
 typedef enum
 {
     STATE_EVENT_NONE = 0,
-    STATE_EVENT_DNSOK,
+    STATE_EVENT_DNS_OK,
     STATE_EVENT_MQTT_CONNECT,
     STATE_EVENT_MQTT_DISCONNECT,
     STATE_EVENT_SOFT_RESET,
     STATE_EVENT_GO,
     STATE_EVENT_CONNECTED,
-    STATE_EVENT_NFC
+    STATE_EVENT_CONNECTION_LOST,
+    STATE_EVENT_NFC,
+    STATE_EVENT_NFC_RESUME,
+    STATE_EVENT_NFC_RESET
 } app_state_event_t;
 
 /**@brief LED's indication state. */
@@ -148,14 +161,13 @@ typedef enum
     BUTTON_TYPE_PUBLISH_TILT
 } button_type_t;
 
-typedef enum
-typedef struct
+/*typedef struct
 {
-    button_type_t type = BUTTON_TYPE_PUBLISH,
+    button_type_t type,
     uint8_t pin,
     uint8_t number,
     mqtt_topic_t topic
-} button_config_t;
+} button_config_t;*/
 
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
@@ -254,7 +266,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
             LEDS_OFF(ALL_APP_LED);
             break;
         }
-        case LEDS_CONNECTABLE_MODE:
+        case LEDS_CONNECTABLE:
         {
             LEDS_INVERT(LED_B);
             LEDS_OFF(LED_R);
@@ -297,73 +309,45 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
         {
             case BSP_BUTTON_0:
             {
-                mqtt_publish_message_t pubmsg =
-                {
-                    .topic = 
-                    {
-                        .p_utf_str = (*uint8_t)TOPIC_BUTTON_1;
-                        .p_utf_str = strlen(TOPIC_BUTTON_1);
-                    }
-                    .payload =
-                    {
-                        .p_bin_str = (*uint8_t)MSG_BUTTON_PRESSED;
-                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                    }
-                }
+                mqtt_publish_message_t pubmsg;
+                pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
+                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_1;
+                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_1);
+                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
+                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
                 app_mqtt_publish(&pubmsg);
                 break;
             }
             case BSP_BUTTON_1:
             {
-                mqtt_publish_message_t pubmsg =
-                {
-                    .topic = 
-                    {
-                        .p_utf_str = (*uint8_t)TOPIC_BUTTON_2;
-                        .p_utf_str = strlen(TOPIC_BUTTON_2);
-                    }
-                    .payload =
-                    {
-                        .p_bin_str = (*uint8_t)MSG_BUTTON_PRESSED;
-                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                    }
-                }
+                mqtt_publish_message_t pubmsg;
+                pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
+                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_2;
+                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_2);
+                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
+                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
                 app_mqtt_publish(&pubmsg);
                 break;
             }
             case BSP_BUTTON_2:
             {
-                mqtt_publish_message_t pubmsg =
-                {
-                    .topic = 
-                    {
-                        .p_utf_str = (*uint8_t)TOPIC_BUTTON_3;
-                        .p_utf_str = strlen(TOPIC_BUTTON_3);
-                    }
-                    .payload =
-                    {
-                        .p_bin_str = (*uint8_t)MSG_BUTTON_PRESSED;
-                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                    }
-                }
+                mqtt_publish_message_t pubmsg;
+                pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
+                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_3;
+                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_3);
+                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
+                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
                 app_mqtt_publish(&pubmsg);
                 break;
             }
             case BSP_BUTTON_3:
             {
-                mqtt_publish_message_t pubmsg =
-                {
-                    .topic = 
-                    {
-                        .p_utf_str = (uint8_t *)TOPIC_BUTTON_4;
-                        .p_utf_str = strlen(TOPIC_BUTTON_4);
-                    }
-                    .payload =
-                    {
-                        .p_bin_str = (uint8_t *)MSG_BUTTON_PRESSED;
-                        .bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                    }
-                }
+                mqtt_publish_message_t pubmsg;
+                pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
+                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_4;
+                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_4);
+                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
+                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
                 app_mqtt_publish(&pubmsg);
                 break;
             }            
@@ -513,7 +497,7 @@ void app_state_update(app_state_event_t * p_event_data, uint16_t event_size)
         }
     } else if (m_app_state == STATE_APP_MQTT_CONNECTING)
     {
-        if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECTED)
+        if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
         {
             // todo: should we handle initial pubs here?
             m_app_state = STATE_APP_ACTIVE_IDLE;

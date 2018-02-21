@@ -2,8 +2,8 @@ PROJECT_NAME     := iot_lwip_mqtt_publisher_pca10040_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-SDK_ROOT := ../../../../../../../..
-PROJ_DIR := ../../..
+SDK_ROOT := ./nrf52sdk
+PROJ_DIR := .
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
   LINKER_SCRIPT  := iot_lwip_mqtt_publisher_gcc_nrf52.ld
@@ -173,6 +173,12 @@ INC_FOLDERS += \
   $(PROJ_DIR)/config \
   $(SDK_ROOT)/components/iot/errno \
   $(SDK_ROOT)/components/libraries/csense_drv \
+  $(SDK_ROOT)/components/iot/medium \
+  $(SDK_ROOT)/components/nfc/t4t_lib \
+  $(SDK_ROOT)/components/nfc/ndef/generic/message \
+  $(SDK_ROOT)/components/iot/ipv6_stack/include \
+  $(SDK_ROOT)/components/iot/ipv6_stack/pbuffer \
+  $(SDK_ROOT)/components/nfc/ndef/generic/record \
   $(SDK_ROOT)/components/ble/ble_services/ble_tps \
   $(PROJ_DIR) \
   $(SDK_ROOT)/components/drivers_nrf/rng \
