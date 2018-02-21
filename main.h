@@ -198,3 +198,6 @@ APP_TIMER_DEF(m_iot_timer_tick_src_id);                                         
 #define APPL_ADDR(...)
 
 #endif // APP_ENABLE_LOGS
+
+void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size);
+

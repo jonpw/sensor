@@ -67,7 +67,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-#include "mydns.h"
+//#include "mydns.h"
 #include "main.h"
 
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
