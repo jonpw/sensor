@@ -68,6 +68,7 @@
 #include "nrf_log_default_backends.h"
 
 #include "dns.h"
+#include "main.h"
 
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
 #define APP_DNS_SERVER_PORT             0x0035                                                      /**< UDP Port number of DNS Server. */
@@ -77,16 +78,16 @@
 /**@brief Application's state. */
 typedef enum
 {
-    DNS_STATE_IDLE = 0,
-    DNS_STATE_QUERYING,
-    DNS_STATE_RESOLVING
+    STATE_DNS_IDLE = 0,
+    STATE_DNS_QUERYING,
+    STATE_DNS_RESOLVING
 } dns_state_t;
 
 static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static ipv6_addr_t            m_hostname_address;                                                   /**< IPv6 address of given hostname. */
-static volatile dns_state_t   m_dns_state = DNS_STATE_IDLE;                                         /**< State of application state machine. */
+static volatile dns_state_t   m_dns_state = STATE_DNS_IDLE;                                         /**< State of application state machine. */
 
 /**@brief Addresses used in sample application. */
 static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x00, 0x00,
@@ -94,21 +95,6 @@ static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x0
                                                                  0x00, 0x00, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x02}};          /**< Multi-cast address of all routers on the local network segment. */
 
-
-void static dns_lookup(const char * p_hostname)
-{
-    APPL_LOG("DNS lookup for hostname: %s", p_hostname);
-
-    // Change application state in case being in IDLE state.
-    if (m_dns_state == DNS_STATE_IDLE)
-    {
-        m_dns_state = DNS_STATE_QUERYING;
-
-        err_code = dns6_query(APP_HOSTNAME, app_dns_handler);
-        APP_ERROR_CHECK(err_code);
-        m_dns_state = DNS_STATE_RESOLVING;
-    }
-}
 
 /**@brief DNS6 module event handler.
  *
@@ -121,9 +107,11 @@ static void app_dns_handler(uint32_t      process_result,
                             uint16_t      addr_count)
 {
     uint32_t index;
-    app_state_event_t state_update = STATE_EVENT_NONE;
 
-    if (m_dns_state != DNS_STATE_RESOLVING)
+    app_state_event_data_t state_update;
+    state_update.evt_type = STATE_EVENT_NONE;
+
+    if (m_dns_state != STATE_DNS_RESOLVING)
     {
         // Exit if it's not in resolving state.
         return;
@@ -144,20 +132,39 @@ static void app_dns_handler(uint32_t      process_result,
             {
                 memcpy(m_hostname_address.u8, p_addr[0].u8, IPV6_ADDR_SIZE);
 
-                app_state_update = STATE_EVENT_DNS_DONE;
+                app_state_event_data_t state_update;
+                state_update.evt_type = STATE_EVENT_DNS_DONE;
+
                 err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);
-                m_dns_state = DNS_STATE_IDLE;
+                m_dns_state = STATE_DNS_IDLE;
             }
         }
     }
     else
     {
         // Start application state machine from beginning.
-        app_state_update = STATE_EVENT_DNS_FAIL;
+        app_state_event_data_t state_update;
+        state_update.evt_type = STATE_EVENT_DNS_FAIL;
         err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
         APP_ERROR_CHECK(err_code);
-        m_dns_state = DNS_STATE_IDLE;
+        m_dns_state = STATE_DNS_IDLE;
+    }
+}
+
+void static dns_lookup(const char * p_hostname)
+{
+    uint32_t    err_code;
+    APPL_LOG("DNS lookup for hostname: %s", p_hostname);
+
+    // Change application state in case being in IDLE state.
+    if (m_dns_state == STATE_DNS_IDLE)
+    {
+        m_dns_state = STATE_DNS_QUERYING;
+
+        err_code = dns6_query(p_hostname, app_dns_handler);
+        APP_ERROR_CHECK(err_code);
+        m_dns_state = STATE_DNS_RESOLVING;
     }
 }
 

@@ -82,7 +82,7 @@ SRC_FILES += \
   $(PROJ_DIR)/net.c \
   $(PROJ_DIR)/mqttapp.c \
   $(PROJ_DIR)/dns.c \
-  $(PROJ_DIR)/writable_ndef_tag.c \
+  $(PROJ_DIR)/writable_ndef_msg.c \
   $(SDK_ROOT)/external/mbedtls/library/aes.c \
   $(SDK_ROOT)/external/mbedtls/library/aesni.c \
   $(SDK_ROOT)/external/mbedtls/library/arc4.c \
