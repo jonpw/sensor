@@ -107,6 +107,7 @@
 #define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
 #define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */
 
+#define BROKER_HOSTNAME "broker.hivemq.org"
 #define MSG_BUTTON_PRESSED "pressed"
 
 #define TOPIC_BUTTON_1  "button/1/event"
@@ -494,10 +495,10 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     {
         if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
         {
-            dns_lookup(...);
+            dns_lookup(BROKER_HOSTNAME);
             m_app_state = STATE_APP_DNS_LOOKUP;
         }
-    } else if (m_app_state == STATE_APP_BROKER_QUERYING)
+    } else if (m_app_state == STATE_APP_DNS_LOOKUP)
     {
         if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
         {
