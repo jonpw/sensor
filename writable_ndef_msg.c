@@ -178,17 +178,6 @@ static void nfc_callback(void          * context,
 
                 // for now, just accept all and reset everything
 
-                // update 6lowpan/btle ssid & key
-
-                // update TLS security values
-
-                // update broker hostname, port
-                
-                
-
-
-
-
                 //TODO: indicate NDEF was written
                 //TODO: process NDEF that was written for sanity, password, compatibility etc.
 

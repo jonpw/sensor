@@ -46,63 +46,6 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
-// <h> lwIP 
-
-//==========================================================
-// <e> NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED - lwip - lwIP stack for nRF5x
-//==========================================================
-#ifndef NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED
-#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 0
-#endif
-// <o> NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL
-#define NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> NRF_LWIP_DRIVER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef NRF_LWIP_DRIVER_CONFIG_INFO_COLOR
-#define NRF_LWIP_DRIVER_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR
-#define NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR 0
-#endif
-
-// </e>
-
-// </h> 
-//==========================================================
-
 // <h> nRF_BLE 
 
 //==========================================================
@@ -1306,7 +1249,7 @@
 // <e> RNG_ENABLED - nrf_drv_rng - RNG peripheral driver
 //==========================================================
 #ifndef RNG_ENABLED
-#define RNG_ENABLED 1
+#define RNG_ENABLED 0
 #endif
 // <q> RNG_CONFIG_ERROR_CORRECTION  - Error correction
  
@@ -1317,7 +1260,7 @@
 
 // <o> RNG_CONFIG_POOL_SIZE - Pool size 
 #ifndef RNG_CONFIG_POOL_SIZE
-#define RNG_CONFIG_POOL_SIZE 64
+#define RNG_CONFIG_POOL_SIZE 32
 #endif
 
 // <o> RNG_CONFIG_IRQ_PRIORITY  - Interrupt priority
@@ -2103,6 +2046,15 @@
 // <h> nRF_IoT 
 
 //==========================================================
+// <o> IPV6_DEFAULT_HOP_LIMIT - ipv6_utils - IoT utilities  <1-255> 
+
+
+// <i> This parameter indicates how many hops by default IPv6 packets can do. Each router which forward IPv6 packets to another host/router decrease this value by 1. When this field become 0, the packet is discarded. Hop limit value of 1,64 or 255 are prefarable in case of more efficient compression.
+
+#ifndef IPV6_DEFAULT_HOP_LIMIT
+#define IPV6_DEFAULT_HOP_LIMIT 64
+#endif
+
 // <h> ble_6lowpan - 6LoWPAN over BLE and Internet Protocol Support Profile library
 
 //==========================================================
@@ -2260,6 +2212,79 @@
 // </h> 
 //==========================================================
 
+// <h> iot_pbuffer - Packet buffer for IPv6 stack
+
+//==========================================================
+// <q> IOT_PBUFFER_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
+ 
+
+// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
+
+#ifndef IOT_PBUFFER_DISABLE_API_PARAM_CHECK
+#define IOT_PBUFFER_DISABLE_API_PARAM_CHECK 0
+#endif
+
+// <e> IOT_PBUFFER_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef IOT_PBUFFER_CONFIG_LOG_ENABLED
+#define IOT_PBUFFER_CONFIG_LOG_ENABLED 0
+#endif
+// <o> IOT_PBUFFER_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef IOT_PBUFFER_CONFIG_LOG_LEVEL
+#define IOT_PBUFFER_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> IOT_PBUFFER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef IOT_PBUFFER_CONFIG_INFO_COLOR
+#define IOT_PBUFFER_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> IOT_PBUFFER_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef IOT_PBUFFER_CONFIG_DEBUG_COLOR
+#define IOT_PBUFFER_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <o> IOT_PBUFFER_MAX_COUNT - Maximum packet buffers managed by the module.  <1-255> 
+
+
+#ifndef IOT_PBUFFER_MAX_COUNT
+#define IOT_PBUFFER_MAX_COUNT 10
+#endif
+
+// </h> 
+//==========================================================
+
 // <h> iot_timer - IoT Timer
 
 //==========================================================
@@ -2278,7 +2303,200 @@
 // <i> The wall clock of the IoT Timer module has to be updated from an external source at regular intervals. This define needs to be set to the interval between updates.
 
 #ifndef IOT_TIMER_RESOLUTION_IN_MS
-#define IOT_TIMER_RESOLUTION_IN_MS 10
+#define IOT_TIMER_RESOLUTION_IN_MS 500
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> ipv6_dns6 - Domain Name System Client (DNS)
+
+//==========================================================
+// <q> DNS6_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
+ 
+
+// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
+
+#ifndef DNS6_DISABLE_API_PARAM_CHECK
+#define DNS6_DISABLE_API_PARAM_CHECK 0
+#endif
+
+// <e> DNS6_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef DNS6_CONFIG_LOG_ENABLED
+#define DNS6_CONFIG_LOG_ENABLED 0
+#endif
+// <o> DNS6_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef DNS6_CONFIG_LOG_LEVEL
+#define DNS6_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> DNS6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef DNS6_CONFIG_INFO_COLOR
+#define DNS6_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> DNS6_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef DNS6_CONFIG_DEBUG_COLOR
+#define DNS6_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <o> DNS6_MAX_PENDING_QUERIES - Maximum number of pending queries in queue.  <1-65534> 
+
+
+#ifndef DNS6_MAX_PENDING_QUERIES
+#define DNS6_MAX_PENDING_QUERIES 3
+#endif
+
+// <o> DNS6_MAX_RETRANSMISSION_COUNT - Max number of retransmissions.  <0-255> 
+
+
+// <i> Set this define to 0 to disable retransmission attempts.
+
+#ifndef DNS6_MAX_RETRANSMISSION_COUNT
+#define DNS6_MAX_RETRANSMISSION_COUNT 3
+#endif
+
+// <o> DNS6_RETRANSMISSION_INTERVAL - Interval between retransmissions in seconds.  <2-4294967295> 
+
+
+#ifndef DNS6_RETRANSMISSION_INTERVAL
+#define DNS6_RETRANSMISSION_INTERVAL 2
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> ipv6_icmp6 - Internet Control Message Protocol (ICMP6)
+
+//==========================================================
+// <q> ICMP6_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
+ 
+
+// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
+
+#ifndef ICMP6_DISABLE_API_PARAM_CHECK
+#define ICMP6_DISABLE_API_PARAM_CHECK 0
+#endif
+
+// <q> ICMP6_ENABLE_ALL_MESSAGES_TO_APPLICATION  - Enables call ICMPv6 event handler on getting any of ICMPv6 message.
+ 
+
+// <i> Set this parameter to 1 to enable call ICMPv6 event handler on receiving any of ICMPv6 messages including error, Neighbour Discovery or ping messages.
+
+#ifndef ICMP6_ENABLE_ALL_MESSAGES_TO_APPLICATION
+#define ICMP6_ENABLE_ALL_MESSAGES_TO_APPLICATION 1
+#endif
+
+// <q> ICMP6_ENABLE_HANDLE_ECHO_REQUEST_TO_APPLICATION  - Enable or disable internal ECHO response.
+ 
+
+// <i> Set this parameter to 1 to disable internal ECHO RESPONSE sending after processing ICMP packet in application (if ICMP6_ENABLE_ALL_MESSAGES_TO_APPLICATION is set). Application then is responsible of processing ECHO REQUEST and should also generate ECHO RESPONSE by itself. Set this parameter to 0 to let automatically reply inside of ICMP6 module, after processing it by application.
+
+#ifndef ICMP6_ENABLE_HANDLE_ECHO_REQUEST_TO_APPLICATION
+#define ICMP6_ENABLE_HANDLE_ECHO_REQUEST_TO_APPLICATION 0
+#endif
+
+// <e> ICMP6_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef ICMP6_CONFIG_LOG_ENABLED
+#define ICMP6_CONFIG_LOG_ENABLED 0
+#endif
+// <o> ICMP6_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef ICMP6_CONFIG_LOG_LEVEL
+#define ICMP6_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> ICMP6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef ICMP6_CONFIG_INFO_COLOR
+#define ICMP6_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> ICMP6_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef ICMP6_CONFIG_DEBUG_COLOR
+#define ICMP6_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <q> ICMP6_ENABLE_ND6_MESSAGES_TO_APPLICATION  - Enables call ICMPv6 event handler on getting Neighbour Discovery message.
+ 
+
+// <i> Set this parameter to 1 to enable call ICMPv6 event handler on receiving one of Neighbour Discovery messages.
+
+#ifndef ICMP6_ENABLE_ND6_MESSAGES_TO_APPLICATION
+#define ICMP6_ENABLE_ND6_MESSAGES_TO_APPLICATION 0
+#endif
+
+// <o> ICMP6_ERROR_MESSAGE_MAX_SIZE  - Maximum error message size when transmitting.
+ 
+
+// <i> Error messages contain partial or complete IPv6 packet that resulted in transmission of error message in the host. See RFC 4443 for details. This configurable parameter allows limiting the size of ICMP packet when responding with an error message. The size defined here is inclusive of ICMP Header.
+// <48=> 48 
+// <1240=> 1240 
+
+#ifndef ICMP6_ERROR_MESSAGE_MAX_SIZE
+#define ICMP6_ERROR_MESSAGE_MAX_SIZE 128
 #endif
 
 // </h> 
@@ -2420,7 +2638,7 @@
 
 // <s> DEVICE_NAME - Device name used in BLE undirected advertisement if COMMISSIONING_ENABLED is not defined.
 #ifndef DEVICE_NAME
-#define DEVICE_NAME "MQTT_Pub"
+#define DEVICE_NAME "DNS_Client"
 #endif
 
 // <q> IS_SRVC_CHANGED_CHARACT_PRESENT  - Include the Service Changed characteristic in the Attribute Table.
@@ -2505,15 +2723,24 @@
 // </h> 
 //==========================================================
 
-// <h> mqtt_config - MQTT Config Definitions
+// <h> ipv6_stack - Internet Protocol version 6 (IPv6)
 
 //==========================================================
-// <e> MQTT_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef MQTT_CONFIG_LOG_ENABLED
-#define MQTT_CONFIG_LOG_ENABLED 0
+// <q> IPV6_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
+ 
+
+// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
+
+#ifndef IPV6_DISABLE_API_PARAM_CHECK
+#define IPV6_DISABLE_API_PARAM_CHECK 0
 #endif
-// <o> MQTT_CONFIG_LOG_LEVEL  - Default Severity level
+
+// <e> IPV6_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef IPV6_CONFIG_LOG_ENABLED
+#define IPV6_CONFIG_LOG_ENABLED 0
+#endif
+// <o> IPV6_CONFIG_LOG_LEVEL  - Default Severity level
  
 // <0=> Off 
 // <1=> Error 
@@ -2521,11 +2748,11 @@
 // <3=> Info 
 // <4=> Debug 
 
-#ifndef MQTT_CONFIG_LOG_LEVEL
-#define MQTT_CONFIG_LOG_LEVEL 3
+#ifndef IPV6_CONFIG_LOG_LEVEL
+#define IPV6_CONFIG_LOG_LEVEL 3
 #endif
 
-// <o> MQTT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> IPV6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -2537,11 +2764,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef MQTT_CONFIG_INFO_COLOR
-#define MQTT_CONFIG_INFO_COLOR 0
+#ifndef IPV6_CONFIG_INFO_COLOR
+#define IPV6_CONFIG_INFO_COLOR 0
 #endif
 
-// <o> MQTT_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> IPV6_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -2553,31 +2780,108 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef MQTT_CONFIG_DEBUG_COLOR
-#define MQTT_CONFIG_DEBUG_COLOR 0
+#ifndef IPV6_CONFIG_DEBUG_COLOR
+#define IPV6_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
 
-// <o> MQTT_MAX_CLIENTS - Maximum number of clients that can be managed by the module.  <1-255> 
+// <q> IPV6_ENABLE_USNUPORTED_PROTOCOLS_TO_APPLICATION  - Enables call application event handler if getting unsupported transport protocols.
+ 
 
+// <i> Set this parameter to 1 to enable event while getting unsupported transport protocol. In the current implementation, it means, all transport protocols besides ICMPv6 or UDP.
 
-#ifndef MQTT_MAX_CLIENTS
-#define MQTT_MAX_CLIENTS 1
+#ifndef IPV6_ENABLE_USNUPORTED_PROTOCOLS_TO_APPLICATION
+#define IPV6_ENABLE_USNUPORTED_PROTOCOLS_TO_APPLICATION 0
 #endif
 
-// <o> MQTT_KEEPALIVE - Keep alive time for MQTT (in seconds). Sending of Ping Requests to keep the connection alive are governed by this value. A keep alive value of zero (0) has the effect of turning off the keep alive mechanism.  <0-65535> 
+// <o> IPV6_MAX_ADDRESS_PER_INTERFACE - Number of IPv6 addresses supported per interface.  <1-255> 
 
 
-#ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 60
+// <i> Number of IPv6 address supported including link local address.
+
+#ifndef IPV6_MAX_ADDRESS_PER_INTERFACE
+#define IPV6_MAX_ADDRESS_PER_INTERFACE 3
 #endif
 
-// <o> MQTT_MAX_PACKET_LENGTH - Maximum MQTT packet size that can be sent (including the fixed and variable header).  <5-268435460> 
+// <o> IPV6_MAX_INTERFACE - Number of IPv6 network interface.  <1-255> 
 
 
-#ifndef MQTT_MAX_PACKET_LENGTH
-#define MQTT_MAX_PACKET_LENGTH 128
+#ifndef IPV6_MAX_INTERFACE
+#define IPV6_MAX_INTERFACE 1
+#endif
+
+// </h> 
+//==========================================================
+
+// <h> ipv6_udp - User Datagram Protocol (UDP)
+
+//==========================================================
+// <q> UDP6_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
+ 
+
+// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
+
+#ifndef UDP6_DISABLE_API_PARAM_CHECK
+#define UDP6_DISABLE_API_PARAM_CHECK 0
+#endif
+
+// <e> UDP6_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef UDP6_CONFIG_LOG_ENABLED
+#define UDP6_CONFIG_LOG_ENABLED 0
+#endif
+// <o> UDP6_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef UDP6_CONFIG_LOG_LEVEL
+#define UDP6_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> UDP6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef UDP6_CONFIG_INFO_COLOR
+#define UDP6_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> UDP6_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef UDP6_CONFIG_DEBUG_COLOR
+#define UDP6_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// <o> UDP6_MAX_SOCKET_COUNT - The max number of sockets to support for UDP module.  <1-255> 
+
+
+#ifndef UDP6_MAX_SOCKET_COUNT
+#define UDP6_MAX_SOCKET_COUNT 3
 #endif
 
 // </h> 
@@ -2697,13 +3001,6 @@
 // <h> nRF_Libraries 
 
 //==========================================================
-// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
- 
-
-#ifndef APP_FIFO_ENABLED
-#define APP_FIFO_ENABLED 1
-#endif
-
 // <q> APP_GPIOTE_ENABLED  - app_gpiote - GPIOTE events dispatcher
  
 
@@ -3164,35 +3461,35 @@
 
 
 #ifndef MEMORY_MANAGER_SMALL_BLOCK_COUNT
-#define MEMORY_MANAGER_SMALL_BLOCK_COUNT 13
+#define MEMORY_MANAGER_SMALL_BLOCK_COUNT 8
 #endif
 
 // <o> MEMORY_MANAGER_SMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'small' block. 
 // <i>  Size of each memory blocks identified as 'small' block. Memory block are recommended to be word-sized.
 
 #ifndef MEMORY_MANAGER_SMALL_BLOCK_SIZE
-#define MEMORY_MANAGER_SMALL_BLOCK_SIZE 128
+#define MEMORY_MANAGER_SMALL_BLOCK_SIZE 64
 #endif
 
 // <o> MEMORY_MANAGER_MEDIUM_BLOCK_COUNT - Size of each memory blocks identified as 'medium' block.  <0-255> 
 
 
 #ifndef MEMORY_MANAGER_MEDIUM_BLOCK_COUNT
-#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 18
+#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 4
 #endif
 
 // <o> MEMORY_MANAGER_MEDIUM_BLOCK_SIZE -  Size of each memory blocks identified as 'medium' block. 
 // <i>  Size of each memory blocks identified as 'medium' block. Memory block are recommended to be word-sized.
 
 #ifndef MEMORY_MANAGER_MEDIUM_BLOCK_SIZE
-#define MEMORY_MANAGER_MEDIUM_BLOCK_SIZE 524
+#define MEMORY_MANAGER_MEDIUM_BLOCK_SIZE 256
 #endif
 
 // <o> MEMORY_MANAGER_LARGE_BLOCK_COUNT - Size of each memory blocks identified as 'large' block.  <0-255> 
 
 
 #ifndef MEMORY_MANAGER_LARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 5
+#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 2
 #endif
 
 // <o> MEMORY_MANAGER_LARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'large' block. 
@@ -3206,7 +3503,7 @@
 
 
 #ifndef MEMORY_MANAGER_XLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 2
+#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 0
 #endif
 
 // <o> MEMORY_MANAGER_XLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra large' block. 
@@ -3220,7 +3517,7 @@
 
 
 #ifndef MEMORY_MANAGER_XXLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 2
+#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 0
 #endif
 
 // <o> MEMORY_MANAGER_XXLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra large' block. 
@@ -3234,7 +3531,7 @@
 
 
 #ifndef MEMORY_MANAGER_XSMALL_BLOCK_COUNT
-#define MEMORY_MANAGER_XSMALL_BLOCK_COUNT 36
+#define MEMORY_MANAGER_XSMALL_BLOCK_COUNT 0
 #endif
 
 // <o> MEMORY_MANAGER_XSMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'extra small' block. 
@@ -3248,7 +3545,7 @@
 
 
 #ifndef MEMORY_MANAGER_XXSMALL_BLOCK_COUNT
-#define MEMORY_MANAGER_XXSMALL_BLOCK_COUNT 100
+#define MEMORY_MANAGER_XXSMALL_BLOCK_COUNT 0
 #endif
 
 // <o> MEMORY_MANAGER_XXSMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra small' block. 
@@ -3498,7 +3795,7 @@
  
 
 #ifndef NRF_QUEUE_ENABLED
-#define NRF_QUEUE_ENABLED 1
+#define NRF_QUEUE_ENABLED 0
 #endif
 
 // <q> NRF_SECTION_ITER_ENABLED  - nrf_section_iter - Section iterator
@@ -6193,7 +6490,7 @@
 // <2=> NRF_SDH_DISPATCH_MODEL_POLLING 
 
 #ifndef NRF_SDH_DISPATCH_MODEL
-#define NRF_SDH_DISPATCH_MODEL 0
+#define NRF_SDH_DISPATCH_MODEL 1
 #endif
 
 // </h> 
@@ -6390,107 +6687,6 @@
 // </h> 
 //==========================================================
 
-
-// </e>
-
-// </h> 
-//==========================================================
-
-// <h> nRF_TLS 
-
-//==========================================================
-// <e> TLS_CONFIG_LOG_ENABLED - nrf_tls - TLS library
-//==========================================================
-#ifndef TLS_CONFIG_LOG_ENABLED
-#define TLS_CONFIG_LOG_ENABLED 0
-#endif
-// <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef TLS_CONFIG_LOG_LEVEL
-#define TLS_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef TLS_CONFIG_INFO_COLOR
-#define TLS_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> TLS_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef TLS_CONFIG_DEBUG_COLOR
-#define TLS_CONFIG_DEBUG_COLOR 0
-#endif
-
-// <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef TLS_CONFIG_LOG_LEVEL
-#define TLS_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef TLS_CONFIG_INFO_COLOR
-#define TLS_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> TLS_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef TLS_CONFIG_DEBUG_COLOR
-#define TLS_CONFIG_DEBUG_COLOR 0
-#endif
 
 // </e>
 
