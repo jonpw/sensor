@@ -2,7 +2,7 @@ PROJECT_NAME     := iot_lwip_mqtt_publisher_pca10040_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-SDK_ROOT := ./nrf52sdk
+SDK_ROOT := ../nrf52sdk
 PROJ_DIR := .
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
