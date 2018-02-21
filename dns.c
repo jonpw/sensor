@@ -107,6 +107,7 @@ static void app_dns_handler(uint32_t      process_result,
                             uint16_t      addr_count)
 {
     uint32_t index;
+    uint32_t    err_code;
 
     app_state_event_data_t state_update;
     state_update.evt_type = STATE_EVENT_NONE;
