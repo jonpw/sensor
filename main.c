@@ -69,6 +69,7 @@
 #include "app_util_platform.h"
 #include "iot_timer.h"
 #include "ipv6_medium.h"
+#include "dns6_api.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -142,13 +143,21 @@ typedef enum
     STATE_EVENT_NFC_RESET
 } app_state_event_t;
 
+typedef struct
+{
+    app_state_event_t evt_type
+} app_state_event_data_t;
+
 /**@brief LED's indication state. */
 typedef enum
 {
     LEDS_INACTIVE = 0,
+    LEDS_IPV6_IF_DOWN,
+    LEDS_IPV6_IF_UP,
     LEDS_CONNECTABLE,
     LEDS_BROKER_DNS,
     LEDS_BROKER_CONNECTING,
+    LEDS_CONNECTED_TO_BROKER,
     LEDS_ACTIVE_IDLE,
     LEDS_PUBACK,
     LEDS_NFC
@@ -470,7 +479,7 @@ static void log_init(void)
 
 // app_state_update called when events occur that should update the main app state
 // sub-states should be updated before calling this
-void app_state_update(app_state_event_t * p_event_data, uint16_t event_size)
+void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size)
 {
 
     if (m_app_state == STATE_APP_IDLE)
@@ -527,7 +536,7 @@ void app_state_update(app_state_event_t * p_event_data, uint16_t event_size)
             // 
             app_mqtt_stop();
             net_stop();
-            m_app_state 
+            //m_app_state;
         }
     }
 
