@@ -79,6 +79,10 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_nfc.c \
   $(PROJ_DIR)/main.c \
+  $(PROJ_DIR)/net.c \
+  $(PROJ_DIR)/mqttapp.c \
+  $(PROJ_DIR)/dns.c \
+  $(PROJ_DIR)/writable_ndef_tag.c \
   $(SDK_ROOT)/external/mbedtls/library/aes.c \
   $(SDK_ROOT)/external/mbedtls/library/aesni.c \
   $(SDK_ROOT)/external/mbedtls/library/arc4.c \
