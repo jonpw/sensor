@@ -189,6 +189,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/drivers_nrf/pwm \
   $(SDK_ROOT)/components/drivers_nrf/uart \
   $(SDK_ROOT)/components/drivers_nrf/hal \
+  $(SDK_ROOT)/components/drivers_nrf/rng \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/drivers_nrf/twi_master \
   $(SDK_ROOT)/components/ble/ble_services/ble_cts_c \
