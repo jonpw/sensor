@@ -90,14 +90,9 @@
 static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
-static ipv6_addr_t            m_hostname_address;                                                   /**< IPv6 address of given hostname. */
-static uint32_t               m_echo_req_retry_count;                                               /**< Number of echo request retransmission. */
-
-#define DEAD_BEEF                           0xDEADBEEF                                              /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 static ipv6_medium_instance_t               m_ipv6_medium;
-static app_mqtt_state_t                     m_connection_state = APP_MQTT_STATE_IDLE;               /**< MQTT Connection state. */
 static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
 
@@ -125,88 +120,6 @@ static void ip_stack_init(void)
 }
 
 
-/**@brief Timer callback used for periodic servicing of LwIP protocol timers.
- *        This trigger is also used in the example to trigger sending TCP Connection.
- *
- * @details Timer callback used for periodic servicing of LwIP protocol timers.
- *
- * @param[in]   wall_clock_value   The value of the wall clock that triggered the callback.
- */
-static void system_timer_callback(iot_timer_time_in_ms_t wall_clock_value)
-{
-    UNUSED_VARIABLE(wall_clock_value);
-
-    sys_check_timeouts();
-    UNUSED_VARIABLE(mqtt_live());
-}
-
-
-/**@brief Function for updating the wall clock of the IoT Timer module.
- *
- * @param[in]   p_context   Pointer used for passing context. No context used in this application.
- */
-static void iot_timer_tick_callback(void * p_context)
-{
-    UNUSED_VARIABLE(p_context);
-
-    uint32_t err_code = iot_timer_update();
-    APP_ERROR_CHECK(err_code);
-}
-
-
-/**@brief Function for the Timer initialization.
- *
- * @details Initializes the timer module. This creates and starts application timers.
- */
-static void timers_init(void)
-{
-    uint32_t err_code;
-
-    // Initialize timer module.
-    APP_ERROR_CHECK(app_timer_init());
-
-    // Create a sys timer.
-    err_code = app_timer_create(&m_iot_timer_tick_src_id,
-                                APP_TIMER_MODE_REPEATED,
-                                iot_timer_tick_callback);
-
-    APP_ERROR_CHECK(err_code);
-}
-
-
-/**@brief Function for initializing the IoT Timer. */
-static void iot_timer_init(void)
-{
-    uint32_t err_code;
-
-    static const iot_timer_client_t list_of_clients[] =
-    {
-        {system_timer_callback,      LWIP_SYS_TICK_MS},
-        {blink_timeout_handler,      LED_BLINK_INTERVAL_MS},
-#ifdef COMMISSIONING_ENABLED
-        {commissioning_time_tick,    SEC_TO_MILLISEC(COMMISSIONING_TICK_INTERVAL_SEC)}
-#endif // COMMISSIONING_ENABLED
-    };
-
-    // The list of IoT Timer clients is declared as a constant.
-    static const iot_timer_clients_list_t iot_timer_clients =
-    {
-        (sizeof(list_of_clients) / sizeof(iot_timer_client_t)),
-        &(list_of_clients[0]),
-    };
-
-    // Passing the list of clients to the IoT Timer module.
-    err_code = iot_timer_client_list_set(&iot_timer_clients);
-    APP_ERROR_CHECK(err_code);
-
-    // Starting the app timer instance that is the tick source for the IoT Timer.
-    err_code = app_timer_start(m_iot_timer_tick_src_id,
-                               APP_TIMER_TICKS(IOT_TIMER_RESOLUTION_IN_MS),
-                               NULL);
-    APP_ERROR_CHECK(err_code);
-}
-
-
 /**@brief Function to handle interface up event. */
 void nrf_driver_interface_up(iot_interface_t const * p_interface)
 {
@@ -215,7 +128,7 @@ void nrf_driver_interface_up(iot_interface_t const * p_interface)
 
     sys_check_timeouts();
 
-    m_display_state = LEDS_IPV6_IF_UP;
+    // TODO: notify someone?
 }
 
 
@@ -225,7 +138,7 @@ void nrf_driver_interface_down(iot_interface_t const * p_interface)
     UNUSED_PARAMETER(p_interface);
     APPL_LOG ("IPv6 Interface Down.");
 
-    m_display_state = LEDS_IPV6_IF_DOWN;
+    // TODO: notify someone?
 }
 
 /**@brief Function for starting connectable mode.
@@ -236,7 +149,7 @@ static void connectable_mode_enter(void)
     APP_ERROR_CHECK(err_code);
 
     APPL_LOG("Physical layer in connectable mode.");
-    m_display_state = LEDS_CONNECTABLE_MODE;
+    // TODO: notify someone?
 }
 
 
@@ -247,12 +160,13 @@ static void on_ipv6_medium_evt(ipv6_medium_evt_t * p_ipv6_medium_evt)
         case IPV6_MEDIUM_EVT_CONN_UP:
         {
             APPL_LOG("Physical layer: connected.");
-            m_display_state = LEDS_IPV6_IF_DOWN;
+            // TODO: notify someone?
             break;
         }
         case IPV6_MEDIUM_EVT_CONN_DOWN:
         {
             APPL_LOG("Physical layer: disconnected.");
+            // TODO: notify someone?
             connectable_mode_enter();
             break;
         }
