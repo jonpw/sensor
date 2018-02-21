@@ -67,7 +67,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-#include "dns.h"
+#include "mydns.h"
 #include "main.h"
 
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
@@ -136,7 +136,7 @@ static void app_dns_handler(uint32_t      process_result,
                 app_state_event_data_t state_update;
                 state_update.evt_type = STATE_EVENT_DNS_OK;
 
-                err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
+                err_code       = app_sched_event_put(&state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);
                 m_dns_state = STATE_DNS_IDLE;
             }
@@ -147,7 +147,7 @@ static void app_dns_handler(uint32_t      process_result,
         // Start application state machine from beginning.
         app_state_event_data_t state_update;
         state_update.evt_type = STATE_EVENT_DNS_FAIL;
-        err_code       = app_sched_event_put(&app_state_update, 0, app_state_update);
+        err_code       = app_sched_event_put(&state_update, 0, app_state_update);
         APP_ERROR_CHECK(err_code);
         m_dns_state = STATE_DNS_IDLE;
     }
