@@ -62,6 +62,7 @@
 #include "nrf_log_default_backends.h"
 
 #include "main.h"
+#include "mqttapp.h"
 
 #include "cJSON.h"
 
@@ -166,15 +167,13 @@ static void nfc_callback(void          * context,
                 state_update.evt_type = STATE_EVENT_NONE;
 
                 // Parse the NDEF record
-                uint32_t nfc_data_len = m_ndef_msg_len; // Filled by the length of the NFC data.
-                uint8_t nfc_data[] = m_ndef_msg_buf; // Filled by the value of the NFC data.
                 // Buffer for parsing results that can hold an NDEF message descriptor with up to 10 records.
                 uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
                 uint32_t desc_buf_len = sizeof(desc_buf);
                 err_code = ndef_msg_parser(desc_buf,
                                     &desc_buf_len,
-                                    nfc_data,
-                                    &nfc_data_len);
+                                    m_ndef_msg_buf,
+                                    &m_ndef_msg_len);
                 APP_ERROR_CHECK(err_code);
                 
                 parse_configuration();
@@ -191,7 +190,7 @@ static void nfc_callback(void          * context,
                 err_code       = app_sched_event_put(NULL, 0, scheduler_ndef_file_update);
                 APP_ERROR_CHECK(err_code);
 
-                state_update   = STATE_EVENT_NFC_RESET;
+                state_update.evt_type   = STATE_EVENT_NFC_RESET;
                 err_code       = app_sched_event_put(&state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);
             }
