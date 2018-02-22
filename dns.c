@@ -67,26 +67,11 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-//#include "mydns.h"
+#include "mydns.h"
 #include "main.h"
-
-#define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
-#define APP_DNS_SERVER_PORT             0x0035                                                      /**< UDP Port number of DNS Server. */
-#define APP_DNS_SERVER_ADDR             {{0x20, 0x01, 0x48, 0x60, 0x48, 0x60, 0x00, 0x00, \
-                                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x88}}          /**< IPv6 address of Google's DNS Server. */
-
-/**@brief Application's state. */
-typedef enum
-{
-    STATE_DNS_IDLE = 0,
-    STATE_DNS_QUERYING,
-    STATE_DNS_RESOLVING
-} dns_state_t;
-
 static ipv6_medium_instance_t m_ipv6_medium;
-eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
+
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
-static ipv6_addr_t            m_hostname_address;                                                   /**< IPv6 address of given hostname. */
 static volatile dns_state_t   m_dns_state = STATE_DNS_IDLE;                                         /**< State of application state machine. */
 
 /**@brief Addresses used in sample application. */
@@ -94,7 +79,6 @@ static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x0
                                                                  0x00, 0x00, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x02}};          /**< Multi-cast address of all routers on the local network segment. */
-
 
 /**@brief DNS6 module event handler.
  *
@@ -131,7 +115,7 @@ static void app_dns_handler(uint32_t      process_result,
             // Store only first given address, but print all of them.
             if (index == 0)
             {
-                memcpy(m_hostname_address.u8, p_addr[0].u8, IPV6_ADDR_SIZE);
+                memcpy(m_hostname_addr.u8, p_addr[0].u8, IPV6_ADDR_SIZE);
 
                 app_state_event_data_t state_update;
                 state_update.evt_type = STATE_EVENT_DNS_OK;

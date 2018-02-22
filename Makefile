@@ -183,6 +183,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/iot/ipv6_stack/include \
   $(SDK_ROOT)/components/iot/ipv6_stack/pbuffer \
   $(SDK_ROOT)/components/nfc/ndef/generic/record \
+  $(SDK_ROOT)/external/cJSON \
   $(SDK_ROOT)/components/ble/ble_services/ble_tps \
   $(PROJ_DIR) \
   $(SDK_ROOT)/components/drivers_nrf/rng \

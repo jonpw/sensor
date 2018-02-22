@@ -136,6 +136,7 @@ typedef enum
     STATE_EVENT_DNS_FAIL,
     STATE_EVENT_MQTT_CONNECT,
     STATE_EVENT_MQTT_DISCONNECT,
+    STATE_EVENT_MQTT_CONNECT_FAILED,
     STATE_EVENT_SOFT_RESET,
     STATE_EVENT_GO,
     STATE_EVENT_CONNECTED,
@@ -201,3 +202,5 @@ APP_TIMER_DEF(m_iot_timer_tick_src_id);                                         
 
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size);
 
+char broker_hostname[32];
+char broker_port[32];

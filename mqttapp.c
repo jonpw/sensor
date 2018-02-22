@@ -74,6 +74,8 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+#include "main.h"
+#include "mydns.h"
 /** Modify m_broker_addr according to your setup.
  *  The address provided below is a place holder.  */
 static const ipv6_addr_t m_broker_addr =
@@ -85,10 +87,10 @@ static const ipv6_addr_t m_broker_addr =
      0x00, 0x00, 0x00, 0x01}
 };
 
-static char broker_hostname[] = "broker.hivemq.org";
+char broker_hostname[] = "broker.hivemq.org";
 
 
-static uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
+uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
 
 #define TOPIC_DEBUG                         "debug/1234/#"
 
@@ -123,17 +125,14 @@ static nrf_tls_key_settings_t m_tls_keys = {
     .p_psk = &m_preshared_key
 };
 
-#ifdef COMMISSIONING_ENABLED
-static bool                                 m_power_off_on_failure = false;
-static bool                                 m_identity_mode_active;
-#endif // COMMISSIONING_ENABLED
-
-
 /**@brief Forward declarations. */
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt);
 
+
+static void app_mqtt_connect(void);
+
 //TODO: Preliminary mqtt_begin
-static void mqtt_begin(void)
+void mqtt_begin(void)
 {
     mqtt_state = STATE_MQTT_CONNECTING;
     app_mqtt_connect();
@@ -165,15 +164,13 @@ static void app_mqtt_connect(void)
 static void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
 {
     // Set topic to be published.
-    const char * topic_str = APP_MQTT_PUBLISH_TOPIC;
-
     mqtt_publish_param_t param;
 
     param.message.topic.qos              = MQTT_QoS_1_ATLEAST_ONCE;
-    param.message.topic.topic.p_utf_str  = pubmsg->topic;
-    param.message.topic.topic.utf_strlen = strlen(pubmsg->topic);
-    param.message.payload.p_bin_str      = pubmsg->payload->p_bin_str,
-    param.message.payload.bin_strlen     = pubmsg->payload->bin_strlen;
+    param.message.topic.topic.p_utf_str  = pubmsg->topic.topic.p_utf_str;
+    param.message.topic.topic.utf_strlen = pubmsg->topic.topic.utf_strlen;
+    param.message.payload.p_bin_str      = pubmsg->payload.p_bin_str,
+    param.message.payload.bin_strlen     = pubmsg->payload.bin_strlen;
     param.message_id                     = m_message_counter;
     param.dup_flag                       = 0;
     param.retain_flag                    = 0;
@@ -196,7 +193,7 @@ static void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
 /**@brief Subscribe with the broker. */
 static void app_mqtt_subscribe(mqtt_topic_t * topic)
 {
-    mqtt_topic_t topic = * topic;/*
+    /*
     {
         .topic =
         {
@@ -225,11 +222,10 @@ static void app_mqtt_subscribe(mqtt_topic_t * topic)
 
 
 /**@brief Unsubscribe with the broker. */
-static void app_mqtt_unsubscribe(void)
+static void app_mqtt_unsubscribe(mqtt_topic_t * topic)
 {
-    const char * topic_str = APP_MQTT_SUBSCRIPTION_TOPIC;
 
-    mqtt_topic_t topic =
+    /*mqtt_topic_t topic =
     {
         .topic =
         {
@@ -237,7 +233,7 @@ static void app_mqtt_unsubscribe(void)
             .utf_strlen = strlen(topic_str)
         },
         .qos = MQTT_QoS_0_AT_MOST_ONCE
-    };
+    };*/
 
     const mqtt_subscription_list_t subscription_list =
     {
@@ -251,12 +247,15 @@ static void app_mqtt_unsubscribe(void)
 
     if (err_code == NRF_SUCCESS)
     {
-        mqtt_state = STATE_MQTT_CONNECTED;
+        // todo: same?
     }
 }
 
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt)
 {
+    uint32_t err_code;
+    app_state_event_data_t state_update;
+
     switch (p_evt->id)
     {
         case MQTT_EVT_CONNACK:
@@ -280,13 +279,13 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 // TODO: Can we tell if session is continued?
                 // TODO: Sub to default topics (<sensor>/#)
                 // TODO: Sub to nominated topics (how do we hook to things?)
-                state_update   = STATE_EVENT_MQTT_CONNECTED;
+                state_update.evt_type   = STATE_EVENT_MQTT_CONNECT;
                 err_code       = app_sched_event_put(&state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);
             }
             else
             {
-                state_update   = STATE_EVENT_MQTT_CONNECT_FAILED;
+                state_update.evt_type   = STATE_EVENT_MQTT_CONNECT_FAILED;
                 err_code       = app_sched_event_put(&state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);
                 mqtt_state = STATE_MQTT_IDLE;
@@ -320,10 +319,10 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 }
             }*/
 
-            if (strcmp(p_evt->param.publish.message.topic.topic.p_bin_str, TOPIC_1) == 0)
+            if (strcmp(p_evt->param.publish.message.payload.p_bin_str, TOPIC_BUTTON_1) == 0)
             {
 
-            } else if (strcmp(p_evt->param.publish.message.topic.topic.p_bin_str, TOPIC_1) == 0)
+            } else if (strcmp(p_evt->param.publish.message.payload.p_bin_str, TOPIC_BUTTON_2) == 0)
             {
             
             }
@@ -350,7 +349,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
             APPL_LOG (">> MQTT_EVT_DISCONNECT");
             mqtt_state = STATE_MQTT_IDLE;
 
-            state_update   = STATE_EVENT_MQTT_DISCONNECT;
+            state_update.evt_type   = STATE_EVENT_MQTT_DISCONNECT;
             err_code       = app_sched_event_put(&state_update, 0, app_state_update);
             APP_ERROR_CHECK(err_code);
             break;
