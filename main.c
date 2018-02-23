@@ -84,6 +84,7 @@
 #include "nrf_delay.h"
 #include "iot_common.h"
 #include "ipv6_api.h"
+#include "dns6_api.h"
 
 // project's includes
 #include "dns.h"

@@ -205,6 +205,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_ias \
   $(SDK_ROOT)/components/libraries/low_power_pwm \
   $(SDK_ROOT)/components/toolchain \
+  $(SDK_ROOT)/components/libraries/fifo/app_fifo \
   $(SDK_ROOT)/components/libraries/hci \
   $(SDK_ROOT)/components/drivers_nrf/spi_slave \
   $(SDK_ROOT)/components/ble/ble_services/ble_hrs \

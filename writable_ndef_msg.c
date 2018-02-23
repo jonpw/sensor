@@ -162,20 +162,14 @@ static void nfc_callback(void          * context,
             * doesnt require restart, but changes button behaviour or direct link mappings
             */
         case NFC_T4T_EVENT_NDEF_UPDATED:
-            if (dataLength > 0)
+            if (dataLength > 0) // may be several updates in one 'write', and the last will set the length to non-zero
             {
                 state_update.evt_type = STATE_EVENT_NONE;
 
                 // Parse the NDEF record
                 // Buffer for parsing results that can hold an NDEF message descriptor with up to 10 records.
-                uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
-                uint32_t desc_buf_len = sizeof(desc_buf);
-                err_code = ndef_msg_parser(desc_buf,
-                                    &desc_buf_len,
-                                    m_ndef_msg_buf,
-                                    &m_ndef_msg_len);
-                APP_ERROR_CHECK(err_code);
-                
+
+
                 parse_configuration();
                 
                 // fail? Don't process any more (disable NFC for a bit?)
@@ -203,8 +197,25 @@ static void nfc_callback(void          * context,
 
 void parse_configuration ()
 {
+    ret_code_t err_code;
+
+    uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
+    uint32_t desc_buf_len = sizeof(desc_buf);
+    err_code = ndef_msg_parser(desc_buf,
+                        &desc_buf_len,
+                        m_ndef_msg_buf,
+                        &m_ndef_msg_len);
+    APP_ERROR_CHECK(err_code);
+    
+    nfc_ndef_record_desc_t * ndef_rec = ((nfc_ndef_msg_desc_t *)desc_buf)->pp_record[0];
+
+    uint32_t ndef_rec_payload_size = 0;
+    err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, NULL, &ndef_rec_payload_size);
+    uint8_t ndef_rec_payload[ndef_rec_payload_size];
+    err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
+                
     // Parse the JSON
-    cJSON *root = cJSON_Parse(ndef_text);
+    cJSON *root = cJSON_Parse(ndef_rec_payload);
 
     // Check password
     cJSON * password = cJSON_GetObjectItem(root, "password");
