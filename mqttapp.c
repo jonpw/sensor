@@ -75,8 +75,28 @@
 #include "nrf_log_default_backends.h"
 
 #include "main.h"
-#include "mydns.h"
 #include "mqttapp.h"
+
+char broker_hostname[32] = "broker.hivemq.org";
+
+uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
+
+// TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
+char                           m_client_id[] = "testapp";                         /**< Unique MQTT client identifier. */
+
+uint8_t identity[] = {0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79};
+uint8_t shared_secret[] = {0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b};
+
+nrf_tls_preshared_key_t m_preshared_key = {
+    .p_identity     = &identity[0],
+    .p_secret_key   = &shared_secret[0],
+    .identity_len   = 15,
+    .secret_key_len = 9
+};
+
+nrf_tls_key_settings_t m_tls_keys = {
+    .p_psk = &m_preshared_key
+};
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 static mqtt_client_t                        m_app_mqtt_client;                                      /**< MQTT Client instance reference provided by the MQTT module. */
@@ -97,11 +117,11 @@ void mqtt_begin(void)
 }
 
 /**@brief Connect to MQTT broker. */
-static void app_mqtt_connect(void)
+static void app_mqtt_connect()
 {
     mqtt_client_init(&m_app_mqtt_client);
 
-    memcpy(m_app_mqtt_client.broker_addr.u8, m_hostname_addr.u8, IPV6_ADDR_SIZE);
+    memcpy(m_app_mqtt_client.broker_addr.u8, m_broker_addr.u8, IPV6_ADDR_SIZE);
     m_app_mqtt_client.broker_port          = m_broker_port;
     m_app_mqtt_client.evt_cb               = app_mqtt_evt_handler;
     m_app_mqtt_client.client_id.p_utf_str  = (uint8_t *)m_client_id;
@@ -119,7 +139,7 @@ static void app_mqtt_connect(void)
  *
  * @param[in]   led_state   LED state being published.
  */
-static void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
+void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
 {
     // Set topic to be published.
     mqtt_publish_param_t param;

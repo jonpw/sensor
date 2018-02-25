@@ -69,11 +69,9 @@
 
 #include "mydns.h"
 #include "main.h"
-static ipv6_medium_instance_t m_ipv6_medium;
 
-static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile dns_state_t   m_dns_state = STATE_DNS_IDLE;                                         /**< State of application state machine. */
-
+                                        /**< IPv6 address of given hostname. */
 /**@brief Addresses used in sample application. */
 static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x00,
@@ -92,6 +90,7 @@ static void app_dns_handler(uint32_t      process_result,
 {
     uint32_t index;
     uint32_t    err_code;
+    ipv6_addr_t * p_addr_out;
 
     app_state_event_data_t state_update;
     state_update.evt_type = STATE_EVENT_NONE;
@@ -115,10 +114,11 @@ static void app_dns_handler(uint32_t      process_result,
             // Store only first given address, but print all of them.
             if (index == 0)
             {
-                memcpy(m_hostname_addr.u8, p_addr[0].u8, IPV6_ADDR_SIZE);
+                memcpy(p_addr_out->u8, p_addr[0].u8, IPV6_ADDR_SIZE);
 
                 app_state_event_data_t state_update;
                 state_update.evt_type = STATE_EVENT_DNS_OK;
+                state_update.data = p_addr_out;
 
                 err_code       = app_sched_event_put(&state_update, 0, app_state_update);
                 APP_ERROR_CHECK(err_code);

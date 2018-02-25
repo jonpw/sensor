@@ -371,6 +371,13 @@
 
 // <h> nRF_Drivers 
 
+// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
+ 
+
+#ifndef APP_FIFO_ENABLED
+#define APP_FIFO_ENABLED 1
+#endif
+
 //==========================================================
 // <e> APP_USBD_ENABLED - app_usbd - USB Device library
 //==========================================================
@@ -1258,7 +1265,7 @@
 // <e> RNG_ENABLED - nrf_drv_rng - RNG peripheral driver
 //==========================================================
 #ifndef RNG_ENABLED
-#define RNG_ENABLED 0
+#define RNG_ENABLED 1
 #endif
 // <q> RNG_CONFIG_ERROR_CORRECTION  - Error correction
  
@@ -1269,7 +1276,7 @@
 
 // <o> RNG_CONFIG_POOL_SIZE - Pool size 
 #ifndef RNG_CONFIG_POOL_SIZE
-#define RNG_CONFIG_POOL_SIZE 32
+#define RNG_CONFIG_POOL_SIZE 64
 #endif
 
 // <o> RNG_CONFIG_IRQ_PRIORITY  - Interrupt priority
@@ -3804,7 +3811,7 @@
  
 
 #ifndef NRF_QUEUE_ENABLED
-#define NRF_QUEUE_ENABLED 0
+#define NRF_QUEUE_ENABLED 1
 #endif
 
 // <q> NRF_SECTION_ITER_ENABLED  - nrf_section_iter - Section iterator

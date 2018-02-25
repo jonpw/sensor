@@ -21,9 +21,14 @@ SRC_FILES += \
   $(SDK_ROOT)/external/lwip/src/core/dhcp.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv6/dhcp6.c \
   $(SDK_ROOT)/external/lwip/src/core/dns.c \
+  $(SDK_ROOT)/components/iot/ipv6_stack/pbuffer/iot_pbuffer.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv4/icmp.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv6/icmp6.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv6/inet6.c \
+  $(SDK_ROOT)/components/iot/ipv6_stack/dns6/dns6.c \
+  $(SDK_ROOT)/components/iot/ipv6_stack/udp/udp6.c \
+  $(SDK_ROOT)/components/iot/ipv6_stack/ipv6/ipv6.c \
+  $(SDK_ROOT)/components/iot/ipv6_stack/utils/ipv6_utils.c \
   $(SDK_ROOT)/external/lwip/src/core/inet_chksum.c \
   $(SDK_ROOT)/external/lwip/src/core/init.c \
   $(SDK_ROOT)/external/lwip/src/core/ip.c \
@@ -43,7 +48,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/lwip/src/core/tcp_in.c \
   $(SDK_ROOT)/external/lwip/src/core/tcp_out.c \
   $(SDK_ROOT)/external/lwip/src/core/timeouts.c \
-  $(SDK_ROOT)/external/lwip/src/core/udp.c \
+  #$(SDK_ROOT)/external/lwip/src/core/udp.c \
   $(SDK_ROOT)/components/libraries/button/app_button.c \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_weak.c \
@@ -181,7 +186,11 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/nfc/t4t_lib \
   $(SDK_ROOT)/components/nfc/ndef/generic/message \
   $(SDK_ROOT)/components/iot/ipv6_stack/include \
+  $(SDK_ROOT)/components/iot/ipv6_stack/utils \
   $(SDK_ROOT)/components/iot/ipv6_stack/pbuffer \
+  $(SDK_ROOT)/components/iot/ipv6_stack/udp \
+  $(SDK_ROOT)/components/iot/ipv6_stack/icmp6 \
+  $(SDK_ROOT)/components/iot/ipv6_stack/dns6 \
   $(SDK_ROOT)/components/nfc/ndef/generic/record \
   $(SDK_ROOT)/external/cJSON \
   $(SDK_ROOT)/components/ble/ble_services/ble_tps \
@@ -194,7 +203,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/drivers_nrf/pwm \
   $(SDK_ROOT)/components/drivers_nrf/uart \
   $(SDK_ROOT)/components/drivers_nrf/hal \
-  $(SDK_ROOT)/components/drivers_nrf/rng \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/drivers_nrf/twi_master \
   $(SDK_ROOT)/components/ble/ble_services/ble_cts_c \
@@ -205,7 +213,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_ias \
   $(SDK_ROOT)/components/libraries/low_power_pwm \
   $(SDK_ROOT)/components/toolchain \
-  $(SDK_ROOT)/components/libraries/fifo/app_fifo \
+  $(SDK_ROOT)/components/libraries/fifo \
   $(SDK_ROOT)/components/libraries/hci \
   $(SDK_ROOT)/components/drivers_nrf/spi_slave \
   $(SDK_ROOT)/components/ble/ble_services/ble_hrs \

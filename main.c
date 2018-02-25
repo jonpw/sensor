@@ -87,11 +87,21 @@
 #include "dns6_api.h"
 
 // project's includes
-#include "dns.h"
 #include "main.h"
+#include "net.h"
+#include "mqttapp.h"
 
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
+
+ipv6_addr_t m_broker_addr =
+{
+    .u8 =
+    {0x20, 0x01, 0x0D, 0xB8,
+     0x00, 0x00, 0x00, 0x00,
+     0x00, 0x00, 0x00, 0x00,
+     0x00, 0x00, 0x00, 0x01}
+};
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 static display_state_t                      m_display_state = LEDS_INACTIVE;                        /**< Board LED display state. */
@@ -394,6 +404,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     {
         if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
         {
+            memcpy(m_broker_addr.u8, ((ipv6_addr_t *)(p_event_data->data))->u8, IPV6_ADDR_SIZE);
             mqtt_begin(); // todo: should we pass a param for the dns result?
             m_app_state = STATE_APP_MQTT_CONNECTING;
         }

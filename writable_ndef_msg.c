@@ -241,7 +241,7 @@ void parse_configuration ()
         cJSON * client = cJSON_GetObjectItem(root, "client");
 
         strcpy(broker_hostname, broker->valuestring);
-        strcpy(broker_port, port->valuestring);
+        m_broker_port = port->valueint;
         strcpy(m_client_id, client->valuestring);
     }
 

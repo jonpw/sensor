@@ -49,6 +49,9 @@
  *        on button press.
  */
 
+#ifndef MQTTAPP_H
+#define MQTTAPP_H
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "boards.h"
@@ -74,22 +77,9 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+extern char broker_hostname[32];
 
-/** Modify m_broker_addr according to your setup.
- *  The address provided below is a place holder.  */
-ipv6_addr_t m_broker_addr =
-{
-    .u8 =
-    {0x20, 0x01, 0x0D, 0xB8,
-     0x00, 0x00, 0x00, 0x00,
-     0x00, 0x00, 0x00, 0x00,
-     0x00, 0x00, 0x00, 0x01}
-};
-
-char broker_hostname[] = "broker.hivemq.org";
-
-
-uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
+extern uint16_t m_broker_port;       /**< Port number of MQTT Broker being used. */
 
 #define TOPIC_DEBUG                         "debug/1234/#"
 
@@ -103,23 +93,19 @@ typedef enum
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 // TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
-char                           m_client_id[] = "testapp";                         /**< Unique MQTT client identifier. */
+extern char                           m_client_id[32];                         /**< Unique MQTT client identifier. */
 
-uint8_t identity[] = {0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79};
-uint8_t shared_secret[] = {0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b};
+extern uint8_t identity[15];
+extern uint8_t shared_secret[9];
 
-nrf_tls_preshared_key_t m_preshared_key = {
-    .p_identity     = &identity[0],
-    .p_secret_key   = &shared_secret[0],
-    .identity_len   = 15,
-    .secret_key_len = 9
-};
-
-nrf_tls_key_settings_t m_tls_keys = {
-    .p_psk = &m_preshared_key
-};
+extern nrf_tls_preshared_key_t m_preshared_key;
+extern nrf_tls_key_settings_t m_tls_keys;
 
 //TODO: Preliminary mqtt_begin
 void mqtt_begin(void);
 
 int mqtt_app_init(void);
+
+void app_mqtt_publish(mqtt_publish_message_t * pubmsg);
+
+#endif

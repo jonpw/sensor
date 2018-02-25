@@ -49,6 +49,9 @@
  *        on button press.
  */
 
+#ifndef MAIN_H
+#define MAIN_H
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "boards.h"
@@ -71,22 +74,10 @@
 #include "ipv6_medium.h"
 #include "dns6_api.h"
 
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
-
-#include "app_error.h"
-#include "nfc_t4t_lib.h"
-#include "nrf_log_ctrl.h"
-#include "ndef_file_m.h"
-#include "nfc_ndef_msg.h"
-
-#include "nrf_delay.h"
 #include "iot_common.h"
 #include "ipv6_api.h"
 
 // project's includes
-#include "dns.h"
 
 #define SCHED_MAX_EVENT_DATA_SIZE           16                                                      /**< Maximum size of scheduler events. */
 #define SCHED_QUEUE_SIZE                    192                                                     /**< Maximum number of events in the scheduler queue. */
@@ -148,7 +139,8 @@ typedef enum
 
 typedef struct
 {
-    app_state_event_t evt_type
+    app_state_event_t evt_type;
+    uint8_t * data
 } app_state_event_data_t;
 
 /**@brief LED's indication state. */
@@ -181,6 +173,10 @@ typedef enum
     mqtt_topic_t topic
 } button_config_t;*/
 
+/** Modify m_broker_addr according to your setup.
+ *  The address provided below is a place holder.  */
+extern ipv6_addr_t m_broker_addr;
+
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
 
@@ -201,6 +197,4 @@ APP_TIMER_DEF(m_iot_timer_tick_src_id);                                         
 #endif // APP_ENABLE_LOGS
 
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size);
-
-char broker_hostname[32];
-char broker_port[32];
+#endif

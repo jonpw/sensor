@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014 - 2017, Nordic Semiconductor ASA
+ * Copyright (c) 2013 - 2017, Nordic Semiconductor ASA
  * 
  * All rights reserved.
  * 
@@ -37,17 +37,21 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
+
 /** @file
  *
- * @defgroup iot_sdk_dns6_app main.c
+ * @defgroup iot_sdk_app_mqtt_client main.c
  * @{
- * @ingroup iot_sdk_app_ipv6
- * @brief This file contains the source code for Nordic's IPv6 DNS6 sample application.
+ * @ingroup iot_sdk_app_lwip
  *
+ * @brief This file contains the source code for LwIP based MQTT Client sample application.
+ *        This example publishes the topic "led/state" on button press.
+ *        Value of 0 or 1 is published as data for the topic based on LED is turned ON or OFF
+ *        on button press.
  */
 
-#ifndef MYDNS_H
-#define MYDNS_H
+#ifndef NET_H
+#define NET_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -58,36 +62,41 @@
 #include "app_scheduler.h"
 #include "app_timer.h"
 #include "app_button.h"
-#include "nrf_delay.h"
-#include "iot_common.h"
+#include "lwip/init.h"
+#include "lwip/inet6.h"
+#include "lwip/ip6.h"
+#include "lwip/ip6_addr.h"
+#include "lwip/netif.h"
+#include "mqtt.h"
+#include "lwip/timers.h"
+#include "nrf_platform_port.h"
+#include "app_util_platform.h"
 #include "iot_timer.h"
-#include "ipv6_api.h"
-#include "icmp6_api.h"
-#include "dns6_api.h"
 #include "ipv6_medium.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-//#include "mydns.h"
+#include "app_error.h"
+#include "nfc_t4t_lib.h"
+#include "nrf_log_ctrl.h"
+#include "ndef_file_m.h"
+#include "nfc_ndef_msg.h"
 
-
-#define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
-#define APP_DNS_SERVER_PORT             0x0035                                                      /**< UDP Port number of DNS Server. */
-#define APP_DNS_SERVER_ADDR             {{0x20, 0x01, 0x48, 0x60, 0x48, 0x60, 0x00, 0x00, \
-                                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x88}}          /**< IPv6 address of Google's DNS Server. */
-
-/**@brief Application's state. */
-typedef enum
-{
-    STATE_DNS_IDLE = 0,
-    STATE_DNS_QUERYING,
-    STATE_DNS_RESOLVING
-} dns_state_t;
+#include "nrf_delay.h"
+#include "iot_common.h"
+#include "ipv6_api.h"
+#include "icmp6_api.h"
+#include "dns6_api.h"
 
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
+eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 
-/**@brief Addresses used in sample application. */
+void nrf_driver_interface_up(iot_interface_t const * p_interface);
+
+void nrf_driver_interface_down(iot_interface_t const * p_interface);
+
+int net_init(void);
 
 #endif
