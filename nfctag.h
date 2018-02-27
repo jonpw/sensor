@@ -70,42 +70,6 @@ typedef enum
     NFC_STATE_FIELD_ON
 } nfc_state_t;
 
-char ssid[] = "sensornet";
-char key[] = "sensor";
-char key[] = "sensor";
-
-void parse_configuration ()
-{
-    // Parse the JSON
-    cJSON *root = cJSON_Parse(ndef_text);
-
-    // Check password
-    password = cJSON_GetObjectItem(root, "password")->valuestring;
-
-    if (password == CORRECT_PASSWORD)
-    {
-        ssid = cJSON_GetObjectItem(root, "ssid")->valuestring;
-        key = cJSON_GetObjectItem(root, "key")->valuestring;
-
-        // todo: how to store the ssid/key in gatt or w/e?...
-
-        identity = cJSON_GetObjectItem(root, "identity")->valuestring;
-        shared_secret = cJSON_GetObjectItem(root, "shared_secret")->valuestring;
-        m_preshared_key = {
-            .p_identity = &identity[0];
-            .p_secret_key = &shared_secret[0];
-            .identity_len = 15;
-            .secret_key_len = 9;
-        }
-        m_tls_keys.p_psk = &m_preshared_key;
-
-        broker = cJSON_GetObjectItem(root, "broker")->valuestring;
-        port = cJSON_GetObjectItem(root, "port")->valueint;
-        client = cJSON_GetObjectItem(root, "client")->valuestring;
-
-        broker_hostname = broker;
-        broker_port = port;
-        m_client_id = client;
-    }
-
-}
+extern char ssid[16];
+extern char key[16];
+extern char password[16];

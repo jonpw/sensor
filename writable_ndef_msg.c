@@ -63,20 +63,16 @@
 
 #include "main.h"
 #include "mqttapp.h"
+#include "nfctag.h"
 
 #include "cJSON.h"
 
-#define CORRECT_PASSWORD "testapp"
+char ssid[] = "sensornet";
+char key[] = "sensor";
+char password[] = CORRECT_PASSWORD;
 
 static uint8_t m_ndef_msg_buf[NDEF_FILE_SIZE];      /**< Buffer for NDEF file. */
 static uint8_t m_ndef_msg_len;                      /**< Length of the NDEF message. */
-
-/**@brief Application's state. */
-typedef enum
-{
-    NFC_STATE_IDLE = 0,
-    NFC_STATE_FIELD_ON
-} nfc_state_t;
 
 static nfc_state_t nfc_state = NFC_STATE_IDLE;
 /**
@@ -222,10 +218,14 @@ void parse_configuration ()
 
     if (strcmp(password->valuestring, CORRECT_PASSWORD) == 0)
     {
-        cJSON * ssid = cJSON_GetObjectItem(root, "ssid");
-        cJSON * key = cJSON_GetObjectItem(root, "key");
+        cJSON * ssid_cjson = cJSON_GetObjectItem(root, "ssid");
+        cJSON * key_cjson = cJSON_GetObjectItem(root, "key");
 
-        // todo: how to store the ssid/key in gatt or w/e?...
+        strcpy(ssid, ssid_cjson->valuestring);
+        strcpy(key, key_cjson->valuestring);
+
+        // todo: custom commissioning. Disable nordic's COMMISSIONING_ENABLED system and use our own
+        // but we have to do it partly similar to theirs (I think so?)
 
         cJSON * identity = cJSON_GetObjectItem(root, "identity");
         cJSON * shared_secret = cJSON_GetObjectItem(root, "shared_secret");
