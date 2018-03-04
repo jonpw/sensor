@@ -193,6 +193,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/iot/ipv6_stack/dns6 \
   $(SDK_ROOT)/components/nfc/ndef/generic/record \
   $(SDK_ROOT)/external/cJSON \
+  $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/ble/ble_services/ble_tps \
   $(PROJ_DIR) \
   $(SDK_ROOT)/components/drivers_nrf/rng \
@@ -270,7 +271,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/components/libraries/atomic_fifo \
   $(SDK_ROOT)/components/libraries/queue \
-  $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/libraries/fifo \
   $(SDK_ROOT)/components/drivers_nrf/lpcomp \
   $(SDK_ROOT)/components/ble/ble_services/ble_ias_c \
@@ -333,7 +333,8 @@ OPT = -O3 -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
-CFLAGS += -DBOARD_PCA10040
+CFLAGS += -DBOARD_252432
+CFLAGS += -DBOARD_CUSTOM
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DMBEDTLS_CONFIG_FILE=\"nrf_tls_config.h\"
@@ -431,7 +432,7 @@ flash_softdevice:
 erase:
 	nrfjprog -f nrf52 --eraseall
 
-SDK_CONFIG_FILE := ../config/sdk_config.h
+SDK_CONFIG_FILE := ./config/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)

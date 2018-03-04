@@ -74,6 +74,8 @@
   #include "arduino_primo.h"
 #elif defined(BOARD_CUSTOM)
   #include "custom_board.h"
+#elif defined(BOARD_252432)
+  #include "pca252432.h"
 #else
 #error "Board is not defined"
 

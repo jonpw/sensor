@@ -67,8 +67,8 @@
 #include "lwip/timers.h"
 #include "nrf_platform_port.h"
 #include "app_util_platform.h"
-#include "iot_timer.h"
 #include "ipv6_medium.h"
+#include "iot_timer.h"
 #include "dns6_api.h"
 
 #include "nrf_log.h"
@@ -175,7 +175,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
     {
         case LEDS_INACTIVE:
         {
-            LEDS_OFF(ALL_APP_LED);
+            LEDS_ON(ALL_APP_LED);
             break;
         }
         case LEDS_CONNECTABLE:
@@ -387,6 +387,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
 
     if (m_app_state == STATE_APP_IDLE)
     {
+        m_led_state = LEDS_IF_DOWN;
         if (p_event_data->evt_type == STATE_EVENT_GO)
         {
             net_init(); // -> mqtt + dns init
@@ -395,6 +396,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_CONNECTABLE)
     {
+        m_led_state = LEDS_IF_UP;
         if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
         {
             dns_lookup(BROKER_HOSTNAME);
@@ -402,6 +404,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_DNS_LOOKUP)
     {
+        m_led_state = LEDS_BROKER_DNS;
         if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
         {
             memcpy(m_broker_addr.u8, ((ipv6_addr_t *)(p_event_data->data))->u8, IPV6_ADDR_SIZE);
@@ -410,6 +413,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_MQTT_CONNECTING)
     {
+        m_led_state = LEDS_ACTIVE_IDLE;
         if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
         {
             // todo: should we handle initial pubs here?
@@ -417,6 +421,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_ACTIVE_IDLE)
     {
+        m_led_state = LEDS_CONNECTABLE;
         if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
             {
                 //todo: reconnect or wait a bit?
@@ -427,23 +432,29 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
             //todo: reconnect? 
             m_app_state = STATE_APP_FAULT;
         }
-
     } else if (m_app_state == STATE_APP_NFC)
     {
         if (p_event_data->evt_type == STATE_EVENT_NFC_RESUME)
             {
+                m_led_state = LEDS_ACTIVE_IDLE;
                 //todo: reconnect or wait a bit?
                 m_app_state = STATE_APP_FAULT;
             }
         else if (p_event_data->evt_type == STATE_EVENT_NFC_RESET)
         {
-            // 
+            m_led_state = LEDS_INACTIVE;
             app_mqtt_stop();
             net_stop();
-            //m_app_state;
+            m_led_state = LEDS_IF_DOWN;
+            m_app_state = STATE_APP_GO;
+        }
+    } else if (p_event_data->evt_type == STATE_EVENT_NFC) // async NFC event
+    {
+        m_led_state = LEDS_NFC;
+        m_app_state = STATE_APP_NFC;
+        // todo: pause everything?
         }
     }
-
 }
 
 /**
@@ -452,6 +463,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
 int main(void)
 {
     uint32_t err_code;
+    LEDS_ON(ALL_APP_LED);
 
     // Common initialize.
     log_init();
@@ -461,6 +473,10 @@ int main(void)
     timers_init();
     iot_timer_init();
     button_init();
+
+    state_update.evt_type   = STATE_EVENT_GO;
+    err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+    APP_ERROR_CHECK(err_code);
 
     // Enter main loop.
     for (;;)
