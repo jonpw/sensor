@@ -37,8 +37,8 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-#ifndef PCA281501
-#define PCA281501
+#ifndef PCA252432
+#define PCA252432
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,12 +46,11 @@ extern "C" {
 
 #include "nrf_gpio.h"
 
-// LEDs definitions for PCA10040
 #define LEDS_NUMBER    3
 
-#define LED_START	   7
-#define LED_R          7
+#define LED_START	   6
 #define LED_G          6
+#define LED_R          7
 #define LED_B          8
 #define LED_STOP	   8
 
@@ -108,4 +107,4 @@ extern "C" {
 }
 #endif
 
-#endif // PCA10040_H
+#endif
