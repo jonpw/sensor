@@ -69,6 +69,7 @@
 #include "lwip/netif.h"
 #include "mqtt.h"
 #include "lwip/timers.h"
+#include "lwip/dns.h"
 #include "nrf_platform_port.h"
 #include "app_util_platform.h"
 #include "iot_timer.h"
@@ -86,9 +87,6 @@
 
 #include "nrf_delay.h"
 #include "iot_common.h"
-#include "ipv6_api.h"
-#include "icmp6_api.h"
-#include "dns6_api.h"
 
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/

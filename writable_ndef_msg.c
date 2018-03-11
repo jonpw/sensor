@@ -56,6 +56,7 @@
 #include "nrf_log_ctrl.h"
 #include "ndef_file_m.h"
 #include "nfc_ndef_msg.h"
+#include "nfc_ndef_msg_parser.h"
 #include "nrf_tls.h"
 
 #include "nrf_log.h"

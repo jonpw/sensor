@@ -58,12 +58,9 @@
 #include "nrf_delay.h"
 #include "iot_common.h"
 #include "iot_timer.h"
-#include "lwip/init.h"
-#include "lwip/inet6.h"
-#include "lwip/ip6.h"
-#include "lwip/ip6_addr.h"
-#include "lwip/dns.h"
-#include "lwip/netif.h"
+#include "ipv6_api.h"
+#include "icmp6_api.h"
+#include "dns6_api.h"
 #include "ipv6_medium.h"
 
 #include "nrf_log.h"
@@ -72,45 +69,62 @@
 
 #include "mydns.h"
 #include "main.h"
-#include "lwip/ip_addr.h"
 
 static volatile dns_state_t   m_dns_state = STATE_DNS_IDLE;                                         /**< State of application state machine. */
                                         /**< IPv6 address of given hostname. */
 /**@brief Addresses used in sample application. */
-/*static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x00, 0x00,
+static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x00,
                                                                  0x00, 0x00, 0x00, 0x02}};          /**< Multi-cast address of all routers on the local network segment. */
-                                                                
+
 /**@brief DNS6 module event handler.
  *
  * @details Callback registered with the DNS6 module to receive asynchronous events from
  *          the module for registering query.
  */
-static void app_dns_handler(char * hostname, ip_addr_t * ipaddr, void * arg)
+static void app_dns_handler(uint32_t      process_result,
+                            const char  * p_hostname,
+                            ipv6_addr_t * p_addr,
+                            uint16_t      addr_count)
 {
-    LWIP_UNUSED_ARG(arg);
-
+    uint32_t index;
     uint32_t    err_code;
+    ipv6_addr_t * p_addr_out;
+
     app_state_event_data_t state_update;
     state_update.evt_type = STATE_EVENT_NONE;
 
     if (m_dns_state != STATE_DNS_RESOLVING)
     {
         // Exit if it's not in resolving state.
-        // todo: shouldn't be here
+        return;
     }
 
-    APPL_LOG("DNS Response for hostname: %s, addr %X", hostname, ipaddr->addr);
+    APPL_LOG("DNS Response for hostname: %s, with %d IPv6 addresses and status 0x%08lX",
+    p_hostname, addr_count, process_result);
 
-    if (ipaddr && ipaddr->addr) // todo: not sure
+    if (process_result == NRF_SUCCESS)
     {
-        app_state_event_data_t state_update;
-        state_update.evt_type = STATE_EVENT_DNS_OK;
-        state_update.data = &ipaddr;
-        err_code = app_sched_event_put(&state_update, 0, app_state_update);
-        APP_ERROR_CHECK(err_code);
-        m_dns_state = STATE_DNS_IDLE;
+        for (index = 0; index < addr_count; index++)
+        {
+            APPL_LOG("[%ld] IPv6 Address: ", index);
+            APPL_ADDR(p_addr[index]);
+
+            // Store only first given address, but print all of them.
+            if (index == 0)
+            {
+                memcpy(p_addr_out->u8, p_addr[0].u8, IPV6_ADDR_SIZE);
+
+                app_state_event_data_t state_update;
+                state_update.evt_type = STATE_EVENT_DNS_OK;
+                state_update.data = p_addr_out;
+
+                err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+                APP_ERROR_CHECK(err_code);
+                m_dns_state = STATE_DNS_IDLE;
+            }
+        }
     }
     else
     {
@@ -123,7 +137,7 @@ static void app_dns_handler(char * hostname, ip_addr_t * ipaddr, void * arg)
     }
 }
 
-void dns_lookup(char * p_hostname)
+void static dns_lookup(const char * p_hostname)
 {
     uint32_t    err_code;
     APPL_LOG("DNS lookup for hostname: %s", p_hostname);
@@ -133,14 +147,33 @@ void dns_lookup(char * p_hostname)
     {
         m_dns_state = STATE_DNS_QUERYING;
 
-        err_code = dns_gethostbyname(p_hostname, &m_broker_addr, app_dns_handler, NULL);
-        
-        if (err_code != ERR_INPROGRESS) {
-            m_dns_state = STATE_DNS_RESOLVING;
-        } else if (err_code = ERR_OK) {
-            app_dns_handler(&p_hostname, &m_broker_addr, NULL);
-        }
+        err_code = dns6_query(p_hostname, app_dns_handler);
+        APP_ERROR_CHECK(err_code);
+        m_dns_state = STATE_DNS_RESOLVING;
     }
+}
+
+/**@brief Function for initializing IP stack.
+ *
+ * @details Initialize the IP Stack.
+ */
+static void dns_client_init(void)
+{
+    uint32_t    err_code;
+
+    // Configure DNS client and server parameters.
+    dns6_init_t dns_init_param =
+    {
+        .local_src_port  = APP_DNS_LOCAL_PORT,
+        .dns_server      =
+        {
+            .port = APP_DNS_SERVER_PORT,
+            .addr = APP_DNS_SERVER_ADDR
+        }
+    };
+
+    err_code = dns6_init(&dns_init_param);
+    APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for application main entry.
@@ -149,8 +182,7 @@ int dns_main_init(void)
 {
     uint32_t err_code;
 
-    //memcpy(&m_dns_server, APP_DNS_SERVER_ADDR, sizeof(APP_DNS_SERVER_ADDR)); // unsure
-    //dns_init();
+    dns_client_init();
 
     APPL_LOG("Init complete.");
 

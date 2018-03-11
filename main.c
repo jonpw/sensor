@@ -63,13 +63,13 @@
 #include "lwip/ip6.h"
 #include "lwip/ip6_addr.h"
 #include "lwip/netif.h"
+#include "lwip/dns.h"
 #include "mqtt.h"
 #include "lwip/timers.h"
 #include "nrf_platform_port.h"
 #include "app_util_platform.h"
 #include "ipv6_medium.h"
 #include "iot_timer.h"
-#include "dns6_api.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -83,31 +83,22 @@
 
 #include "nrf_delay.h"
 #include "iot_common.h"
-#include "ipv6_api.h"
-#include "dns6_api.h"
 
 // project's includes
 #include "main.h"
 #include "net.h"
 #include "mqttapp.h"
+#include "mydns.h"
 
 static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
-
-ipv6_addr_t m_broker_addr =
-{
-    .u8 =
-    {0x20, 0x01, 0x0D, 0xB8,
-     0x00, 0x00, 0x00, 0x00,
-     0x00, 0x00, 0x00, 0x00,
-     0x00, 0x00, 0x00, 0x01}
-};
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 static display_state_t                      m_display_state = LEDS_INACTIVE;                        /**< Board LED display state. */
 static bool                                 m_led_state  = false;                                   /**< LED state. This is the topic being published by the example MQTT client. */
 static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
+ip_addr_t   m_broker_addr;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -155,7 +146,7 @@ static void leds_init(void)
 static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 {
     UNUSED_PARAMETER(wall_clock_value);
-
+    /*
     if (m_do_ind_err == true)
     {
         // Flash LED_THREE for three periods if error occurs.
@@ -185,14 +176,14 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
             LEDS_OFF(LED_G);
             break;
         }
-        case LEDS_IPV6_IF_DOWN:
+        case LEDS_IF_DOWN:
         {
             LEDS_ON(LED_B);
             LEDS_OFF(LED_R);
             LEDS_OFF(LED_G);
             break;
         }
-        case LEDS_IPV6_IF_UP:
+        case LEDS_IF_UP:
         {
             LEDS_INVERT(LED_G);
             LEDS_OFF(LED_R);
@@ -210,7 +201,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         {
             break;
         }
-    }
+    }*/
 }
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
@@ -349,7 +340,7 @@ static void iot_timer_init(void)
     {
         {system_timer_callback,   LWIP_SYS_TICK_MS},
         {blink_timeout_handler,   LED_BLINK_INTERVAL_MS},
-        {dns6_timeout_process,    SEC_TO_MILLISEC(DNS6_RETRANSMISSION_INTERVAL)},
+//        {dns6_timeout_process,    SEC_TO_MILLISEC(DNS6_RETRANSMISSION_INTERVAL)},
     };
 
     // The list of IoT Timer clients is declared as a constant.
@@ -391,7 +382,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         if (p_event_data->evt_type == STATE_EVENT_GO)
         {
             net_init(); // -> mqtt + dns init
-            nfc_init();
+            nfc_main_init();
             m_app_state = STATE_APP_STARTING;
         }
     } else if (m_app_state == STATE_APP_CONNECTABLE)
@@ -407,7 +398,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_led_state = LEDS_BROKER_DNS;
         if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
         {
-            memcpy(m_broker_addr.u8, ((ipv6_addr_t *)(p_event_data->data))->u8, IPV6_ADDR_SIZE);
+            //memcpy(m_broker_addr.u8, ((ip_addr_t *)(p_event_data->data))->addr, 4*4); // todo: not sure if correct
             mqtt_begin(); // todo: should we pass a param for the dns result?
             m_app_state = STATE_APP_MQTT_CONNECTING;
         }
@@ -443,17 +434,16 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         else if (p_event_data->evt_type == STATE_EVENT_NFC_RESET)
         {
             m_led_state = LEDS_INACTIVE;
-            app_mqtt_stop();
-            net_stop();
+            //app_mqtt_stop();
+            //net_stop();
             m_led_state = LEDS_IF_DOWN;
-            m_app_state = STATE_APP_GO;
+            m_app_state = STATE_APP_IDLE;
         }
     } else if (p_event_data->evt_type == STATE_EVENT_NFC) // async NFC event
     {
         m_led_state = LEDS_NFC;
         m_app_state = STATE_APP_NFC;
         // todo: pause everything?
-        }
     }
 }
 
@@ -463,17 +453,22 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
 int main(void)
 {
     uint32_t err_code;
-    LEDS_ON(ALL_APP_LED);
 
     // Common initialize.
     log_init();
     scheduler_init();
 
     leds_init();
+    LEDS_ON(ALL_APP_LED);
+
+    /*
     timers_init();
     iot_timer_init();
     button_init();
 
+    memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
+
+    app_state_event_data_t state_update;
     state_update.evt_type   = STATE_EVENT_GO;
     err_code       = app_sched_event_put(&state_update, 0, app_state_update);
     APP_ERROR_CHECK(err_code);
@@ -489,7 +484,7 @@ int main(void)
             err_code = sd_app_evt_wait();
             APP_ERROR_CHECK(err_code);
         }
-    }
+    }*/
 }
 
 /**

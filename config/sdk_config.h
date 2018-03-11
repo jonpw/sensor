@@ -1516,7 +1516,7 @@
 // <e> SPI_ENABLED - nrf_drv_spi - SPI/SPIM peripheral driver
 //==========================================================
 #ifndef SPI_ENABLED
-#define SPI_ENABLED 0
+#define SPI_ENABLED 1
 #endif
 // <o> SPI_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -1562,7 +1562,7 @@
 // <e> SPI0_ENABLED - Enable SPI0 instance
 //==========================================================
 #ifndef SPI0_ENABLED
-#define SPI0_ENABLED 0
+#define SPI0_ENABLED 1
 #endif
 // <q> SPI0_USE_EASY_DMA  - Use EasyDMA
  
@@ -1891,7 +1891,7 @@
 // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver
 //==========================================================
 #ifndef UART_ENABLED
-#define UART_ENABLED 1
+#define UART_ENABLED 0
 #endif
 // <o> UART_DEFAULT_CONFIG_HWFC  - Hardware Flow Control
  
@@ -1968,7 +1968,7 @@
 // <e> UART0_ENABLED - Enable UART0 instance
 //==========================================================
 #ifndef UART0_ENABLED
-#define UART0_ENABLED 1
+#define UART0_ENABLED 0
 #endif
 // <q> UART0_CONFIG_USE_EASY_DMA  - Default setting for using EasyDMA
  
@@ -3955,7 +3955,7 @@
 // <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_UART_ENABLED
-#define NRF_LOG_BACKEND_UART_ENABLED 1
+#define NRF_LOG_BACKEND_UART_ENABLED 0
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN
@@ -7437,5 +7437,89 @@
 //==========================================================
 
 // <<< end of configuration section >>>
+// <e> NFC_NDEF_MSG_PARSER_ENABLED - nfc_ndef_msg_parser - NFC NDEF message parser module
+//==========================================================
+#ifndef NFC_NDEF_MSG_PARSER_ENABLED
+#define NFC_NDEF_MSG_PARSER_ENABLED 1
+#endif
+// <e> NFC_NDEF_MSG_PARSER_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NFC_NDEF_MSG_PARSER_LOG_ENABLED
+#define NFC_NDEF_MSG_PARSER_LOG_ENABLED 0
+#endif
+// <o> NFC_NDEF_MSG_PARSER_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NFC_NDEF_MSG_PARSER_LOG_LEVEL
+#define NFC_NDEF_MSG_PARSER_LOG_LEVEL 3
+#endif
+
+// <o> NFC_NDEF_MSG_PARSER_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NFC_NDEF_MSG_PARSER_INFO_COLOR
+#define NFC_NDEF_MSG_PARSER_INFO_COLOR 0
+#endif
+
+// </e>
+
+// </e>
+
+// <e> NFC_NDEF_RECORD_PARSER_ENABLED - nfc_ndef_record_parser - NFC NDEF Record parser module
+//==========================================================
+#ifndef NFC_NDEF_RECORD_PARSER_ENABLED
+#define NFC_NDEF_RECORD_PARSER_ENABLED 1
+#endif
+// <e> NFC_NDEF_RECORD_PARSER_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef NFC_NDEF_RECORD_PARSER_LOG_ENABLED
+#define NFC_NDEF_RECORD_PARSER_LOG_ENABLED 0
+#endif
+// <o> NFC_NDEF_RECORD_PARSER_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NFC_NDEF_RECORD_PARSER_LOG_LEVEL
+#define NFC_NDEF_RECORD_PARSER_LOG_LEVEL 3
+#endif
+
+// <o> NFC_NDEF_RECORD_PARSER_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NFC_NDEF_RECORD_PARSER_INFO_COLOR
+#define NFC_NDEF_RECORD_PARSER_INFO_COLOR 0
+#endif
+
+// </e>
+
+// </e>
+
 #endif //SDK_CONFIG_H
 

@@ -61,10 +61,9 @@
 #include "nrf_delay.h"
 #include "iot_common.h"
 #include "iot_timer.h"
-#include "ipv6_api.h"
-#include "icmp6_api.h"
-#include "dns6_api.h"
 #include "ipv6_medium.h"
+#include "lwip/dns.h"
+#include "lwip/ip_addr.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -74,9 +73,8 @@
 
 
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
-#define APP_DNS_SERVER_PORT             0x0035                                                      /**< UDP Port number of DNS Server. */
-#define APP_DNS_SERVER_ADDR             {{0x20, 0x01, 0x48, 0x60, 0x48, 0x60, 0x00, 0x00, \
-                                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x88, 0x88}}          /**< IPv6 address of Google's DNS Server. */
+#define APP_DNS_SERVER_ADDR             (u32_t){0x20014860, 0x48600000, 0x00000000, 0x00008888}          /**< IPv6 address of Google's DNS Server. */
+#define DNS_SERVER_ADDRESS             (u32_t){0x20014860, 0x48600000, 0x00000000, 0x00008888}          /**< IPv6 address of Google's DNS Server. */
 
 /**@brief Application's state. */
 typedef enum
@@ -87,7 +85,11 @@ typedef enum
 } dns_state_t;
 
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
-
+extern ip_addr_t m_dns_server;
+extern ip_addr_t m_dns_result;
 /**@brief Addresses used in sample application. */
+
+extern int dns_main_init(void);
+extern void dns_lookup(char * p_hostname);
 
 #endif

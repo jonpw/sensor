@@ -83,11 +83,9 @@
 
 #include "nrf_delay.h"
 #include "iot_common.h"
-#include "ipv6_api.h"
-#include "icmp6_api.h"
-#include "dns6_api.h"
 
 #include "net.h"
+#include "main.h"
  
 static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
@@ -229,9 +227,9 @@ int net_init(void)
     APP_ERROR_CHECK(err_code);
 
     ip_stack_init();
-    ip_stack_timer_init();
+    //ip_stack_timer_init();
 
-    dns_client_init();
+    dns_main_init();
     mqtt_app_init();
 
 

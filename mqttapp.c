@@ -121,7 +121,7 @@ static void app_mqtt_connect()
 {
     mqtt_client_init(&m_app_mqtt_client);
 
-    memcpy(m_app_mqtt_client.broker_addr.u8, m_broker_addr.u8, IPV6_ADDR_SIZE);
+    memcpy(m_app_mqtt_client.broker_addr.u8, m_broker_addr.addr, IPV6_ADDR_SIZE);
     m_app_mqtt_client.broker_port          = m_broker_port;
     m_app_mqtt_client.evt_cb               = app_mqtt_evt_handler;
     m_app_mqtt_client.client_id.p_utf_str  = (uint8_t *)m_client_id;

@@ -66,16 +66,15 @@
 #include "lwip/ip6.h"
 #include "lwip/ip6_addr.h"
 #include "lwip/netif.h"
+#include "lwip/dns.h"
 #include "mqtt.h"
 #include "lwip/timers.h"
 #include "nrf_platform_port.h"
 #include "app_util_platform.h"
 #include "iot_timer.h"
 #include "ipv6_medium.h"
-#include "dns6_api.h"
 
 #include "iot_common.h"
-#include "ipv6_api.h"
 
 // project's includes
 
@@ -89,11 +88,7 @@
 #define DEAD_BEEF                       0xDEADBEEF                                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define MAX_LENGTH_FILENAME             128                                                         /**< Max length of filename to copy for the debug error handler. */
 
-#define LED_R                             BSP_LED_0_MASK
-#define LED_G                             BSP_LED_1_MASK
-#define LED_B                             BSP_LED_2_MASK
-#define ALL_APP_LED                        (BSP_LED_0_MASK | BSP_LED_1_MASK | \
-                                            BSP_LED_2_MASK )                        /**< Define used for simultaneous operation of all application LEDs. */
+#define ALL_APP_LED                        (LED_R | LED_G | LED_B)                        /**< Define used for simultaneous operation of all application LEDs. */
 
 #define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
 #define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */
@@ -105,6 +100,8 @@
 #define TOPIC_BUTTON_2  "button/2/event"
 #define TOPIC_BUTTON_3  "button/3/event"
 #define TOPIC_BUTTON_4  "button/4/event"
+
+#define INITIAL_BROKER_ADDR             (u32_t){0x20010DB8, 0x00000000, 0x00000000, 0x00000001}
 
 /**@brief Application's state. */
 typedef enum
@@ -147,8 +144,8 @@ typedef struct
 typedef enum
 {
     LEDS_INACTIVE = 0,
-    LEDS_IPV6_IF_DOWN,
-    LEDS_IPV6_IF_UP,
+    LEDS_IF_DOWN,
+    LEDS_IF_UP,
     LEDS_CONNECTABLE,
     LEDS_BROKER_DNS,
     LEDS_BROKER_CONNECTING,
@@ -175,7 +172,7 @@ typedef enum
 
 /** Modify m_broker_addr according to your setup.
  *  The address provided below is a place holder.  */
-extern ipv6_addr_t m_broker_addr;
+extern ip_addr_t m_broker_addr;
 
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */

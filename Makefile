@@ -21,14 +21,9 @@ SRC_FILES += \
   $(SDK_ROOT)/external/lwip/src/core/dhcp.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv6/dhcp6.c \
   $(SDK_ROOT)/external/lwip/src/core/dns.c \
-  $(SDK_ROOT)/components/iot/ipv6_stack/pbuffer/iot_pbuffer.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv4/icmp.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv6/icmp6.c \
   $(SDK_ROOT)/external/lwip/src/core/ipv6/inet6.c \
-  $(SDK_ROOT)/components/iot/ipv6_stack/dns6/dns6.c \
-  $(SDK_ROOT)/components/iot/ipv6_stack/udp/udp6.c \
-  $(SDK_ROOT)/components/iot/ipv6_stack/ipv6/ipv6.c \
-  $(SDK_ROOT)/components/iot/ipv6_stack/utils/ipv6_utils.c \
   $(SDK_ROOT)/external/lwip/src/core/inet_chksum.c \
   $(SDK_ROOT)/external/lwip/src/core/init.c \
   $(SDK_ROOT)/external/lwip/src/core/ip.c \
@@ -48,7 +43,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/lwip/src/core/tcp_in.c \
   $(SDK_ROOT)/external/lwip/src/core/tcp_out.c \
   $(SDK_ROOT)/external/lwip/src/core/timeouts.c \
-  #$(SDK_ROOT)/external/lwip/src/core/udp.c \
+  $(SDK_ROOT)/external/lwip/src/core/udp.c \
   $(SDK_ROOT)/components/libraries/button/app_button.c \
   $(SDK_ROOT)/components/libraries/util/app_error.c \
   $(SDK_ROOT)/components/libraries/util/app_error_weak.c \
@@ -86,8 +81,18 @@ SRC_FILES += \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/net.c \
   $(PROJ_DIR)/mqttapp.c \
-  $(PROJ_DIR)/dns.c \
+  $(PROJ_DIR)/mydns.c \
   $(PROJ_DIR)/writable_ndef_msg.c \
+  $(PROJ_DIR)/ndef_file_m.c \
+  $(SDK_ROOT)/external/cJSON/cJSON.c \
+  $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_msg.c \
+  $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_rec.c \
+  $(SDK_ROOT)/components/nfc/ndef/parser/message/nfc_ndef_msg_parser.c \
+  $(SDK_ROOT)/components/nfc/ndef/parser/message/nfc_ndef_msg_parser_local.c \
+  $(SDK_ROOT)/components/nfc/ndef/parser/record/nfc_ndef_record_parser.c \
+  $(SDK_ROOT)/components/nfc/t4t_lib/hal_t4t/hal_nfc_t4t.c \
+  $(SDK_ROOT)/components/nfc/ndef/generic/message/nfc_ndef_msg.c \
+  $(SDK_ROOT)/components/nfc/ndef/generic/record/nfc_ndef_record.c \
   $(SDK_ROOT)/external/mbedtls/library/aes.c \
   $(SDK_ROOT)/external/mbedtls/library/aesni.c \
   $(SDK_ROOT)/external/mbedtls/library/arc4.c \
@@ -185,12 +190,8 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/iot/medium \
   $(SDK_ROOT)/components/nfc/t4t_lib \
   $(SDK_ROOT)/components/nfc/ndef/generic/message \
-  $(SDK_ROOT)/components/iot/ipv6_stack/include \
-  $(SDK_ROOT)/components/iot/ipv6_stack/utils \
-  $(SDK_ROOT)/components/iot/ipv6_stack/pbuffer \
-  $(SDK_ROOT)/components/iot/ipv6_stack/udp \
-  $(SDK_ROOT)/components/iot/ipv6_stack/icmp6 \
-  $(SDK_ROOT)/components/iot/ipv6_stack/dns6 \
+  $(SDK_ROOT)/components/nfc/ndef/parser/message \
+  $(SDK_ROOT)/components/nfc/ndef/parser/record \
   $(SDK_ROOT)/components/nfc/ndef/generic/record \
   $(SDK_ROOT)/external/cJSON \
   $(SDK_ROOT)/components/boards \
@@ -225,13 +226,14 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_nus_c \
   $(SDK_ROOT)/components/libraries/mem_manager \
   $(SDK_ROOT)/components/libraries/fstorage \
-  $(SDK_ROOT)/external/lwip/src/include/lwip \
+  $(SDK_ROOT)/external/lwip/src/include \
   $(SDK_ROOT)/components/libraries/gpiote \
   $(SDK_ROOT)/components/drivers_nrf/wdt \
   $(SDK_ROOT)/components/libraries/crc32 \
   $(SDK_ROOT)/components/libraries/fds \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/mouse \
   $(SDK_ROOT)/components/libraries/pwm \
+  $(SDK_ROOT)/components/nfc/ndef/uri \
   $(SDK_ROOT)/components/libraries/strerror \
   $(SDK_ROOT)/components/iot/medium/commissioning \
   $(SDK_ROOT)/components/drivers_nrf/power \
@@ -267,7 +269,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/twi \
   $(SDK_ROOT)/components/device \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/kbd \
-  ../config \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/components/libraries/atomic_fifo \
   $(SDK_ROOT)/components/libraries/queue \
@@ -324,6 +325,7 @@ INC_FOLDERS += \
 
 # Libraries common to all targets
 LIB_FILES += \
+  $(SDK_ROOT)/components/nfc/t4t_lib/nfc_t4t_lib_gcc.a \
 
 # Optimization flags
 OPT = -O3 -g3

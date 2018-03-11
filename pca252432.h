@@ -60,9 +60,9 @@ extern "C" {
 
 #define LEDS_LIST { LED_R, LED_G, LED_B}
 
-#define BSP_LED_1	LED_R
-#define BSP_LED_2	LED_G
-#define BSP_LED_3	LED_B
+#define BSP_LED_0	LED_R
+#define BSP_LED_1	LED_G
+#define BSP_LED_2	LED_B
 
 #define BUTTONS_NUMBER 4
 
@@ -90,6 +90,8 @@ extern "C" {
 
 #define RX_PIN_NUMBER  15
 #define TX_PIN_NUMBER  16
+#define CTS_PIN_NUMBER 17
+#define RTS_PIN_NUMBER 18	
 #define HWFC           false
 
 #define SPIM0_SCK_PIN   28  // SPI clock GPIO pin number.
