@@ -88,7 +88,7 @@
 #define DEAD_BEEF                       0xDEADBEEF                                                  /**< Value used as error code on stack dump, can be used to identify stack location on stack unwind. */
 #define MAX_LENGTH_FILENAME             128                                                         /**< Max length of filename to copy for the debug error handler. */
 
-#define ALL_APP_LED                        (LED_R | LED_G | LED_B)                        /**< Define used for simultaneous operation of all application LEDs. */
+#define ALL_APP_LED                        (BSP_LED_0 | BSP_LED_1 | BSP_LED_2)                        /**< Define used for simultaneous operation of all application LEDs. */
 
 #define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
 #define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */

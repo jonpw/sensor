@@ -132,10 +132,10 @@ static void scheduler_init(void)
 static void leds_init(void)
 {
     // Configure application LED pins.
-    LEDS_CONFIGURE(ALL_APP_LED);
+    bsp_board_leds_init();
 
     // Turn off all LED on initialization.
-    LEDS_OFF(ALL_APP_LED);
+    bsp_board_leds_off();
 }
 
 
@@ -146,7 +146,6 @@ static void leds_init(void)
 static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 {
     UNUSED_PARAMETER(wall_clock_value);
-    /*
     if (m_do_ind_err == true)
     {
         // Flash LED_THREE for three periods if error occurs.
@@ -156,7 +155,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         }
         else
         {
-            LEDS_OFF(LED_R);
+            bsp_board_led_on(0);
             m_do_ind_err = false;
             m_ind_err_count = 0;
         }
@@ -166,42 +165,44 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
     {
         case LEDS_INACTIVE:
         {
-            LEDS_ON(ALL_APP_LED);
+            bsp_board_led_invert(0);
+            bsp_board_led_invert(1);
+            bsp_board_led_invert(2);
             break;
         }
         case LEDS_CONNECTABLE:
         {
-            LEDS_INVERT(LED_B);
-            LEDS_OFF(LED_R);
-            LEDS_OFF(LED_G);
+            bsp_board_led_off(0);
+            bsp_board_led_off(1);
+            bsp_board_led_invert(2);
             break;
         }
         case LEDS_IF_DOWN:
         {
-            LEDS_ON(LED_B);
-            LEDS_OFF(LED_R);
-            LEDS_OFF(LED_G);
+            bsp_board_led_off(0);
+            bsp_board_led_off(1);
+            bsp_board_led_on(2);
             break;
         }
         case LEDS_IF_UP:
         {
-            LEDS_INVERT(LED_G);
-            LEDS_OFF(LED_R);
-            LEDS_OFF(LED_B);
+            bsp_board_led_off(0);
+            bsp_board_led_invert(1);
+            bsp_board_led_off(2);
             break;
         }
         case LEDS_CONNECTED_TO_BROKER:
         {
-            LEDS_ON(LED_G);
-            LEDS_OFF(LED_R);
-            LEDS_OFF(LED_B);
+            bsp_board_led_off(0);
+            bsp_board_led_on(1);
+            bsp_board_led_off(2);
             break;
         }
         default:
         {
             break;
         }
-    }*/
+    }
 }
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
@@ -378,7 +379,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
 
     if (m_app_state == STATE_APP_IDLE)
     {
-        m_led_state = LEDS_IF_DOWN;
+        m_display_state = LEDS_IF_DOWN;
         if (p_event_data->evt_type == STATE_EVENT_GO)
         {
             net_init(); // -> mqtt + dns init
@@ -387,7 +388,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_CONNECTABLE)
     {
-        m_led_state = LEDS_IF_UP;
+        m_display_state = LEDS_IF_UP;
         if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
         {
             dns_lookup(BROKER_HOSTNAME);
@@ -395,7 +396,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_DNS_LOOKUP)
     {
-        m_led_state = LEDS_BROKER_DNS;
+        m_display_state = LEDS_BROKER_DNS;
         if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
         {
             //memcpy(m_broker_addr.u8, ((ip_addr_t *)(p_event_data->data))->addr, 4*4); // todo: not sure if correct
@@ -404,7 +405,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_MQTT_CONNECTING)
     {
-        m_led_state = LEDS_ACTIVE_IDLE;
+        m_display_state = LEDS_ACTIVE_IDLE;
         if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
         {
             // todo: should we handle initial pubs here?
@@ -412,7 +413,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         }
     } else if (m_app_state == STATE_APP_ACTIVE_IDLE)
     {
-        m_led_state = LEDS_CONNECTABLE;
+        m_display_state = LEDS_CONNECTABLE;
         if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
             {
                 //todo: reconnect or wait a bit?
@@ -427,21 +428,21 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     {
         if (p_event_data->evt_type == STATE_EVENT_NFC_RESUME)
             {
-                m_led_state = LEDS_ACTIVE_IDLE;
+                m_display_state = LEDS_ACTIVE_IDLE;
                 //todo: reconnect or wait a bit?
                 m_app_state = STATE_APP_FAULT;
             }
         else if (p_event_data->evt_type == STATE_EVENT_NFC_RESET)
         {
-            m_led_state = LEDS_INACTIVE;
+            m_display_state = LEDS_INACTIVE;
             //app_mqtt_stop();
             //net_stop();
-            m_led_state = LEDS_IF_DOWN;
+            m_display_state = LEDS_IF_DOWN;
             m_app_state = STATE_APP_IDLE;
         }
     } else if (p_event_data->evt_type == STATE_EVENT_NFC) // async NFC event
     {
-        m_led_state = LEDS_NFC;
+        m_display_state = LEDS_NFC;
         m_app_state = STATE_APP_NFC;
         // todo: pause everything?
     }
@@ -459,19 +460,20 @@ int main(void)
     scheduler_init();
 
     leds_init();
-    LEDS_ON(ALL_APP_LED);
+    bsp_board_leds_on();
 
-    /*
     timers_init();
     iot_timer_init();
     button_init();
 
-    memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
+    //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
+    m_display_state = LEDS_INACTIVE;
+    m_app_state = STATE_APP_IDLE;
 
-    app_state_event_data_t state_update;
+    /*app_state_event_data_t state_update;
     state_update.evt_type   = STATE_EVENT_GO;
     err_code       = app_sched_event_put(&state_update, 0, app_state_update);
-    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(err_code);*/
 
     // Enter main loop.
     for (;;)
@@ -484,7 +486,7 @@ int main(void)
             err_code = sd_app_evt_wait();
             APP_ERROR_CHECK(err_code);
         }
-    }*/
+    }
 }
 
 /**
