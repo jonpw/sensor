@@ -78,10 +78,10 @@
 
 // project's includes
 
-#define SCHED_MAX_EVENT_DATA_SIZE           16                                                      /**< Maximum size of scheduler events. */
+#define SCHED_MAX_EVENT_DATA_SIZE           32                                                      /**< Maximum size of scheduler events. */
 #define SCHED_QUEUE_SIZE                    192                                                     /**< Maximum number of events in the scheduler queue. */
 
-#define STATE_APP_INTERVAL              APP_TIMER_TICKS(1500)                                       /**< Interval for executing application state machine. */
+//#define STATE_APP_INTERVAL              APP_TIMER_TICKS(1500)                                       /**< Interval for executing application state machine. */
 
 #define APP_RTR_SOLICITATION_DELAY      1000                                                        /**< Time before host sends an initial solicitation in ms. */
 
@@ -177,7 +177,7 @@ extern ip_addr_t m_broker_addr;
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
 
-#define APP_ENABLE_LOGS                     1                                                       /**< Enable logs in the application. */
+#define APP_ENABLE_LOGS                     0                                                       /**< Enable logs in the application. */
 
 #if (APP_ENABLE_LOGS == 1)
 

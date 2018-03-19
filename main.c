@@ -207,9 +207,10 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
+    bsp_board_led_invert(0);
     if (button_action == APP_BUTTON_PUSH)
     {
-        switch (pin_no)
+        /*switch (pin_no)
         {
             case BSP_BUTTON_0:
             {
@@ -257,7 +258,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }            
             default:
                 break;
-        }
+        }*/
     }
 }
 
@@ -276,7 +277,7 @@ static void button_init(void)
 
     #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(50)
 
-    err_code = app_button_init(buttons, sizeof(buttons) / sizeof(buttons[0]), BUTTON_DETECTION_DELAY);
+    err_code = app_button_init(buttons, BUTTONS_NUMBER, BUTTON_DETECTION_DELAY);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_button_enable();
@@ -340,8 +341,7 @@ static void iot_timer_init(void)
     static const iot_timer_client_t list_of_clients[] =
     {
         {system_timer_callback,   LWIP_SYS_TICK_MS},
-        {blink_timeout_handler,   LED_BLINK_INTERVAL_MS},
-//        {dns6_timeout_process,    SEC_TO_MILLISEC(DNS6_RETRANSMISSION_INTERVAL)},
+        {blink_timeout_handler,   LED_BLINK_INTERVAL_MS}
     };
 
     // The list of IoT Timer clients is declared as a constant.
@@ -463,17 +463,21 @@ int main(void)
     bsp_board_leds_on();
 
     timers_init();
+    bsp_board_led_off(0);
     iot_timer_init();
+    bsp_board_led_off(1);
     button_init();
+    bsp_board_led_off(2);
+
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
     m_app_state = STATE_APP_IDLE;
 
-    /*app_state_event_data_t state_update;
+    app_state_event_data_t state_update;
     state_update.evt_type   = STATE_EVENT_GO;
     err_code       = app_sched_event_put(&state_update, 0, app_state_update);
-    APP_ERROR_CHECK(err_code);*/
+    APP_ERROR_CHECK(err_code);
 
     // Enter main loop.
     for (;;)
@@ -482,9 +486,14 @@ int main(void)
 
         if (NRF_LOG_PROCESS() == false)
         {
+            bsp_board_led_invert(0);
+            //bsp_board_led_on(1);
+            //bsp_board_led_off(2);
             // Sleep waiting for an application event.
+            nrf_delay_ms(50);
             err_code = sd_app_evt_wait();
             APP_ERROR_CHECK(err_code);
+
         }
     }
 }

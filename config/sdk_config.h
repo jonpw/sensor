@@ -527,7 +527,7 @@
 // <2=> Synth 
 
 #ifndef CLOCK_CONFIG_LF_SRC
-#define CLOCK_CONFIG_LF_SRC 1
+#define CLOCK_CONFIG_LF_SRC 0
 #endif
 
 // <o> CLOCK_CONFIG_IRQ_PRIORITY  - Interrupt priority
@@ -2319,7 +2319,7 @@
 // <i> The wall clock of the IoT Timer module has to be updated from an external source at regular intervals. This define needs to be set to the interval between updates.
 
 #ifndef IOT_TIMER_RESOLUTION_IN_MS
-#define IOT_TIMER_RESOLUTION_IN_MS 500
+#define IOT_TIMER_RESOLUTION_IN_MS 10
 #endif
 
 // </h> 
@@ -3094,7 +3094,7 @@
 // <i> will fail.
 
 #ifndef APP_TIMER_CONFIG_OP_QUEUE_SIZE
-#define APP_TIMER_CONFIG_OP_QUEUE_SIZE 10
+#define APP_TIMER_CONFIG_OP_QUEUE_SIZE 12
 #endif
 
 // <q> APP_TIMER_CONFIG_USE_SCHEDULER  - Enable scheduling app_timer events to app_scheduler
