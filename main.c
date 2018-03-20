@@ -210,7 +210,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
     bsp_board_led_invert(0);
     if (button_action == APP_BUTTON_PUSH)
     {
-        /*switch (pin_no)
+        switch (pin_no)
         {
             case BSP_BUTTON_0:
             {
@@ -258,7 +258,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }            
             default:
                 break;
-        }*/
+        }
     }
 }
 
@@ -275,7 +275,7 @@ static void button_init(void)
         {BSP_BUTTON_3,        false, BUTTON_PULL, button_event_handler},
     };
 
-    #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(50)
+    #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(100)
 
     err_code = app_button_init(buttons, BUTTONS_NUMBER, BUTTON_DETECTION_DELAY);
     APP_ERROR_CHECK(err_code);
@@ -382,6 +382,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_IF_DOWN;
         if (p_event_data->evt_type == STATE_EVENT_GO)
         {
+            bsp_board_led_invert(1);
             net_init(); // -> mqtt + dns init
             nfc_main_init();
             m_app_state = STATE_APP_STARTING;
@@ -454,45 +455,80 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
 int main(void)
 {
     uint32_t err_code;
+    uint32_t x;
 
     // Common initialize.
-    log_init();
+    //log_init();
     scheduler_init();
 
     leds_init();
-    bsp_board_leds_on();
+    bsp_board_leds_off();
+
+    bsp_board_led_on(2);
+    nrf_delay_ms(250);
+    bsp_board_led_off(2);
+    nrf_delay_ms(250);
 
     timers_init();
-    bsp_board_led_off(0);
+
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+
     iot_timer_init();
-    bsp_board_led_off(1);
-    button_init();
-    bsp_board_led_off(2);
+
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+
+    //button_init();
+
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
 
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
     m_app_state = STATE_APP_IDLE;
 
-    app_state_event_data_t state_update;
+    /*app_state_event_data_t state_update;
     state_update.evt_type   = STATE_EVENT_GO;
     err_code       = app_sched_event_put(&state_update, 0, app_state_update);
-    APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(err_code);*/
 
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+    bsp_board_led_invert(0);
+    nrf_delay_ms(250);
+
+
+    net_init();
     // Enter main loop.
     for (;;)
     {
+        bsp_board_led_invert(2);
+        nrf_delay_ms(50);
         app_sched_execute();
 
         if (NRF_LOG_PROCESS() == false)
         {
-            bsp_board_led_invert(0);
+        
             //bsp_board_led_on(1);
             //bsp_board_led_off(2);
             // Sleep waiting for an application event.
-            nrf_delay_ms(50);
+            //nrf_delay_ms(50);
             err_code = sd_app_evt_wait();
             APP_ERROR_CHECK(err_code);
+            /*for (x=0;x<err_code-NRF_ERROR_BASE_NUM;x++)
+            {
+                bsp_board_led_invert(1);
+                nrf_delay_ms(100);
+            }
+            nrf_delay_ms(1000);*/
 
         }
     }

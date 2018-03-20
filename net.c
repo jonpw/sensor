@@ -201,7 +201,8 @@ int net_init(void)
     uint32_t err_code;
 
     // Common initialize.
-
+    bsp_board_led_invert(0);
+    nrf_delay_ms(50);
     static ipv6_medium_init_params_t ipv6_medium_init_params;
     memset(&ipv6_medium_init_params, 0x00, sizeof(ipv6_medium_init_params));
     ipv6_medium_init_params.ipv6_medium_evt_handler    = on_ipv6_medium_evt;
@@ -215,7 +216,8 @@ int net_init(void)
                                 IPV6_MEDIUM_ID_BLE,
                                 &m_ipv6_medium);
     APP_ERROR_CHECK(err_code);
-
+    bsp_board_led_invert(0);
+    nrf_delay_ms(50);
     eui48_t ipv6_medium_eui48;
     err_code = ipv6_medium_eui48_get(m_ipv6_medium.ipv6_medium_instance_id,
                                      &ipv6_medium_eui48);
@@ -225,12 +227,19 @@ int net_init(void)
     err_code = ipv6_medium_eui48_set(m_ipv6_medium.ipv6_medium_instance_id,
                                      &ipv6_medium_eui48);
     APP_ERROR_CHECK(err_code);
-
+    bsp_board_led_invert(0);
+    nrf_delay_ms(50);
     ip_stack_init();
+    bsp_board_led_invert(0);
+    nrf_delay_ms(50);
     //ip_stack_timer_init();
 
     dns_main_init();
+    bsp_board_led_invert(0);
+    nrf_delay_ms(50);
     mqtt_app_init();
+    bsp_board_led_invert(0);
+    nrf_delay_ms(50);
 
 
     // Start execution.
