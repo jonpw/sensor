@@ -90,7 +90,7 @@
 #include "mqttapp.h"
 #include "mydns.h"
 
-static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
+//static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
@@ -458,7 +458,7 @@ int main(void)
     uint32_t x;
 
     // Common initialize.
-    //log_init();
+    log_init();
     scheduler_init();
 
     leds_init();
@@ -512,6 +512,9 @@ int main(void)
     {
         bsp_board_led_invert(2);
         nrf_delay_ms(50);
+        bsp_board_led_invert(2);
+        nrf_delay_ms(50);
+
         app_sched_execute();
 
         if (NRF_LOG_PROCESS() == false)

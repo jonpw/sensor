@@ -89,7 +89,7 @@
  
 static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
-static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
+//static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 static ipv6_medium_instance_t               m_ipv6_medium;
 static bool                                 m_do_ind_err = false;
@@ -201,23 +201,26 @@ int net_init(void)
     uint32_t err_code;
 
     // Common initialize.
-    bsp_board_led_invert(0);
+    bsp_board_led_invert(1);
     nrf_delay_ms(50);
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+
     static ipv6_medium_init_params_t ipv6_medium_init_params;
     memset(&ipv6_medium_init_params, 0x00, sizeof(ipv6_medium_init_params));
     ipv6_medium_init_params.ipv6_medium_evt_handler    = on_ipv6_medium_evt;
     ipv6_medium_init_params.ipv6_medium_error_handler  = on_ipv6_medium_error;
-#ifdef COMMISSIONING_ENABLED
-    ipv6_medium_init_params.commissioning_id_mode_cb   = commissioning_id_mode_cb;
-    ipv6_medium_init_params.commissioning_power_off_cb = commissioning_power_off_cb;
-#endif // COMMISSIONING_ENABLED
 
     err_code = ipv6_medium_init(&ipv6_medium_init_params,
                                 IPV6_MEDIUM_ID_BLE,
                                 &m_ipv6_medium);
-    APP_ERROR_CHECK(err_code);
-    bsp_board_led_invert(0);
+    //APP_ERROR_CHECK(err_code);
+
+    bsp_board_led_invert(1);
     nrf_delay_ms(50);
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+
     eui48_t ipv6_medium_eui48;
     err_code = ipv6_medium_eui48_get(m_ipv6_medium.ipv6_medium_instance_id,
                                      &ipv6_medium_eui48);
@@ -227,18 +230,32 @@ int net_init(void)
     err_code = ipv6_medium_eui48_set(m_ipv6_medium.ipv6_medium_instance_id,
                                      &ipv6_medium_eui48);
     APP_ERROR_CHECK(err_code);
-    bsp_board_led_invert(0);
-    nrf_delay_ms(50);
-    ip_stack_init();
-    bsp_board_led_invert(0);
-    nrf_delay_ms(50);
-    //ip_stack_timer_init();
 
-    dns_main_init();
-    bsp_board_led_invert(0);
+    bsp_board_led_invert(1);
     nrf_delay_ms(50);
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+
+    ip_stack_init();
+
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+
+    //ip_stack_timer_init();
+    dns_main_init();
+
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+
     mqtt_app_init();
-    bsp_board_led_invert(0);
+
+    bsp_board_led_invert(1);
+    nrf_delay_ms(50);
+    bsp_board_led_invert(1);
     nrf_delay_ms(50);
 
 
