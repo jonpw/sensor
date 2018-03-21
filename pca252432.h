@@ -100,7 +100,7 @@ extern "C" {
 #define SPIM0_SS_PIN    24  // SPI Slave Select GPIO pin number.
 
 // Low frequency clock source to be used by the SoftDevice
-#define NRF_CLOCK_LFCLKSRC      {.source       = NRF_CLOCK_LF_SRC_XTAL,      \
+#define NRF_CLOCK_LFCLKSRC      {.source       = NRF_CLOCK_LF_SRC_RC,      \
                                  .rc_ctiv      = 0,                          \
                                  .rc_temp_ctiv = 0,                          \
                                  .accuracy     = NRF_CLOCK_LF_ACCURACY_20_PPM}

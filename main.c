@@ -135,6 +135,7 @@ static void leds_init(void)
     bsp_board_leds_init();
 
     // Turn off all LED on initialization.
+    m_display_state = LEDS_INACTIVE;
     bsp_board_leds_off();
 }
 
@@ -376,22 +377,19 @@ static void log_init(void)
 // sub-states should be updated before calling this
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size)
 {
-
+    bsp_board_led_invert(1);
     if (m_app_state == STATE_APP_IDLE)
     {
         m_display_state = LEDS_IF_DOWN;
         if (p_event_data->evt_type == STATE_EVENT_GO)
-        {
-            bsp_board_led_invert(1);
-            net_init(); // -> mqtt + dns init
-            nfc_main_init();
-            m_app_state = STATE_APP_STARTING;
+        {        
+            m_app_state = STATE_APP_CONNECTABLE;
         }
     } else if (m_app_state == STATE_APP_CONNECTABLE)
     {
-        m_display_state = LEDS_IF_UP;
         if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
         {
+            m_display_state = LEDS_IF_UP;
             dns_lookup(BROKER_HOSTNAME);
             m_app_state = STATE_APP_DNS_LOOKUP;
         }
@@ -454,6 +452,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
  */
 int main(void)
 {
+    nrf_delay_ms(250);
     uint32_t err_code;
     uint32_t x;
 
@@ -462,59 +461,28 @@ int main(void)
     scheduler_init();
 
     leds_init();
-    bsp_board_leds_off();
-
-    bsp_board_led_on(2);
-    nrf_delay_ms(250);
-    bsp_board_led_off(2);
-    nrf_delay_ms(250);
-
     timers_init();
-
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-
     iot_timer_init();
-
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-
-    //button_init();
-
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-
+    button_init();
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
     m_app_state = STATE_APP_IDLE;
 
-    /*app_state_event_data_t state_update;
+    app_state_event_data_t state_update;
     state_update.evt_type   = STATE_EVENT_GO;
     err_code       = app_sched_event_put(&state_update, 0, app_state_update);
-    APP_ERROR_CHECK(err_code);*/
-
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-    bsp_board_led_invert(0);
-    nrf_delay_ms(250);
-
+    APP_ERROR_CHECK(err_code);
 
     net_init();
+
+    //nfc_main_init();
+
     // Enter main loop.
     for (;;)
     {
         bsp_board_led_invert(2);
-        nrf_delay_ms(50);
-        bsp_board_led_invert(2);
-        nrf_delay_ms(50);
-
+        
         app_sched_execute();
 
         if (NRF_LOG_PROCESS() == false)
