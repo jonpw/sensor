@@ -149,6 +149,7 @@ static void connectable_mode_enter(void)
 
     APPL_LOG("Physical layer in connectable mode.");
     // TODO: notify someone?
+    bsp_board_led_on(1);
 }
 
 
@@ -199,13 +200,8 @@ static void log_init(void)
 int net_init(void)
 {
     uint32_t err_code;
-    uint32_t x;
 
     // Common initialize.
-    /*bsp_board_led_invert(1);
-    nrf_delay_ms(250);
-    bsp_board_led_invert(1);
-    nrf_delay_ms(250);*/
 
     static ipv6_medium_init_params_t ipv6_medium_init_params;
     memset(&ipv6_medium_init_params, 0x00, sizeof(ipv6_medium_init_params));
@@ -216,22 +212,8 @@ int net_init(void)
                                 IPV6_MEDIUM_ID_BLE,
                                 &m_ipv6_medium);
 
-    /*if (err_code == NRF_ERROR_INVALID_PARAM) {
-        bsp_board_led_on(0);
-        nrf_delay_ms(2000);
-    }
-    if (err_code == NRF_ERROR_INVALID_STATE) {
-        bsp_board_led_on(1);
-        nrf_delay_ms(2000);
-    }*/
-
 
     APP_ERROR_CHECK(err_code);
-
-    bsp_board_led_invert(2);
-    nrf_delay_ms(250);
-    bsp_board_led_invert(2);
-    nrf_delay_ms(250);
 
     eui48_t ipv6_medium_eui48;
     err_code = ipv6_medium_eui48_get(m_ipv6_medium.ipv6_medium_instance_id,
@@ -243,33 +225,12 @@ int net_init(void)
                                      &ipv6_medium_eui48);
     APP_ERROR_CHECK(err_code);
 
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-
     ip_stack_init();
-
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
 
     //ip_stack_timer_init();
     dns_main_init();
 
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-
     mqtt_app_init();
-
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-    bsp_board_led_invert(1);
-    nrf_delay_ms(50);
-
 
     // Start execution.
     connectable_mode_enter();

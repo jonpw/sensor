@@ -208,7 +208,10 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
-    bsp_board_led_invert(0);
+    bsp_board_led_on(0);
+    nrf_delay_ms(50);
+    bsp_board_led_off(0);
+    nrf_delay_ms(50);
     if (button_action == APP_BUTTON_PUSH)
     {
         switch (pin_no)
@@ -270,19 +273,20 @@ static void button_init(void)
 
     static app_button_cfg_t buttons[] =
     {
-        {BSP_BUTTON_0,        false, BUTTON_PULL, button_event_handler},
-        {BSP_BUTTON_1,        false, BUTTON_PULL, button_event_handler},
-        {BSP_BUTTON_2,        false, BUTTON_PULL, button_event_handler},
-        {BSP_BUTTON_3,        false, BUTTON_PULL, button_event_handler},
+        {BSP_BUTTON_0, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
+        {BSP_BUTTON_1, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
+        {BSP_BUTTON_2, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
+        {BSP_BUTTON_3, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
     };
 
-    #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(100)
+    #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(10)
 
     err_code = app_button_init(buttons, BUTTONS_NUMBER, BUTTON_DETECTION_DELAY);
     APP_ERROR_CHECK(err_code);
 
     err_code = app_button_enable();
     APP_ERROR_CHECK(err_code);
+    nrf_gpio_cfg(BSP_BUTTON_3, NRF_GPIO_PIN_DIR_INPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
 }
 
 /**@brief Timer callback used for periodic servicing of LwIP protocol timers.
@@ -452,6 +456,10 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
  */
 int main(void)
 {
+    nrf_delay_ms(1000);
+    bsp_board_led_on(1);
+    nrf_delay_ms(250);
+    bsp_board_led_off(1);
     nrf_delay_ms(250);
     uint32_t err_code;
     uint32_t x;
@@ -475,6 +483,11 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     net_init();
+
+    bsp_board_led_on(1);
+    nrf_delay_ms(100);
+    bsp_board_led_off(1);
+    nrf_delay_ms(100);
 
     //nfc_main_init();
 
