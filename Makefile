@@ -251,6 +251,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/drivers_nrf/common \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/generic \
+  $(SDK_ROOT)/components/nfc/t4t_parser/tlv \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/drivers_nrf/pdm \
   $(SDK_ROOT)/external/lwip/src/port \

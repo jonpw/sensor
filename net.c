@@ -149,7 +149,6 @@ static void connectable_mode_enter(void)
 
     APPL_LOG("Physical layer in connectable mode.");
     // TODO: notify someone?
-    bsp_board_led_on(1);
 }
 
 

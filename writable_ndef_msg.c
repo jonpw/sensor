@@ -51,6 +51,7 @@
 #include <stdbool.h>
 #include "app_error.h"
 #include "app_scheduler.h"
+#include "nrf_delay.h"
 #include "boards.h"
 #include "nfc_t4t_lib.h"
 #include "nrf_log_ctrl.h"
@@ -58,6 +59,7 @@
 #include "nfc_ndef_msg.h"
 #include "nfc_ndef_msg_parser.h"
 #include "nrf_tls.h"
+#include "nfc_t4t_tlv_block.h"
 
 #include "nrf_log.h"
 #include "nrf_log_default_backends.h"
@@ -73,7 +75,7 @@ char key[] = "sensor";
 char password[] = CORRECT_PASSWORD;
 
 static uint8_t m_ndef_msg_buf[NDEF_FILE_SIZE];      /**< Buffer for NDEF file. */
-static uint8_t m_ndef_msg_len;                      /**< Length of the NDEF message. */
+static uint32_t m_ndef_msg_len;                      /**< Length of the NDEF message. */
 
 static nfc_state_t nfc_state = NFC_STATE_IDLE;
 /**
@@ -142,7 +144,6 @@ static void nfc_callback(void          * context,
             break;
 
         case NFC_T4T_EVENT_FIELD_OFF:
-            bsp_board_leds_off();
             nfc_state = NFC_STATE_IDLE;
             err_code       = app_sched_event_put(NULL, 0, scheduler_nfc_field_change);
             APP_ERROR_CHECK(err_code);
@@ -167,7 +168,7 @@ static void nfc_callback(void          * context,
                 // Buffer for parsing results that can hold an NDEF message descriptor with up to 10 records.
 
 
-                parse_configuration();
+                //parse_configuration();
                 
                 // fail? Don't process any more (disable NFC for a bit?)
 
@@ -194,22 +195,59 @@ static void nfc_callback(void          * context,
 
 void parse_configuration ()
 {
+    uint32_t x;
     ret_code_t err_code;
+    bsp_board_led_on(2);
+    nrf_delay_ms(250);
+    bsp_board_led_off(2);
+    nrf_delay_ms(250);
+
 
     uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
     uint32_t desc_buf_len = sizeof(desc_buf);
     err_code = ndef_msg_parser(desc_buf,
                         &desc_buf_len,
                         m_ndef_msg_buf,
-                        &m_ndef_msg_len);
+                        m_ndef_msg_len);
+    for (x=0;x<err_code;x++)
+    {
+        bsp_board_led_on(1);
+        nrf_delay_ms(50);
+        bsp_board_led_off(1);
+        nrf_delay_ms(250);
+    }
+
+    if (err_code==NRF_ERROR_INVALID_LENGTH)
+    {
+        bsp_board_led_on(0);
+        nrf_delay_ms(500);
+    }
     APP_ERROR_CHECK(err_code);
-    
+
+    bsp_board_led_on(2);
+    nrf_delay_ms(250);
+    bsp_board_led_off(2);
+    nrf_delay_ms(250);
+
     nfc_ndef_record_desc_t * ndef_rec = ((nfc_ndef_msg_desc_t *)desc_buf)->pp_record[0];
 
     uint32_t ndef_rec_payload_size = 0;
     err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, NULL, &ndef_rec_payload_size);
+    APP_ERROR_CHECK(err_code);
+
+    bsp_board_led_on(2);
+    nrf_delay_ms(250);
+    bsp_board_led_off(2);
+    nrf_delay_ms(250);
+
     uint8_t ndef_rec_payload[ndef_rec_payload_size];
     err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
+    APP_ERROR_CHECK(err_code);
+
+    bsp_board_led_on(2);
+    nrf_delay_ms(250);
+    bsp_board_led_off(2);
+    nrf_delay_ms(250);
                 
     // Parse the JSON
     cJSON *root = cJSON_Parse(ndef_rec_payload);
@@ -276,6 +314,7 @@ int nfc_main_init(bool resetDefault)
     /* Load NDEF message from the flash file. */
     err_code = ndef_file_load(m_ndef_msg_buf, sizeof(m_ndef_msg_buf));
     APP_ERROR_CHECK(err_code);
+
     parse_configuration();
 
     /* Set up NFC */
@@ -289,7 +328,6 @@ int nfc_main_init(bool resetDefault)
     /* Start sensing NFC field */
     err_code = nfc_t4t_emulation_start();
     APP_ERROR_CHECK(err_code);
-
 }
 
 
