@@ -168,7 +168,7 @@ static void nfc_callback(void          * context,
                 // Buffer for parsing results that can hold an NDEF message descriptor with up to 10 records.
 
 
-                //parse_configuration();
+                parse_configuration();
                 
                 // fail? Don't process any more (disable NFC for a bit?)
 
@@ -197,58 +197,69 @@ void parse_configuration ()
 {
     uint32_t x;
     ret_code_t err_code;
-    bsp_board_led_on(2);
-    nrf_delay_ms(250);
-    bsp_board_led_off(2);
-    nrf_delay_ms(250);
-
 
     uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
     uint32_t desc_buf_len = sizeof(desc_buf);
     err_code = ndef_msg_parser(desc_buf,
                         &desc_buf_len,
-                        m_ndef_msg_buf,
+                        m_ndef_msg_buf+2,
                         m_ndef_msg_len);
-    for (x=0;x<err_code;x++)
+    APP_ERROR_CHECK(err_code);
+
+    nfc_ndef_msg_desc_t * ndefMessageDesc = (nfc_ndef_msg_desc_t *)desc_buf;
+
+    uint32_t remaining_len = m_ndef_msg_len;
+
+    for (uint32_t i = 0; i < ndefMessageDesc->record_count; i++)
     {
-        bsp_board_led_on(1);
-        nrf_delay_ms(50);
-        bsp_board_led_off(1);
-        nrf_delay_ms(250);
+        nfc_ndef_bin_payload_desc_t payloadDescription;
+        nfc_ndef_record_desc_t recordDesc;
+        nfc_ndef_record_location_t recordLocation;
+        uint32_t size = sizeof(nfc_ndef_record_desc_t);
+
+        size = remaining_len;
+
+        err_code = ndef_record_parser(&payloadDescription,
+                                        &recordDesc,
+                                        &recordLocation,
+                                        ndefMessageDesc->pp_record[i],
+                                        &size);
+
+        if (recordDesc.payload_constructor != NULL)
+        {
+            uint32_t ndef_rec_payload_size = 0;
+            //err_code = recordDesc.payload_constructor(recordDesc.p_payload_descriptor, NULL, &ndef_rec_payload_size);
+            //APP_ERROR_CHECK(err_code);
+
+            uint8_t ndef_rec_payload[ndef_rec_payload_size];
+            //err_code = recordDesc.payload_constructor(recordDesc.p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
+            //APP_ERROR_CHECK(err_code);
+        }
+
+        remaining_len -= size;
+    }
+/*
+    if (m_ndef_msg_len > 0)
+    {
+        if (nfc_ndef_msg_desc->record_count > 0)
+        {
+            p_parser_memo_desc * ndef_rec = nfc_ndef_msg_desc->pp_record[0];
+
+            uint32_t ndef_rec_payload_size = 0;
+            err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, NULL, &ndef_rec_payload_size);
+            APP_ERROR_CHECK(err_code);
+
+            uint8_t ndef_rec_payload[ndef_rec_payload_size];
+            err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
+            APP_ERROR_CHECK(err_code);
+        }
     }
 
-    if (err_code==NRF_ERROR_INVALID_LENGTH)
-    {
-        bsp_board_led_on(0);
-        nrf_delay_ms(500);
-    }
-    APP_ERROR_CHECK(err_code);
-
     bsp_board_led_on(2);
-    nrf_delay_ms(250);
+    nrf_delay_ms(50);
     bsp_board_led_off(2);
-    nrf_delay_ms(250);
-
-    nfc_ndef_record_desc_t * ndef_rec = ((nfc_ndef_msg_desc_t *)desc_buf)->pp_record[0];
-
-    uint32_t ndef_rec_payload_size = 0;
-    err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, NULL, &ndef_rec_payload_size);
-    APP_ERROR_CHECK(err_code);
-
-    bsp_board_led_on(2);
-    nrf_delay_ms(250);
-    bsp_board_led_off(2);
-    nrf_delay_ms(250);
-
-    uint8_t ndef_rec_payload[ndef_rec_payload_size];
-    err_code = ndef_rec->payload_constructor(ndef_rec->p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
-    APP_ERROR_CHECK(err_code);
-
-    bsp_board_led_on(2);
-    nrf_delay_ms(250);
-    bsp_board_led_off(2);
-    nrf_delay_ms(250);
-                
+    nrf_delay_ms(50);
+/*
     // Parse the JSON
     cJSON *root = cJSON_Parse(ndef_rec_payload);
 
@@ -283,7 +294,7 @@ void parse_configuration ()
         m_broker_port = port->valueint;
         strcpy(m_client_id, client->valuestring);
     }
-
+*/
 }
 
 void nfc_reset_default ()

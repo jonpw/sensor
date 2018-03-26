@@ -478,7 +478,7 @@ int main(void)
 
     nfc_main_init();
 
-    //net_init();
+    net_init();
 
     app_state_event_data_t state_update;
     state_update.evt_type   = STATE_EVENT_GO;
@@ -486,7 +486,7 @@ int main(void)
     APP_ERROR_CHECK(err_code);
 
     bsp_board_led_on(1);
-    nrf_delay_ms(100);
+    nrf_delay_ms(500);
     bsp_board_led_off(1);
     nrf_delay_ms(100);
 
