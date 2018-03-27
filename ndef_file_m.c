@@ -50,6 +50,14 @@
 #include "ndef_file_m.h"
 #include "fds.h"
 #include "nfc_uri_msg.h"
+#include "nfc_text_rec.h"
+#include "nfc_ndef_msg.h"
+#include "nfc_ndef_record.h"
+#include "writable_ndef_msg.h"
+#include "net.h"
+#include "mqttapp.h"
+#include "main.h"
+#include "cJSON.h"
 
 #define NRF_LOG_MODULE_NAME ndef_file_m
 #include "nrf_log.h"
@@ -202,6 +210,49 @@ ret_code_t ndef_file_setup(void)
     return err_code;
 }
 
+static const uint8_t en_code[] = {'e', 'n'};
+#define MAX_REC_COUNT      3     /**< Maximum records count. */
+
+ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
+{
+    ret_code_t err_code;
+    char * json_string;
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "password", CORRECT_PASSWORD);
+    cJSON_AddStringToObject(root, "ssid", ssid);
+    cJSON_AddStringToObject(root, "key", key);
+    cJSON_AddStringToObject(root, "identity", identity);
+    cJSON_AddStringToObject(root, "shared_secret", shared_secret);
+    cJSON_AddStringToObject(root, "broker", broker_hostname);
+    cJSON_AddStringToObject(root, "port", m_broker_port);
+    cJSON_AddStringToObject(root, "client", m_client_id);
+
+    json_string = cJSON_Print(root);
+
+    NFC_NDEF_TEXT_RECORD_DESC_DEF(nfc_text_rec,
+                                  UTF_8,
+                                  en_code,
+                                  sizeof(en_code),
+                                  json_string,
+                                  sizeof(json_string));
+
+    /* Create NFC NDEF message description, capacity - MAX_REC_COUNT records */
+    /** @snippet [NFC text usage_3] */
+    NFC_NDEF_MSG_DEF(nfc_text_msg, MAX_REC_COUNT);
+    /** @snippet [NFC text usage_3] */
+
+    /* Add text records to NDEF text message */
+    /** @snippet [NFC text usage_4] */
+    err_code = nfc_ndef_msg_record_add(&NFC_NDEF_MSG(nfc_text_msg),
+                                       &NFC_NDEF_TEXT_RECORD_DESC(nfc_text_rec));
+    VERIFY_SUCCESS(err_code);
+
+    /** @snippet [NFC text usage_5] */
+    err_code = nfc_ndef_msg_encode(&NFC_NDEF_MSG(nfc_text_msg),
+                                   p_buff,
+                                   size);
+    return err_code;   
+}
 
 ret_code_t ndef_file_update(uint8_t const * p_buff, uint32_t size)
 {
@@ -229,11 +280,12 @@ ret_code_t ndef_file_update(uint8_t const * p_buff, uint32_t size)
 ret_code_t ndef_file_default_message(uint8_t * p_buff, uint32_t * p_size)
 {
     /* Encode URI message into buffer. */
-    ret_code_t err_code = nfc_uri_msg_encode(NFC_URI_HTTP_WWW,
+    /*ret_code_t err_code = nfc_uri_msg_encode(NFC_URI_HTTP_WWW,
                                              m_url,
                                              sizeof(m_url),
                                              p_buff,
-                                             p_size);
+                                             p_size);*/
+    ret_code_t err_code = ndef_file_compose(p_buff, p_size);
     return err_code;
 }
 

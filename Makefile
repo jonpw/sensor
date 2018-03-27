@@ -263,6 +263,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/timer \
   $(SDK_ROOT)/components/ble/ble_services/ble_lls \
   $(SDK_ROOT)/components/iot/medium/ble_ncfgs \
+  $(SDK_ROOT)/components/nfc/ndef/text \
   $(SDK_ROOT)/components/softdevice/s132/headers \
   $(SDK_ROOT)/components/ble/ble_services/ble_bas \
   $(SDK_ROOT)/components/ble/ble_services/ble_cscs \

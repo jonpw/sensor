@@ -90,7 +90,7 @@ static void scheduler_ndef_file_update(void * p_event_data, uint16_t event_size)
 
     // Update flash file with new NDEF message.
     err_code = ndef_file_update(m_ndef_msg_buf, m_ndef_msg_len + NLEN_FIELD_SIZE);
-    APP_ERROR_CHECK(err_code);
+    //APP_ERROR_CHECK(err_code);
 
     NRF_LOG_INFO("NDEF message updated!");
 }
@@ -134,6 +134,7 @@ static void nfc_callback(void          * context,
     ret_code_t err_code;
     app_state_event_data_t state_update;
 
+    bsp_board_led_invert(0);
     switch (event)
     {
         case NFC_T4T_EVENT_FIELD_ON:
@@ -182,9 +183,9 @@ static void nfc_callback(void          * context,
                 err_code       = app_sched_event_put(NULL, 0, scheduler_ndef_file_update);
                 APP_ERROR_CHECK(err_code);
 
-                state_update.evt_type   = STATE_EVENT_NFC_RESET;
-                err_code       = app_sched_event_put(&state_update, 0, app_state_update);
-                APP_ERROR_CHECK(err_code);
+                //state_update.evt_type   = STATE_EVENT_NFC_RESET;
+                //err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+                //APP_ERROR_CHECK(err_code);
             }
             break;
 
@@ -224,17 +225,25 @@ void parse_configuration ()
                                         &recordLocation,
                                         ndefMessageDesc->pp_record[i],
                                         &size);
-
-        if (recordDesc.payload_constructor != NULL)
+        if (recordLocation == NDEF_LONE_RECORD) 
         {
-            uint32_t ndef_rec_payload_size = 0;
-            //err_code = recordDesc.payload_constructor(recordDesc.p_payload_descriptor, NULL, &ndef_rec_payload_size);
-            //APP_ERROR_CHECK(err_code);
 
-            uint8_t ndef_rec_payload[ndef_rec_payload_size];
-            //err_code = recordDesc.payload_constructor(recordDesc.p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
-            //APP_ERROR_CHECK(err_code);
+            if (recordDesc.tnf == TNF_WELL_KNOWN)
+            {
+                if (recordDesc.payload_constructor != NULL)
+                {
+                    uint32_t ndef_rec_payload_size = 0;
+                    //err_code = recordDesc.payload_constructor(&recordDesc.p_payload_descriptor, NULL, &ndef_rec_payload_size);
+                    APP_ERROR_CHECK(err_code);
+
+                }
+            }
         }
+
+            /*uint8_t ndef_rec_payload[ndef_rec_payload_size];
+            err_code = recordDesc.payload_constructor(&recordDesc.p_payload_descriptor, ndef_rec_payload, sizeof(ndef_rec_payload));
+            APP_ERROR_CHECK(err_code);
+        }*/
 
         remaining_len -= size;
     }
