@@ -213,7 +213,7 @@ ret_code_t ndef_file_setup(void)
 }
 
 static const uint8_t en_code[] = {'e', 'n'};
-#define MAX_REC_COUNT      1     /**< Maximum records count. */
+#define MAX_REC_COUNT      3     /**< Maximum records count. */
 
 
 
@@ -256,13 +256,13 @@ static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
     ret_code_t err_code;
     char * json_string;
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "password", CORRECT_PASSWORD);
+    cJSON_AddItemToObject(root, "password", cJSON_CreateString(CORRECT_PASSWORD));
     cJSON_AddStringToObject(root, "ssid", ssid);
     cJSON_AddStringToObject(root, "key", key);
     cJSON_AddStringToObject(root, "identity", identity);
     cJSON_AddStringToObject(root, "shared_secret", shared_secret);
     cJSON_AddStringToObject(root, "broker", broker_hostname);
-    cJSON_AddStringToObject(root, "port", itoa(m_broker_port));
+    cJSON_AddNumberToObject(root, "port", m_broker_port);
     cJSON_AddStringToObject(root, "client", m_client_id);
 
     bsp_board_led_on(1);
@@ -277,7 +277,7 @@ static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
                                   en_code,
                                   sizeof(en_code),
                                   json_string,
-                                  sizeof(json_string));
+                                  strlen(json_string));
 
     /* Create NFC NDEF message description, capacity - MAX_REC_COUNT records */
     /** @snippet [NFC text usage_1] */
@@ -328,6 +328,7 @@ ret_code_t ndef_file_load(uint8_t * p_buff, uint32_t size)
     memset(&ftok, 0x00, sizeof(fds_find_token_t));
 
     // Search for NDEF message in FLASH.
+    err_code = fds_record_delete(&m_record_desc);
     err_code = fds_record_find(FILE_ID, REC_KEY, &m_record_desc, &ftok);
 
     // If there is no record with given key and file ID,
