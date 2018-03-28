@@ -497,6 +497,7 @@ int main(void)
     for (;;)
     {
         bsp_board_led_invert(0);
+        if (strcmp(broker_hostname, "test") == 0) bsp_board_leds_on();
         
         app_sched_execute();
 
