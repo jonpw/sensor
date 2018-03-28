@@ -6740,6 +6740,10 @@
 #define NFC_NDEF_URI_MSG_ENABLED 1
 #endif
 
+#ifndef NFC_NDEF_TEXT_RECORD_ENABLED
+#define NFC_NDEF_TEXT_RECORD_ENABLED 1
+#endif
+
 // <q> NFC_NDEF_URI_REC_ENABLED  - nfc_uri_rec - Encoding data for a URI record for NFC Tag
  
 

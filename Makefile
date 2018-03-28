@@ -87,6 +87,7 @@ SRC_FILES += \
   $(SDK_ROOT)/external/cJSON/cJSON.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_msg.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_rec.c \
+  $(SDK_ROOT)/components/nfc/ndef/text/nfc_text_rec.c \
   $(SDK_ROOT)/components/nfc/ndef/parser/message/nfc_ndef_msg_parser.c \
   $(SDK_ROOT)/components/nfc/ndef/parser/message/nfc_ndef_msg_parser_local.c \
   $(SDK_ROOT)/components/nfc/ndef/parser/record/nfc_ndef_record_parser.c \
