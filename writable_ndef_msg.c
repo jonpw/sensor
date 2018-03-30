@@ -197,9 +197,9 @@ static void nfc_callback(void          * context,
 
 void parse_configuration ()
 {
-    uint32_t x;
     ret_code_t err_code;
-
+    uint32_t nfc_data_left     = *m_ndef_msg_len;
+    uint32_t temp_nfc_data_len = 0;
     uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
     uint32_t desc_buf_len = sizeof(desc_buf);
     err_code = ndef_msg_parser(desc_buf,
@@ -208,127 +208,100 @@ void parse_configuration ()
                         m_ndef_msg_len);
     APP_ERROR_CHECK(err_code);
 
-    nfc_ndef_msg_desc_t * ndefMessageDesc = (nfc_ndef_msg_desc_t *)desc_buf;
+    nfc_ndef_record_location_t record_location;
 
-    for (uint8_t x =0;x<ndefMessageDesc->record_count;x++)
+    // want to modify -> use local copy
+    nfc_ndef_bin_payload_desc_t * p_bin_pay_desc = p_parser_memo_desc->p_bin_pay_desc;
+    nfc_ndef_record_desc_t      * p_rec_desc     = p_parser_memo_desc->p_rec_desc;
+
+    while (nfc_data_left > 0)
     {
+        temp_nfc_data_len = nfc_data_left;
 
-        bsp_board_led_on(2);
-        nrf_delay_ms(250);
-        bsp_board_leds_off();
-        nrf_delay_ms(250);
+        ret_code = ndef_record_parser(p_bin_pay_desc,
+                                      p_rec_desc,
+                                      &record_location,
+                                      p_nfc_data,
+                                      &temp_nfc_data_len);
 
-
-    }
-
-    uint32_t remaining_len = m_ndef_msg_len;
-bsp_board_leds_off();
-bsp_board_led_on(1);
-nrf_delay_ms(250);
-    for (uint32_t i = 0; i < ndefMessageDesc->record_count; i++)
-    {
-        nfc_ndef_bin_payload_desc_t payloadDescription;
-        nfc_ndef_record_desc_t recordDesc;
-        nfc_ndef_record_location_t recordLocation;
-        uint32_t size = remaining_len;
-
-        err_code = ndef_record_parser(&payloadDescription,
-                                        &recordDesc,
-                                        &recordLocation,
-                                        m_ndef_msg_buf+2,
-                                        &size);
-        for (uint8_t x =0;x<err_code;x++)
+        if (ret_code != NRF_SUCCESS)
         {
-            bsp_board_led_on(2);
-            nrf_delay_ms(250);
-            bsp_board_leds_off();
-            nrf_delay_ms(250);
+            return; //ret_code;
         }
-
-        if (payloadDescription.p_payload == NULL)
-        {
-            bsp_board_leds_off();
-            bsp_board_led_on(0);
-            nrf_delay_ms(150);
-            bsp_board_led_off(0);
-            nrf_delay_ms(150);
-            bsp_board_led_on(0);
-            nrf_delay_ms(150);
-            bsp_board_led_off(0);
-            nrf_delay_ms(250);
-            bsp_board_leds_off();
-            return;
-        }
-
-        if (err_code != NRF_SUCCESS)
-        {
-            bsp_board_leds_off();
-            bsp_board_led_on(0);
-            nrf_delay_ms(250);
-            bsp_board_leds_off();
-            return;
-        }
-
-
-        if (recordDesc.tnf == TNF_WELL_KNOWN)
+    
+        p_rec_desc->tnf == TNF_WELL_KNOWN)
         {
             if ((strncmp(recordDesc.p_type, nfc_text_rec_type_field, recordDesc.type_length) == 0))
             {
-                cJSON *root = cJSON_Parse(&(payloadDescription.p_payload)+3);
-                if (root == NULL)
-                {
-                    bsp_board_leds_off();
-                    bsp_board_led_on(2);
-                    nrf_delay_ms(250);
-                    bsp_board_leds_off();
-                    return;
-                }
-
-                // Check password
-                cJSON * inpassword = cJSON_GetObjectItem(root, "password");
-                
-                    bsp_board_leds_off();
-                    bsp_board_led_on(2);
-                    nrf_delay_ms(250);
-
-                if (strcmp(inpassword->valuestring, password) == 0)
-                {
-                    /*
-
-                    cJSON * ssid_cjson = cJSON_GetObjectItem(root, "ssid");
-                    cJSON * key_cjson = cJSON_GetObjectItem(root, "key");
-
-                    strcpy(ssid, ssid_cjson->valuestring);
-                    strcpy(key, key_cjson->valuestring);
-
-                    // todo: custom commissioning. Disable nordic's COMMISSIONING_ENABLED system and use our own
-                    // but we have to do it partly similar to theirs (I think so?)
-
-                    cJSON * identity = cJSON_GetObjectItem(root, "identity");
-                    cJSON * shared_secret = cJSON_GetObjectItem(root, "shared_secret");
-                    nrf_tls_preshared_key_t m_preshared_key;
-                    m_preshared_key.p_identity = identity->valuestring;
-                    m_preshared_key.p_secret_key = shared_secret->valuestring;
-                    m_preshared_key.identity_len = 15;
-                    m_preshared_key.secret_key_len = 9;
-                    m_tls_keys.p_psk = &m_preshared_key;
-
-                    cJSON * broker = cJSON_GetObjectItem(root, "broker");
-                    cJSON * port = cJSON_GetObjectItem(root, "port");
-                    cJSON * client = cJSON_GetObjectItem(root, "client");
-
-                    strcpy(broker_hostname, broker->valuestring);
-                    m_broker_port = port->valueint;
-                    strcpy(m_client_id, client->valuestring);*/
-                }
-                cJSON_Delete(root);
+                parse_configuration_data(p_nfc_data+3);
             }
         }
 
-        remaining_len -= size;
+
+        nfc_data_left -= temp_nfc_data_len;
+
+        if ((record_location == NDEF_LAST_RECORD) || (record_location == NDEF_LONE_RECORD))
+        {
+            *p_nfc_data_len = *p_nfc_data_len - nfc_data_left;
+            return;// NRF_SUCCESS;
+        }
+        else
+        {
+            if (p_parser_memo_desc->p_msg_desc->record_count ==
+                p_parser_memo_desc->p_msg_desc->max_record_count)
+            {
+                return;// NRF_ERROR_NO_MEM;
+            }
+
+            p_nfc_data += temp_nfc_data_len;
+            p_bin_pay_desc++;
+            p_rec_desc++;
+        }
     }
-    nrf_delay_ms(250);
-    bsp_board_leds_off();
+
+
+void parse_configuration_data (char * configdata)
+{
+    cJSON *root = cJSON_Parse(configdata);
+    if (root == NULL)
+    {
+        return;
+    }
+
+    // Check password
+    cJSON * inpassword = cJSON_GetObjectItem(root, "password");
+
+    if (strcmp(inpassword->valuestring, password) == 0)
+    {
+        /*
+
+        cJSON * ssid_cjson = cJSON_GetObjectItem(root, "ssid");
+        cJSON * key_cjson = cJSON_GetObjectItem(root, "key");
+
+        strcpy(ssid, ssid_cjson->valuestring);
+        strcpy(key, key_cjson->valuestring);
+
+        // todo: custom commissioning. Disable nordic's COMMISSIONING_ENABLED system and use our own
+        // but we have to do it partly similar to theirs (I think so?)
+
+        cJSON * identity = cJSON_GetObjectItem(root, "identity");
+        cJSON * shared_secret = cJSON_GetObjectItem(root, "shared_secret");
+        nrf_tls_preshared_key_t m_preshared_key;
+        m_preshared_key.p_identity = identity->valuestring;
+        m_preshared_key.p_secret_key = shared_secret->valuestring;
+        m_preshared_key.identity_len = 15;
+        m_preshared_key.secret_key_len = 9;
+        m_tls_keys.p_psk = &m_preshared_key;
+
+        cJSON * broker = cJSON_GetObjectItem(root, "broker");
+        cJSON * port = cJSON_GetObjectItem(root, "port");
+        cJSON * client = cJSON_GetObjectItem(root, "client");
+
+        strcpy(broker_hostname, broker->valuestring);
+        m_broker_port = port->valueint;
+        strcpy(m_client_id, client->valuestring);*/
+    }
+    cJSON_Delete(root);
 }
 
 void nfc_reset_default ()
