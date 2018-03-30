@@ -161,7 +161,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
             m_ind_err_count = 0;
         }
     }
-
+/*
     switch (m_display_state)
     {
         case LEDS_INACTIVE:
@@ -203,7 +203,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         {
             break;
         }
-    }
+    }*/
 }
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
@@ -485,18 +485,12 @@ int main(void)
     err_code       = app_sched_event_put(&state_update, 0, app_state_update);
     APP_ERROR_CHECK(err_code);
 
-    bsp_board_led_on(1);
-    nrf_delay_ms(500);
-    bsp_board_led_off(1);
-    nrf_delay_ms(100);
-
-
-    bsp_board_led_off(0);
+    bsp_board_leds_off();
 
     // Enter main loop.
     for (;;)
     {
-        bsp_board_led_invert(0);
+        //bsp_board_led_invert(0);
         if (strcmp(broker_hostname, "test") == 0) bsp_board_leds_on();
         
         app_sched_execute();

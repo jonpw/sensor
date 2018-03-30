@@ -219,10 +219,6 @@ static const uint8_t en_code[] = {'e', 'n'};
 
 ret_code_t ndef_file_update(uint8_t const * p_buff, uint32_t size)
 {
-    bsp_board_led_on(2);
-    nrf_delay_ms(50);
-    bsp_board_led_off(2);
-    nrf_delay_ms(250);
     ret_code_t err_code;
 
     // Prepare record structure.
@@ -239,19 +235,11 @@ ret_code_t ndef_file_update(uint8_t const * p_buff, uint32_t size)
         NRF_LOG_INFO("FDS has no space left, Garbage Collector triggered!");
         err_code = fds_gc();
     }
-bsp_board_led_on(2);
-    nrf_delay_ms(50);
-    bsp_board_led_off(2);
-    nrf_delay_ms(250);
     return err_code;
 }
 
 static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
 {
-    bsp_board_led_on(1);
-    nrf_delay_ms(50);
-    bsp_board_led_off(1);
-    nrf_delay_ms(250);
 
     ret_code_t err_code;
     char * json_string;
@@ -264,11 +252,6 @@ static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
     cJSON_AddStringToObject(root, "broker", broker_hostname);
     cJSON_AddNumberToObject(root, "port", m_broker_port);
     cJSON_AddStringToObject(root, "client", m_client_id);
-
-    bsp_board_led_on(1);
-    nrf_delay_ms(50);
-    bsp_board_led_off(1);
-    nrf_delay_ms(250);
 
     json_string = cJSON_Print(root);
 
@@ -298,10 +281,6 @@ static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
                                    p_buff,
                                    size);
     /** @snippet [NFC text usage_5] */
-    bsp_board_led_on(1);
-    nrf_delay_ms(50);
-    bsp_board_led_off(1);
-    nrf_delay_ms(250);
     cJSON_Delete(root);
     return err_code;   
 }
