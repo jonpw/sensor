@@ -97,7 +97,7 @@ static uint8_t                              m_ind_err_count = 0;
 
 /**@brief Function for initializing IP stack.
  *
- * @details Initialize the IP Stack and its driver.
+ * @details Initialize the IP Stack and its dri
  */
 static void ip_stack_init(void)
 {
@@ -122,22 +122,30 @@ static void ip_stack_init(void)
 /**@brief Function to handle interface up event. */
 void nrf_driver_interface_up(iot_interface_t const * p_interface)
 {
+    uint32_t err_code;
     UNUSED_PARAMETER(p_interface);
     APPL_LOG ("IPv6 Interface Up.");
 
     sys_check_timeouts();
 
-    // TODO: notify someone?
+    app_state_event_data_t state_update;
+    state_update.evt_type   = STATE_EVENT_CONNECTED;
+    err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
+    APP_ERROR_CHECK(err_code);
 }
 
 
 /**@brief Function to handle interface down event. */
 void nrf_driver_interface_down(iot_interface_t const * p_interface)
 {
+    uint32_t err_code;
     UNUSED_PARAMETER(p_interface);
     APPL_LOG ("IPv6 Interface Down.");
 
-    // TODO: notify someone?
+    app_state_event_data_t state_update;
+    state_update.evt_type   = STATE_EVENT_CONNECTION_LOST;
+    err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
+    APP_ERROR_CHECK(err_code);
 }
 
 /**@brief Function for starting connectable mode.
@@ -166,7 +174,7 @@ static void on_ipv6_medium_evt(ipv6_medium_evt_t * p_ipv6_medium_evt)
         {
             APPL_LOG("Physical layer: disconnected.");
             // TODO: notify someone?
-            connectable_mode_enter();
+            //connectable_mode_enter();
             break;
         }
         default:

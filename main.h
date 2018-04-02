@@ -101,7 +101,8 @@
 #define TOPIC_BUTTON_3  "button/3/event"
 #define TOPIC_BUTTON_4  "button/4/event"
 
-#define INITIAL_BROKER_ADDR             (u32_t){0x20010DB8, 0x00000000, 0x00000000, 0x00000001}
+#define INITIAL_BROKER_ADDR        (u32_t){0x20010DB8, 0x00000000, 0x00000000, 0x00000001}
+#define BROKER_MOSQUITTO           (u32_t){0x200141d0, 0x000A3A10, 0x00000000, 0x00000001}
 
 /**@brief Application's state. */
 typedef enum
@@ -144,14 +145,11 @@ typedef struct
 typedef enum
 {
     LEDS_INACTIVE = 0,
-    LEDS_IF_DOWN,
-    LEDS_IF_UP,
     LEDS_CONNECTABLE,
-    LEDS_BROKER_DNS,
-    LEDS_BROKER_CONNECTING,
-    LEDS_CONNECTED_TO_BROKER,
+    LEDS_CONNECTED,
+    LEDS_DNS_FAIL,
+    LEDS_MQTT_CONNECTING,
     LEDS_ACTIVE_IDLE,
-    LEDS_PUBACK,
     LEDS_NFC
 } display_state_t;
 

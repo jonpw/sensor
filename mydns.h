@@ -69,12 +69,20 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-//#include "mydns.h"
-
 
 #define APP_DNS_LOCAL_PORT              0x8888                                                      /**< UDP Port number of local DNS Resolver. */
-#define APP_DNS_SERVER_ADDR             (u32_t){0x20014860, 0x48600000, 0x00000000, 0x00008888}          /**< IPv6 address of Google's DNS Server. */
-#define DNS_SERVER_ADDRESS             (u32_t){0x20014860, 0x48600000, 0x00000000, 0x00008888}          /**< IPv6 address of Google's DNS Server. */
+//#define APP_DNS_SERVER_ADDR             (u32_t){0x20014860, 0x48600000, 0x00000000, 0x00008888}          /**< IPv6 address of Google's DNS Server. */
+//#define DNS_SERVER_ADDRESS             (u32_t){0x20014860, 0x48600000, 0x00000000, 0x00008888}          /**< IPv6 address of Google's DNS Server. */
+//#define DNS_SERVER_ADDRESS              (u32_t){0xFE800000, 0x00000000, 0xC6E984FF, 0xFE7B25E3}
+//#define APP_DNS_SERVER_ADDR             (u32_t){0xFE800000, 0x00000000, 0xC6E984FF, 0xFE7B25E3}
+
+//#define DNS_SERVER_ADDRESS              (u32_t){0xFE800000, 0x00000000, 0x021583FF, 0xFEED6AAD}
+//#define APP_DNS_SERVER_ADDR             (u32_t){0xFE800000, 0x00000000, 0x021583FF, 0xFEED6AAD}
+#define DNS_SERVER_X0             0xFE800000
+#define DNS_SERVER_X1             0x00000000
+#define DNS_SERVER_X2             0x021583FF
+#define DNS_SERVER_X3             0xFEED6AAD
+//#define DNS_SERVER_ADDRESS(ipaddr) (ip6_addr_set(ipaddr, APP_DNS_SERVER_ADDR))
 
 /**@brief Application's state. */
 typedef enum
@@ -90,6 +98,6 @@ extern ip_addr_t m_dns_result;
 /**@brief Addresses used in sample application. */
 
 extern int dns_main_init(void);
-extern void dns_lookup(char * p_hostname);
+extern void app_dns_lookup(char * p_hostname);
 
 #endif

@@ -77,7 +77,8 @@
 #include "main.h"
 #include "mqttapp.h"
 
-char broker_hostname[32] = "broker.hivemq.org";
+//char broker_hostname[32] = "broker.hivemq.org";
+char broker_hostname[32] = "test.mosquitto.org";
 
 uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
 
@@ -86,6 +87,8 @@ char                           m_client_id[] = "testapp";                       
 
 uint8_t identity[] = {0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79};
 uint8_t shared_secret[] = {0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b};
+//char * mqtt_username[] = "user";
+//char * mqtt_passwd[] = "pass";
 
 nrf_tls_preshared_key_t m_preshared_key = {
     .p_identity     = &identity[0],
@@ -106,31 +109,32 @@ static uint8_t                              m_ind_err_count = 0;
 static uint16_t                             m_message_counter = 1;                                  /**< Message counter used to generated message ids for MQTT messages. */
 static uint16_t                             m_sub_message_id = 1;
 
-static void app_mqtt_connect(void);
+static void app_mqtt_connect(ip_addr_t * ipaddr);
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt);
 
 //TODO: Preliminary mqtt_begin
-void mqtt_begin(void)
+void mqtt_begin(ip_addr_t * ipaddr)
 {
     mqtt_state = STATE_MQTT_CONNECTING;
-    app_mqtt_connect();
+    app_mqtt_connect(ipaddr);
 }
 
 /**@brief Connect to MQTT broker. */
-static void app_mqtt_connect()
+static void app_mqtt_connect(ip_addr_t * ipaddr)
 {
     mqtt_client_init(&m_app_mqtt_client);
-
-    memcpy(m_app_mqtt_client.broker_addr.u8, m_broker_addr.addr, IPV6_ADDR_SIZE);
+    memcpy(m_app_mqtt_client.broker_addr.u32, ipaddr->addr, IPV6_ADDR_SIZE);
     m_app_mqtt_client.broker_port          = m_broker_port;
     m_app_mqtt_client.evt_cb               = app_mqtt_evt_handler;
     m_app_mqtt_client.client_id.p_utf_str  = (uint8_t *)m_client_id;
     m_app_mqtt_client.client_id.utf_strlen = strlen(m_client_id);
     m_app_mqtt_client.p_password           = NULL;
     m_app_mqtt_client.p_user_name          = NULL;
+    //memcpy(m_app_mqtt_client.p_password, mqtt_password, strlen(mqtt_password));
+    //memcpy(m_app_mqtt_client.p_user_name, mqtt_username, strlen(mqtt_username));
     m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
     m_app_mqtt_client.p_security_settings  = &m_tls_keys;
-
+    
     UNUSED_VARIABLE(mqtt_connect(&m_app_mqtt_client));
 }
 
@@ -154,7 +158,7 @@ void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
     param.retain_flag                    = 0;
 
     uint32_t err_code = mqtt_publish(&m_app_mqtt_client, &param);
-    APPL_LOG("mqtt_publish result 0x%08lx", err_code);
+    //APPL_LOG("mqtt_publish result 0x%08lx", err_code);
 
     if (err_code == NRF_SUCCESS)
     {
@@ -258,13 +262,13 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 // TODO: Sub to default topics (<sensor>/#)
                 // TODO: Sub to nominated topics (how do we hook to things?)
                 state_update.evt_type   = STATE_EVENT_MQTT_CONNECT;
-                err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+                err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
                 APP_ERROR_CHECK(err_code);
             }
             else
             {
                 state_update.evt_type   = STATE_EVENT_MQTT_CONNECT_FAILED;
-                err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+                err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
                 APP_ERROR_CHECK(err_code);
                 mqtt_state = STATE_MQTT_IDLE;
             }
@@ -328,8 +332,9 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
             mqtt_state = STATE_MQTT_IDLE;
 
             state_update.evt_type   = STATE_EVENT_MQTT_DISCONNECT;
-            err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+            err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
             APP_ERROR_CHECK(err_code);
+
             break;
         }
         default:

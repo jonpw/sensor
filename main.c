@@ -146,7 +146,7 @@ static void leds_init(void)
  */
 static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 {
-    UNUSED_PARAMETER(wall_clock_value);
+    /*UNUSED_PARAMETER(wall_clock_value);
     if (m_do_ind_err == true)
     {
         // Flash LED_THREE for three periods if error occurs.
@@ -161,7 +161,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
             m_ind_err_count = 0;
         }
     }
-/*
+
     switch (m_display_state)
     {
         case LEDS_INACTIVE:
@@ -178,27 +178,35 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
             bsp_board_led_invert(2);
             break;
         }
-        case LEDS_IF_DOWN:
+        case LEDS_CONNECTED:
         {
             bsp_board_led_off(0);
             bsp_board_led_off(1);
             bsp_board_led_on(2);
             break;
         }
-        case LEDS_IF_UP:
+        case LEDS_MQTT_CONNECTING:
         {
             bsp_board_led_off(0);
             bsp_board_led_invert(1);
             bsp_board_led_off(2);
             break;
         }
-        case LEDS_CONNECTED_TO_BROKER:
+        case LEDS_ACTIVE_IDLE:
         {
             bsp_board_led_off(0);
             bsp_board_led_on(1);
             bsp_board_led_off(2);
             break;
         }
+        case LEDS_DNS_FAIL:
+        {
+            bsp_board_led_invert(0);
+            bsp_board_led_off(1);
+            bsp_board_led_off(2);
+            break;
+        }
+
         default:
         {
             break;
@@ -208,45 +216,50 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
-    bsp_board_led_on(0);
-    nrf_delay_ms(50);
-    bsp_board_led_off(0);
-    nrf_delay_ms(50);
+    //bsp_board_led_on(0);
+    //nrf_delay_ms(50);
+    //bsp_board_led_off(0);
+    ip_addr_t ipaddr;
+    IP6_ADDR(&ipaddr, 0x200141d0, 0x000A3A10, 0x00000000, 0x00000001);
     if (button_action == APP_BUTTON_PUSH)
     {
         switch (pin_no)
         {
             case BSP_BUTTON_0:
-            {
+            {/*
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
                 pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_1;
                 pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_1);
                 pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
                 pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);
+                app_mqtt_publish(&pubmsg);*/
+                    app_dns_lookup(BROKER_HOSTNAME);
+
                 break;
             }
             case BSP_BUTTON_1:
-            {
+            {/*
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
                 pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_2;
                 pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_2);
                 pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
                 pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);
+                app_mqtt_publish(&pubmsg);*/
+            app_dns_lookup(BROKER_HOSTNAME);
                 break;
             }
             case BSP_BUTTON_2:
-            {
+            {/*
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
                 pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_3;
                 pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_3);
                 pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
                 pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);
+                app_mqtt_publish(&pubmsg);*/
+                mqtt_begin(&ipaddr);
                 break;
             }
             case BSP_BUTTON_3:
@@ -381,7 +394,7 @@ static void log_init(void)
 // sub-states should be updated before calling this
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size)
 {
-    if (m_app_state == STATE_APP_IDLE)
+   /* if (m_app_state == STATE_APP_IDLE)
     {
         m_display_state = LEDS_IF_DOWN;
         if (p_event_data->evt_type == STATE_EVENT_GO)
@@ -447,6 +460,68 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_NFC;
         m_app_state = STATE_APP_NFC;
         // todo: pause everything?
+    }*/
+    ip_addr_t * ipaddr = BROKER_MOSQUITTO;
+    if (p_event_data->evt_type == STATE_EVENT_GO)
+    {        
+        m_app_state = STATE_APP_CONNECTABLE;
+        m_display_state = LEDS_CONNECTABLE;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
+    {
+        m_display_state = LEDS_CONNECTED;
+        //app_dns_lookup(broker_hostname);
+        //mqtt_begin(ipaddr);
+        m_app_state = STATE_APP_DNS_LOOKUP;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
+    {
+        m_display_state = LEDS_MQTT_CONNECTING;
+        //memcpy(m_broker_addr.u8, ((ip_addr_t *)(p_event_data->data))->addr, 4*4); // todo: not sure if correct
+        mqtt_begin(ipaddr); // todo: should we pass a param for the dns result?
+        m_app_state = STATE_APP_MQTT_CONNECTING;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_DNS_FAIL)
+    {
+        m_display_state = LEDS_DNS_FAIL;
+        m_app_state = STATE_APP_FAULT;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
+    {   
+        m_display_state = LEDS_ACTIVE_IDLE;
+        // todo: should we handle initial pubs here?
+        m_app_state = STATE_APP_ACTIVE_IDLE;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
+    {
+        m_display_state = LEDS_MQTT_CONNECTING;
+        mqtt_begin(ipaddr);
+        m_app_state = STATE_APP_FAULT;
+    }   
+    else if (p_event_data->evt_type == STATE_EVENT_CONNECTION_LOST)
+    {
+        m_display_state = LEDS_CONNECTABLE;
+        //todo: reconnect? 
+        m_app_state = STATE_APP_FAULT;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_NFC_RESUME)
+    {
+        m_display_state = LEDS_ACTIVE_IDLE;
+        //todo: reconnect or wait a bit?
+        m_app_state = STATE_APP_FAULT;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_NFC_RESET)
+    {
+        //app_mqtt_stop();
+        //net_stop();
+        m_display_state = LEDS_CONNECTABLE;
+        m_app_state = STATE_APP_IDLE;
+    }
+    else if (p_event_data->evt_type == STATE_EVENT_NFC) // async NFC event
+    {
+        m_display_state = LEDS_NFC;
+        m_app_state = STATE_APP_NFC;
+        // todo: pause everything?
     }
 }
 
@@ -480,10 +555,13 @@ int main(void)
 
     net_init();
 
-    app_state_event_data_t state_update;
-    state_update.evt_type   = STATE_EVENT_GO;
-    err_code       = app_sched_event_put(&state_update, 0, app_state_update);
-    APP_ERROR_CHECK(err_code);
+    m_app_state = STATE_APP_CONNECTABLE;
+    m_display_state = LEDS_CONNECTABLE;
+
+    //app_state_event_data_t state_update;
+    //state_update.evt_type   = STATE_EVENT_GO;
+    //err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
+    //APP_ERROR_CHECK(err_code);
 
     bsp_board_leds_off();
 
@@ -491,7 +569,7 @@ int main(void)
     for (;;)
     {
         //bsp_board_led_invert(0);
-        if (strcmp(broker_hostname, "test") == 0) bsp_board_leds_on();
+        //if (strcmp(broker_hostname, "test") == 0) bsp_board_leds_on();
         
         app_sched_execute();
 

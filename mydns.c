@@ -65,6 +65,7 @@
 #include "lwip/dns.h"
 #include "lwip/netif.h"
 #include "ipv6_medium.h"
+#include "lwip/ip6_addr.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -75,13 +76,7 @@
 #include "lwip/ip_addr.h"
 
 static volatile dns_state_t   m_dns_state = STATE_DNS_IDLE;                                         /**< State of application state machine. */
-                                        /**< IPv6 address of given hostname. */
-/**@brief Addresses used in sample application. */
-/*static const ipv6_addr_t      m_local_routers_multicast_addr = {{0xFF, 0x02, 0x00, 0x00,
-                                                                 0x00, 0x00, 0x00, 0x00,
-                                                                 0x00, 0x00, 0x00, 0x00,
-                                                                 0x00, 0x00, 0x00, 0x02}};          /**< Multi-cast address of all routers on the local network segment. */
-                                                                
+
 /**@brief DNS6 module event handler.
  *
  * @details Callback registered with the DNS6 module to receive asynchronous events from
@@ -97,48 +92,50 @@ static void app_dns_handler(char * hostname, ip_addr_t * ipaddr, void * arg)
 
     if (m_dns_state != STATE_DNS_RESOLVING)
     {
+        return;
         // Exit if it's not in resolving state.
         // todo: shouldn't be here
     }
 
     APPL_LOG("DNS Response for hostname: %s, addr %X", hostname, ipaddr->addr);
 
-    if (ipaddr && ipaddr->addr) // todo: not sure
+    if ((ipaddr) && (ipaddr->addr)) // todo: not sure
     {
+        bsp_board_led_on(1);
         app_state_event_data_t state_update;
         state_update.evt_type = STATE_EVENT_DNS_OK;
         state_update.data = &ipaddr;
-        err_code = app_sched_event_put(&state_update, 0, app_state_update);
+        err_code = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
         APP_ERROR_CHECK(err_code);
         m_dns_state = STATE_DNS_IDLE;
     }
     else
     {
         // Start application state machine from beginning.
+        bsp_board_led_on(0);
         app_state_event_data_t state_update;
         state_update.evt_type = STATE_EVENT_DNS_FAIL;
-        err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+        err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
         APP_ERROR_CHECK(err_code);
         m_dns_state = STATE_DNS_IDLE;
     }
 }
 
-void dns_lookup(char * p_hostname)
+void app_dns_lookup(char * p_hostname)
 {
     uint32_t    err_code;
     APPL_LOG("DNS lookup for hostname: %s", p_hostname);
-
+    
     // Change application state in case being in IDLE state.
     if (m_dns_state == STATE_DNS_IDLE)
     {
         m_dns_state = STATE_DNS_QUERYING;
-
-        err_code = dns_gethostbyname(p_hostname, &m_broker_addr, app_dns_handler, NULL);
+        err_code = dns_gethostbyname(&p_hostname, &m_broker_addr, &app_dns_handler, NULL);
         
-        if (err_code != ERR_INPROGRESS) {
+        if (err_code == ERR_INPROGRESS) {
             m_dns_state = STATE_DNS_RESOLVING;
-        } else if (err_code = ERR_OK) {
-            app_dns_handler(&p_hostname, &m_broker_addr, NULL);
+        } else if (err_code == ERR_OK) {
+            app_dns_handler(p_hostname, &m_broker_addr, NULL);
         }
     }
 }
@@ -148,6 +145,10 @@ void dns_lookup(char * p_hostname)
 int dns_main_init(void)
 {
     uint32_t err_code;
+    ip_addr_t mydns;
+    IP6_ADDR(&mydns, DNS_SERVER_X0, DNS_SERVER_X1, DNS_SERVER_X2, DNS_SERVER_X3);
+    dns_setserver(0, &mydns);
+    m_dns_state = STATE_DNS_IDLE;
 
     //memcpy(&m_dns_server, APP_DNS_SERVER_ADDR, sizeof(APP_DNS_SERVER_ADDR)); // unsure
     //dns_init();

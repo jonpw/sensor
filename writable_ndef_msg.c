@@ -113,10 +113,10 @@ static void scheduler_nfc_field_change(void * p_event_data, uint16_t event_size)
     if (nfc_state == NFC_STATE_FIELD_ON)
     {
         state_update.evt_type = STATE_EVENT_NFC;
-        err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+        err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
     } else {
         state_update.evt_type = STATE_EVENT_NFC_RESET;
-        err_code       = app_sched_event_put(&state_update, 0, app_state_update);
+        err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
     }
 
     NRF_LOG_INFO("NDEF message updated!");
@@ -198,8 +198,6 @@ static void nfc_callback(void          * context,
 void parse_configuration ()
 {
     ret_code_t err_code;
-    uint32_t nfc_data_left     = *m_ndef_msg_len;
-    uint32_t temp_nfc_data_len = 0;
     uint8_t desc_buf[NFC_NDEF_PARSER_REQIRED_MEMO_SIZE_CALC(10)];
     uint32_t desc_buf_len = sizeof(desc_buf);
     err_code = ndef_msg_parser(desc_buf,
@@ -208,57 +206,22 @@ void parse_configuration ()
                         m_ndef_msg_len);
     APP_ERROR_CHECK(err_code);
 
-    nfc_ndef_record_location_t record_location;
+    nfc_ndef_msg_desc_t * nfc_ndef_msg_desc = (nfc_ndef_msg_desc_t *) desc_buf;
+    nfc_ndef_record_desc_t * nfc_ndef_record_desc;
 
-    // want to modify -> use local copy
-    nfc_ndef_bin_payload_desc_t * p_bin_pay_desc = p_parser_memo_desc->p_bin_pay_desc;
-    nfc_ndef_record_desc_t      * p_rec_desc     = p_parser_memo_desc->p_rec_desc;
-
-    while (nfc_data_left > 0)
+    for (uint8_t x=0;x<nfc_ndef_msg_desc->record_count;x++)
     {
-        temp_nfc_data_len = nfc_data_left;
-
-        ret_code = ndef_record_parser(p_bin_pay_desc,
-                                      p_rec_desc,
-                                      &record_location,
-                                      p_nfc_data,
-                                      &temp_nfc_data_len);
-
-        if (ret_code != NRF_SUCCESS)
+        nfc_ndef_record_desc = (nfc_ndef_record_desc_t *)nfc_ndef_msg_desc->pp_record[x];
+        nfc_ndef_bin_payload_desc_t * nfc_ndef_rec_payload = (nfc_ndef_bin_payload_desc_t *)(nfc_ndef_record_desc->p_payload_descriptor);
+        if ((nfc_ndef_record_desc->tnf == TNF_WELL_KNOWN) &&
+            (strncmp(nfc_ndef_record_desc->p_type, nfc_text_rec_type_field, strlen(nfc_text_rec_type_field)) == 0) &&
+            (nfc_ndef_rec_payload->payload_length > 0))
         {
-            return; //ret_code;
-        }
-    
-        p_rec_desc->tnf == TNF_WELL_KNOWN)
-        {
-            if ((strncmp(recordDesc.p_type, nfc_text_rec_type_field, recordDesc.type_length) == 0))
-            {
-                parse_configuration_data(p_nfc_data+3);
-            }
-        }
-
-
-        nfc_data_left -= temp_nfc_data_len;
-
-        if ((record_location == NDEF_LAST_RECORD) || (record_location == NDEF_LONE_RECORD))
-        {
-            *p_nfc_data_len = *p_nfc_data_len - nfc_data_left;
-            return;// NRF_SUCCESS;
-        }
-        else
-        {
-            if (p_parser_memo_desc->p_msg_desc->record_count ==
-                p_parser_memo_desc->p_msg_desc->max_record_count)
-            {
-                return;// NRF_ERROR_NO_MEM;
-            }
-
-            p_nfc_data += temp_nfc_data_len;
-            p_bin_pay_desc++;
-            p_rec_desc++;
+            bsp_board_led_on(0);
+            parse_configuration_data(nfc_ndef_rec_payload->p_payload+3);
         }
     }
-
+}
 
 void parse_configuration_data (char * configdata)
 {
@@ -273,7 +236,8 @@ void parse_configuration_data (char * configdata)
 
     if (strcmp(inpassword->valuestring, password) == 0)
     {
-        /*
+        bsp_board_leds_off();
+        bsp_board_led_on(1);
 
         cJSON * ssid_cjson = cJSON_GetObjectItem(root, "ssid");
         cJSON * key_cjson = cJSON_GetObjectItem(root, "key");
@@ -299,7 +263,7 @@ void parse_configuration_data (char * configdata)
 
         strcpy(broker_hostname, broker->valuestring);
         m_broker_port = port->valueint;
-        strcpy(m_client_id, client->valuestring);*/
+        strcpy(m_client_id, client->valuestring);
     }
     cJSON_Delete(root);
 }

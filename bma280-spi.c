@@ -49,6 +49,7 @@
 #include "nrf_log_default_backends.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
+#define SPI_MNGR_QUEUE_SIZE 4
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 
@@ -56,6 +57,21 @@ static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instanc
 static uint8_t       m_tx_buf[] = TEST_STRING;           /**< TX buffer. */
 static uint8_t       m_rx_buf[sizeof(TEST_STRING) + 1];    /**< RX buffer. */
 static const uint8_t m_length = sizeof(m_tx_buf);        /**< Transfer length. */
+NRF_SPI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, spi);
+
+    // SPI0 (with transaction manager) initialization.
+nrf_drv_spi_config_t const bma_spi_config =
+{
+    .sck_pin        = BMA280_SCK_PIN,
+    .mosi_pin       = BMA_MOSI_PIN,
+    .miso_pin       = BMA_MISO_PIN,
+    .ss_pin         = BMA_SS_PIN,
+    .irq_priority   = APP_IRQ_PRIORITY_LOWEST,
+    .orc            = 0xFF,
+    .frequency      = NRF_DRV_SPI_FREQ_8M,
+    .mode           = NRF_DRV_SPI_MODE_3,
+    .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
+};
 
 /**
  * @brief SPI user event handler.
@@ -75,19 +91,7 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
 
 int main(void)
 {
-    bsp_board_leds_init();
-
-    APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
-    
-    NRF_LOG_INFO("SPI example.");
-
-    nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
-    spi_config.ss_pin   = SPI_SS_PIN;
-    spi_config.miso_pin = SPI_MISO_PIN;
-    spi_config.mosi_pin = SPI_MOSI_PIN;
-    spi_config.sck_pin  = SPI_SCK_PIN;
-    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
+    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &bma_spi_config, spi_event_handler, NULL));
 
     while (1)
     {
