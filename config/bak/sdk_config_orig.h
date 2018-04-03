@@ -46,15 +46,63 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
- // <h> Application 
+// <h> lwIP 
 
 //==========================================================
-// <o> NDEF_FILE_SIZE - NDEF file maximal size. 
-#ifndef NDEF_FILE_SIZE
-#define NDEF_FILE_SIZE 1024
+// <e> NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED - lwip - lwIP stack for nRF5x
+//==========================================================
+#ifndef NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED
+#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 0
+#endif
+// <o> NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL
+#define NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL 3
 #endif
 
+// <o> NRF_LWIP_DRIVER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_LWIP_DRIVER_CONFIG_INFO_COLOR
+#define NRF_LWIP_DRIVER_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR
+#define NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
 // </h> 
+//==========================================================
+
 // <h> nRF_BLE 
 
 //==========================================================
@@ -370,13 +418,6 @@
 //==========================================================
 
 // <h> nRF_Drivers 
-
-// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
- 
-
-#ifndef APP_FIFO_ENABLED
-#define APP_FIFO_ENABLED 1
-#endif
 
 //==========================================================
 // <e> APP_USBD_ENABLED - app_usbd - USB Device library
@@ -1516,7 +1557,7 @@
 // <e> SPI_ENABLED - nrf_drv_spi - SPI/SPIM peripheral driver
 //==========================================================
 #ifndef SPI_ENABLED
-#define SPI_ENABLED 1
+#define SPI_ENABLED 0
 #endif
 // <o> SPI_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -1562,7 +1603,7 @@
 // <e> SPI0_ENABLED - Enable SPI0 instance
 //==========================================================
 #ifndef SPI0_ENABLED
-#define SPI0_ENABLED 1
+#define SPI0_ENABLED 0
 #endif
 // <q> SPI0_USE_EASY_DMA  - Use EasyDMA
  
@@ -2057,7 +2098,11 @@
 // </e>
 
 // </h> 
+//==========================================================
 
+// <h> nRF_IoT 
+
+//==========================================================
 // <h> ble_6lowpan - 6LoWPAN over BLE and Internet Protocol Support Profile library
 
 //==========================================================
@@ -2215,79 +2260,6 @@
 // </h> 
 //==========================================================
 
-// <h> iot_pbuffer - Packet buffer for IPv6 stack
-
-//==========================================================
-// <q> IOT_PBUFFER_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
- 
-
-// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
-
-#ifndef IOT_PBUFFER_DISABLE_API_PARAM_CHECK
-#define IOT_PBUFFER_DISABLE_API_PARAM_CHECK 0
-#endif
-
-// <e> IOT_PBUFFER_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef IOT_PBUFFER_CONFIG_LOG_ENABLED
-#define IOT_PBUFFER_CONFIG_LOG_ENABLED 0
-#endif
-// <o> IOT_PBUFFER_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef IOT_PBUFFER_CONFIG_LOG_LEVEL
-#define IOT_PBUFFER_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> IOT_PBUFFER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef IOT_PBUFFER_CONFIG_INFO_COLOR
-#define IOT_PBUFFER_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> IOT_PBUFFER_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef IOT_PBUFFER_CONFIG_DEBUG_COLOR
-#define IOT_PBUFFER_CONFIG_DEBUG_COLOR 0
-#endif
-
-// </e>
-
-// <o> IOT_PBUFFER_MAX_COUNT - Maximum packet buffers managed by the module.  <1-255> 
-
-
-#ifndef IOT_PBUFFER_MAX_COUNT
-#define IOT_PBUFFER_MAX_COUNT 10
-#endif
-
-// </h> 
-//==========================================================
-
 // <h> iot_timer - IoT Timer
 
 //==========================================================
@@ -2308,6 +2280,9 @@
 #ifndef IOT_TIMER_RESOLUTION_IN_MS
 #define IOT_TIMER_RESOLUTION_IN_MS 10
 #endif
+
+// </h> 
+//==========================================================
 
 // <h> ipv6_medium - IPv6 Medium
 
@@ -2445,7 +2420,7 @@
 
 // <s> DEVICE_NAME - Device name used in BLE undirected advertisement if COMMISSIONING_ENABLED is not defined.
 #ifndef DEVICE_NAME
-#define DEVICE_NAME "DNS_Client"
+#define DEVICE_NAME "MQTT_Pub"
 #endif
 
 // <q> IS_SRVC_CHANGED_CHARACT_PRESENT  - Include the Service Changed characteristic in the Attribute Table.
@@ -2528,29 +2503,17 @@
 #endif
 
 // </h> 
-
-
-// </h> 
 //==========================================================
 
-// <h> ipv6_udp - User Datagram Protocol (UDP)
+// <h> mqtt_config - MQTT Config Definitions
 
 //==========================================================
-// <q> UDP6_DISABLE_API_PARAM_CHECK  - Enable or disable API parameter check.
- 
-
-// <i> API parameter checks are added to ensure right parameters are passed to the module. These checks are useful during development phase but be redundant once application is developed. Disabling this can result in some code saving.
-
-#ifndef UDP6_DISABLE_API_PARAM_CHECK
-#define UDP6_DISABLE_API_PARAM_CHECK 0
+// <e> MQTT_CONFIG_LOG_ENABLED - Enables logging in the module.
+//==========================================================
+#ifndef MQTT_CONFIG_LOG_ENABLED
+#define MQTT_CONFIG_LOG_ENABLED 0
 #endif
-
-// <e> UDP6_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef UDP6_CONFIG_LOG_ENABLED
-#define UDP6_CONFIG_LOG_ENABLED 0
-#endif
-// <o> UDP6_CONFIG_LOG_LEVEL  - Default Severity level
+// <o> MQTT_CONFIG_LOG_LEVEL  - Default Severity level
  
 // <0=> Off 
 // <1=> Error 
@@ -2558,11 +2521,11 @@
 // <3=> Info 
 // <4=> Debug 
 
-#ifndef UDP6_CONFIG_LOG_LEVEL
-#define UDP6_CONFIG_LOG_LEVEL 3
+#ifndef MQTT_CONFIG_LOG_LEVEL
+#define MQTT_CONFIG_LOG_LEVEL 3
 #endif
 
-// <o> UDP6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> MQTT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -2574,11 +2537,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef UDP6_CONFIG_INFO_COLOR
-#define UDP6_CONFIG_INFO_COLOR 0
+#ifndef MQTT_CONFIG_INFO_COLOR
+#define MQTT_CONFIG_INFO_COLOR 0
 #endif
 
-// <o> UDP6_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> MQTT_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -2590,17 +2553,31 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef UDP6_CONFIG_DEBUG_COLOR
-#define UDP6_CONFIG_DEBUG_COLOR 0
+#ifndef MQTT_CONFIG_DEBUG_COLOR
+#define MQTT_CONFIG_DEBUG_COLOR 0
 #endif
 
 // </e>
 
-// <o> UDP6_MAX_SOCKET_COUNT - The max number of sockets to support for UDP module.  <1-255> 
+// <o> MQTT_MAX_CLIENTS - Maximum number of clients that can be managed by the module.  <1-255> 
 
 
-#ifndef UDP6_MAX_SOCKET_COUNT
-#define UDP6_MAX_SOCKET_COUNT 3
+#ifndef MQTT_MAX_CLIENTS
+#define MQTT_MAX_CLIENTS 1
+#endif
+
+// <o> MQTT_KEEPALIVE - Keep alive time for MQTT (in seconds). Sending of Ping Requests to keep the connection alive are governed by this value. A keep alive value of zero (0) has the effect of turning off the keep alive mechanism.  <0-65535> 
+
+
+#ifndef MQTT_KEEPALIVE
+#define MQTT_KEEPALIVE 60
+#endif
+
+// <o> MQTT_MAX_PACKET_LENGTH - Maximum MQTT packet size that can be sent (including the fixed and variable header).  <5-268435460> 
+
+
+#ifndef MQTT_MAX_PACKET_LENGTH
+#define MQTT_MAX_PACKET_LENGTH 128
 #endif
 
 // </h> 
@@ -2720,6 +2697,13 @@
 // <h> nRF_Libraries 
 
 //==========================================================
+// <q> APP_FIFO_ENABLED  - app_fifo - Software FIFO implementation
+ 
+
+#ifndef APP_FIFO_ENABLED
+#define APP_FIFO_ENABLED 1
+#endif
+
 // <q> APP_GPIOTE_ENABLED  - app_gpiote - GPIOTE events dispatcher
  
 
@@ -3045,7 +3029,7 @@
 // <e> HARDFAULT_HANDLER_ENABLED - hardfault_default - HardFault default handler for debugging and release
 //==========================================================
 #ifndef HARDFAULT_HANDLER_ENABLED
-#define HARDFAULT_HANDLER_ENABLED 1
+#define HARDFAULT_HANDLER_ENABLED 0
 #endif
 // <q> HARDFAULT_HANDLER_GDB_PSP_BACKTRACE  - Bypass the GDB problem with multiple stack pointers backtrace
  
@@ -3180,35 +3164,35 @@
 
 
 #ifndef MEMORY_MANAGER_SMALL_BLOCK_COUNT
-#define MEMORY_MANAGER_SMALL_BLOCK_COUNT 8
+#define MEMORY_MANAGER_SMALL_BLOCK_COUNT 13
 #endif
 
 // <o> MEMORY_MANAGER_SMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'small' block. 
 // <i>  Size of each memory blocks identified as 'small' block. Memory block are recommended to be word-sized.
 
 #ifndef MEMORY_MANAGER_SMALL_BLOCK_SIZE
-#define MEMORY_MANAGER_SMALL_BLOCK_SIZE 64
+#define MEMORY_MANAGER_SMALL_BLOCK_SIZE 128
 #endif
 
 // <o> MEMORY_MANAGER_MEDIUM_BLOCK_COUNT - Size of each memory blocks identified as 'medium' block.  <0-255> 
 
 
 #ifndef MEMORY_MANAGER_MEDIUM_BLOCK_COUNT
-#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 4
+#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 18
 #endif
 
 // <o> MEMORY_MANAGER_MEDIUM_BLOCK_SIZE -  Size of each memory blocks identified as 'medium' block. 
 // <i>  Size of each memory blocks identified as 'medium' block. Memory block are recommended to be word-sized.
 
 #ifndef MEMORY_MANAGER_MEDIUM_BLOCK_SIZE
-#define MEMORY_MANAGER_MEDIUM_BLOCK_SIZE 256
+#define MEMORY_MANAGER_MEDIUM_BLOCK_SIZE 524
 #endif
 
 // <o> MEMORY_MANAGER_LARGE_BLOCK_COUNT - Size of each memory blocks identified as 'large' block.  <0-255> 
 
 
 #ifndef MEMORY_MANAGER_LARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 2
+#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 5
 #endif
 
 // <o> MEMORY_MANAGER_LARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'large' block. 
@@ -3222,7 +3206,7 @@
 
 
 #ifndef MEMORY_MANAGER_XLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 0
+#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 2
 #endif
 
 // <o> MEMORY_MANAGER_XLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra large' block. 
@@ -3236,7 +3220,7 @@
 
 
 #ifndef MEMORY_MANAGER_XXLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 0
+#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 2
 #endif
 
 // <o> MEMORY_MANAGER_XXLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra large' block. 
@@ -3250,7 +3234,7 @@
 
 
 #ifndef MEMORY_MANAGER_XSMALL_BLOCK_COUNT
-#define MEMORY_MANAGER_XSMALL_BLOCK_COUNT 0
+#define MEMORY_MANAGER_XSMALL_BLOCK_COUNT 36
 #endif
 
 // <o> MEMORY_MANAGER_XSMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'extra small' block. 
@@ -3264,7 +3248,7 @@
 
 
 #ifndef MEMORY_MANAGER_XXSMALL_BLOCK_COUNT
-#define MEMORY_MANAGER_XXSMALL_BLOCK_COUNT 0
+#define MEMORY_MANAGER_XXSMALL_BLOCK_COUNT 100
 #endif
 
 // <o> MEMORY_MANAGER_XXSMALL_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra small' block. 
@@ -3658,7 +3642,7 @@
 // <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_UART_ENABLED
-#define NRF_LOG_BACKEND_UART_ENABLED 0
+#define NRF_LOG_BACKEND_UART_ENABLED 1
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN
@@ -6209,7 +6193,7 @@
 // <2=> NRF_SDH_DISPATCH_MODEL_POLLING 
 
 #ifndef NRF_SDH_DISPATCH_MODEL
-#define NRF_SDH_DISPATCH_MODEL 1
+#define NRF_SDH_DISPATCH_MODEL 0
 #endif
 
 // </h> 
@@ -6410,78 +6394,17 @@
 // </e>
 
 // </h> 
- // <h> nRF_NFC 
+//==========================================================
+
+// <h> nRF_TLS 
 
 //==========================================================
-// <e> NFC_NDEF_MSG_ENABLED - nfc_ndef_msg - NFC NDEF Message generator module
+// <e> TLS_CONFIG_LOG_ENABLED - nrf_tls - TLS library
 //==========================================================
-#ifndef NFC_NDEF_MSG_ENABLED
-#define NFC_NDEF_MSG_ENABLED 1
+#ifndef TLS_CONFIG_LOG_ENABLED
+#define TLS_CONFIG_LOG_ENABLED 0
 #endif
-// <o> NFC_NDEF_MSG_TAG_TYPE  - NFC Tag Type
- 
-// <2=> Type 2 Tag 
-// <4=> Type 4 Tag 
-
-#ifndef NFC_NDEF_MSG_TAG_TYPE
-#define NFC_NDEF_MSG_TAG_TYPE 4
-#endif
-
-// </e>
-
-// <q> NFC_NDEF_RECORD_ENABLED  - nfc_ndef_record - NFC NDEF Record generator module
- 
-
-#ifndef NFC_NDEF_RECORD_ENABLED
-#define NFC_NDEF_RECORD_ENABLED 1
-#endif
-
-// <q> NFC_NDEF_URI_MSG_ENABLED  - nfc_uri_msg - Encoding data for NDEF message with URI record for NFC Tag
- 
-
-#ifndef NFC_NDEF_URI_MSG_ENABLED
-#define NFC_NDEF_URI_MSG_ENABLED 1
-#endif
-
-#ifndef NFC_NDEF_TEXT_RECORD_ENABLED
-#define NFC_NDEF_TEXT_RECORD_ENABLED 1
-#endif
-
-// <q> NFC_NDEF_URI_REC_ENABLED  - nfc_uri_rec - Encoding data for a URI record for NFC Tag
- 
-
-#ifndef NFC_NDEF_URI_REC_ENABLED
-#define NFC_NDEF_URI_REC_ENABLED 1
-#endif
-
-// <e> NFC_T4T_HAL_ENABLED - nfc_t4t_hal - Hardware Abstraction Layer for NFC library.
-//==========================================================
-#ifndef NFC_T4T_HAL_ENABLED
-#define NFC_T4T_HAL_ENABLED 1
-#endif
-// <o> NFCT_CONFIG_IRQ_PRIORITY  - Interrupt priority
- 
-
-// <i> Priorities 0,2 (nRF51) and 0,1,4,5 (nRF52) are reserved for SoftDevice
-// <0=> 0 (highest) 
-// <1=> 1 
-// <2=> 2 
-// <3=> 3 
-// <4=> 4 
-// <5=> 5 
-// <6=> 6 
-// <7=> 7 
-
-#ifndef NFCT_CONFIG_IRQ_PRIORITY
-#define NFCT_CONFIG_IRQ_PRIORITY 7
-#endif
-
-// <e> HAL_NFC_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_LOG_ENABLED
-#define HAL_NFC_CONFIG_LOG_ENABLED 0
-#endif
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
+// <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
  
 // <0=> Off 
 // <1=> Error 
@@ -6489,11 +6412,11 @@
 // <3=> Info 
 // <4=> Debug 
 
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
+#ifndef TLS_CONFIG_LOG_LEVEL
+#define TLS_CONFIG_LOG_LEVEL 3
 #endif
 
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -6505,11 +6428,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
+#ifndef TLS_CONFIG_INFO_COLOR
+#define TLS_CONFIG_INFO_COLOR 0
 #endif
 
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> TLS_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -6521,11 +6444,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
+#ifndef TLS_CONFIG_DEBUG_COLOR
+#define TLS_CONFIG_DEBUG_COLOR 0
 #endif
 
-// <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
+// <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
  
 // <0=> Off 
 // <1=> Error 
@@ -6533,11 +6456,11 @@
 // <3=> Info 
 // <4=> Debug 
 
-#ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
+#ifndef TLS_CONFIG_LOG_LEVEL
+#define TLS_CONFIG_LOG_LEVEL 3
 #endif
 
-// <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+// <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -6549,11 +6472,11 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef HAL_NFC_CONFIG_INFO_COLOR
-#define HAL_NFC_CONFIG_INFO_COLOR 0
+#ifndef TLS_CONFIG_INFO_COLOR
+#define TLS_CONFIG_INFO_COLOR 0
 #endif
 
-// <o> HAL_NFC_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+// <o> TLS_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
  
 // <0=> Default 
 // <1=> Black 
@@ -6565,578 +6488,9 @@
 // <7=> Cyan 
 // <8=> White 
 
-#ifndef HAL_NFC_CONFIG_DEBUG_COLOR
-#define HAL_NFC_CONFIG_DEBUG_COLOR 0
+#ifndef TLS_CONFIG_DEBUG_COLOR
+#define TLS_CONFIG_DEBUG_COLOR 0
 #endif
-
-// </e>
-
-// <e> HAL_NFC_CONFIG_DEBUG_PIN_ENABLED - Enables pin debug in the module.
-//==========================================================
-#ifndef HAL_NFC_CONFIG_DEBUG_PIN_ENABLED
-#define HAL_NFC_CONFIG_DEBUG_PIN_ENABLED 0
-#endif
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 11
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 12
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 24
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 25
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 28
-#endif
-
-// <o> HAL_NFC_HCLOCK_ON_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_ON_DEBUG_PIN
-#define HAL_NFC_HCLOCK_ON_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_HCLOCK_OFF_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_HCLOCK_OFF_DEBUG_PIN
-#define HAL_NFC_HCLOCK_OFF_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_NFC_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_NFC_EVENT_DEBUG_PIN
-#define HAL_NFC_NFC_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_DETECT_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_DETECT_EVENT_DEBUG_PIN
-#define HAL_NFC_DETECT_EVENT_DEBUG_PIN 31
-#endif
-
-// <o> HAL_NFC_TIMER4_EVENT_DEBUG_PIN  - Pin number
- 
-// <0=> 0 (P0.0) 
-// <1=> 1 (P0.1) 
-// <2=> 2 (P0.2) 
-// <3=> 3 (P0.3) 
-// <4=> 4 (P0.4) 
-// <5=> 5 (P0.5) 
-// <6=> 6 (P0.6) 
-// <7=> 7 (P0.7) 
-// <8=> 8 (P0.8) 
-// <9=> 9 (P0.9) 
-// <10=> 10 (P0.10) 
-// <11=> 11 (P0.11) 
-// <12=> 12 (P0.12) 
-// <13=> 13 (P0.13) 
-// <14=> 14 (P0.14) 
-// <15=> 15 (P0.15) 
-// <16=> 16 (P0.16) 
-// <17=> 17 (P0.17) 
-// <18=> 18 (P0.18) 
-// <19=> 19 (P0.19) 
-// <20=> 20 (P0.20) 
-// <21=> 21 (P0.21) 
-// <22=> 22 (P0.22) 
-// <23=> 23 (P0.23) 
-// <24=> 24 (P0.24) 
-// <25=> 25 (P0.25) 
-// <26=> 26 (P0.26) 
-// <27=> 27 (P0.27) 
-// <28=> 28 (P0.28) 
-// <29=> 29 (P0.29) 
-// <30=> 30 (P0.30) 
-// <31=> 31 (P0.31) 
-// <32=> 32 (P1.0) 
-// <33=> 33 (P1.1) 
-// <34=> 34 (P1.2) 
-// <35=> 35 (P1.3) 
-// <36=> 36 (P1.4) 
-// <37=> 37 (P1.5) 
-// <38=> 38 (P1.6) 
-// <39=> 39 (P1.7) 
-// <40=> 40 (P1.8) 
-// <41=> 41 (P1.9) 
-// <42=> 42 (P1.10) 
-// <43=> 43 (P1.11) 
-// <44=> 44 (P1.12) 
-// <45=> 45 (P1.13) 
-// <46=> 46 (P1.14) 
-// <47=> 47 (P1.15) 
-// <4294967295=> Not connected 
-
-#ifndef HAL_NFC_TIMER4_EVENT_DEBUG_PIN
-#define HAL_NFC_TIMER4_EVENT_DEBUG_PIN 31
-#endif
-
-// </e>
 
 // </e>
 
@@ -7144,166 +6498,5 @@
 //==========================================================
 
 // <<< end of configuration section >>>
-// <e> NFC_NDEF_MSG_PARSER_ENABLED - nfc_ndef_msg_parser - NFC NDEF message parser module
-//==========================================================
-#ifndef NFC_NDEF_MSG_PARSER_ENABLED
-#define NFC_NDEF_MSG_PARSER_ENABLED 1
-#endif
-// <e> NFC_NDEF_MSG_PARSER_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef NFC_NDEF_MSG_PARSER_LOG_ENABLED
-#define NFC_NDEF_MSG_PARSER_LOG_ENABLED 0
-#endif
-// <o> NFC_NDEF_MSG_PARSER_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef NFC_NDEF_MSG_PARSER_LOG_LEVEL
-#define NFC_NDEF_MSG_PARSER_LOG_LEVEL 3
-#endif
-
-// <o> NFC_NDEF_MSG_PARSER_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef NFC_NDEF_MSG_PARSER_INFO_COLOR
-#define NFC_NDEF_MSG_PARSER_INFO_COLOR 0
-#endif
-
-// </e>
-
-// </e>
-
-// <e> NFC_NDEF_RECORD_PARSER_ENABLED - nfc_ndef_record_parser - NFC NDEF Record parser module
-//==========================================================
-#ifndef NFC_NDEF_RECORD_PARSER_ENABLED
-#define NFC_NDEF_RECORD_PARSER_ENABLED 1
-#endif
-// <e> NFC_NDEF_RECORD_PARSER_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef NFC_NDEF_RECORD_PARSER_LOG_ENABLED
-#define NFC_NDEF_RECORD_PARSER_LOG_ENABLED 0
-#endif
-// <o> NFC_NDEF_RECORD_PARSER_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef NFC_NDEF_RECORD_PARSER_LOG_LEVEL
-#define NFC_NDEF_RECORD_PARSER_LOG_LEVEL 3
-#endif
-
-// <o> NFC_NDEF_RECORD_PARSER_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef NFC_NDEF_RECORD_PARSER_INFO_COLOR
-#define NFC_NDEF_RECORD_PARSER_INFO_COLOR 0
-#endif
-
-// </e>
-
-// </e>
-
-//==========================================================
-
-// <h> mqtt_config - MQTT Config Definitions
-
-//==========================================================
-// <e> MQTT_CONFIG_LOG_ENABLED - Enables logging in the module.
-//==========================================================
-#ifndef MQTT_CONFIG_LOG_ENABLED
-#define MQTT_CONFIG_LOG_ENABLED 0
-#endif
-// <o> MQTT_CONFIG_LOG_LEVEL  - Default Severity level
- 
-// <0=> Off 
-// <1=> Error 
-// <2=> Warning 
-// <3=> Info 
-// <4=> Debug 
-
-#ifndef MQTT_CONFIG_LOG_LEVEL
-#define MQTT_CONFIG_LOG_LEVEL 3
-#endif
-
-// <o> MQTT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef MQTT_CONFIG_INFO_COLOR
-#define MQTT_CONFIG_INFO_COLOR 0
-#endif
-
-// <o> MQTT_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
- 
-// <0=> Default 
-// <1=> Black 
-// <2=> Red 
-// <3=> Green 
-// <4=> Yellow 
-// <5=> Blue 
-// <6=> Magenta 
-// <7=> Cyan 
-// <8=> White 
-
-#ifndef MQTT_CONFIG_DEBUG_COLOR
-#define MQTT_CONFIG_DEBUG_COLOR 0
-#endif
-
-// </e>
-
-// <o> MQTT_MAX_CLIENTS - Maximum number of clients that can be managed by the module.  <1-255> 
-
-
-#ifndef MQTT_MAX_CLIENTS
-#define MQTT_MAX_CLIENTS 1
-#endif
-
-// <o> MQTT_KEEPALIVE - Keep alive time for MQTT (in seconds). Sending of Ping Requests to keep the connection alive are governed by this value. A keep alive value of zero (0) has the effect of turning off the keep alive mechanism.  <0-65535> 
-
-
-#ifndef MQTT_KEEPALIVE
-#define MQTT_KEEPALIVE 60
-#endif
-
-// <o> MQTT_MAX_PACKET_LENGTH - Maximum MQTT packet size that can be sent (including the fixed and variable header).  <5-268435460> 
-
-
-#ifndef MQTT_MAX_PACKET_LENGTH
-#define MQTT_MAX_PACKET_LENGTH 128
-#endif
-
 #endif //SDK_CONFIG_H
 

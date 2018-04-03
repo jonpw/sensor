@@ -252,6 +252,8 @@ static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
     cJSON_AddStringToObject(root, "broker", broker_hostname);
     cJSON_AddNumberToObject(root, "port", m_broker_port);
     cJSON_AddStringToObject(root, "client", m_client_id);
+    cJSON_AddStringToObject(root, "dns", (dns_getserver(0))->addr[0]);
+
 
     json_string = cJSON_Print(root);
 
@@ -306,44 +308,18 @@ ret_code_t ndef_file_load(uint8_t * p_buff, uint32_t size)
     // Always clear token before running new file/record search.
     memset(&ftok, 0x00, sizeof(fds_find_token_t));
 
-    // Search for NDEF message in FLASH.
-    err_code = fds_record_delete(&m_record_desc);
-    err_code = fds_record_find(FILE_ID, REC_KEY, &m_record_desc, &ftok);
-
     // If there is no record with given key and file ID,
     // create default message and store in FLASH.
-    if (err_code == FDS_SUCCESS)
-    {
-        NRF_LOG_INFO("Found NDEF file record.");
+    // Create default NDEF message.
+    err_code = ndef_file_default_message(p_buff, &size);
+    VERIFY_SUCCESS(err_code);
 
-        err_code = ndef_file_compose(p_buff, size);
-        //err_code = ndef_file_update(p_buff, size+NLEN_FIELD_SIZE);
+    // Search for NDEF message in FLASH.
+    err_code = fds_record_find(FILE_ID, REC_KEY, &m_record_desc, &ftok);
 
-        // Open record for read.
-        err_code = fds_record_open(&m_record_desc, &flash_record);
-        VERIFY_SUCCESS(err_code);
-
-        // Access the record through the flash_record structure.
-        memcpy(p_buff,
-               flash_record.p_data,
-               flash_record.p_header->length_words * sizeof(uint32_t));
-
-        // Print file length and raw message data.
-        NRF_LOG_DEBUG("NDEF file data length: %u bytes.",
-                      flash_record.p_header->length_words * sizeof(uint32_t));
-
-        NRF_LOG_HEXDUMP_DEBUG(p_buff, flash_record.p_header->length_words * sizeof(uint32_t));
-
-        // Close the record when done.
-        err_code = fds_record_close(&m_record_desc);
-    }
-    else if (err_code == FDS_ERR_NOT_FOUND)
+    if (err_code == FDS_ERR_NOT_FOUND)
     {
         NRF_LOG_INFO("NDEF file record not found, default NDEF file created.", err_code);
-
-        // Create default NDEF message.
-        err_code = ndef_file_default_message(p_buff, &size);
-        VERIFY_SUCCESS(err_code);
 
         // Create record with default NDEF message.
         err_code = ndef_file_create(p_buff, size);

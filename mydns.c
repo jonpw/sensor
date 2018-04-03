@@ -101,7 +101,6 @@ static void app_dns_handler(char * hostname, ip_addr_t * ipaddr, void * arg)
 
     if ((ipaddr) && (ipaddr->addr)) // todo: not sure
     {
-        bsp_board_led_on(1);
         app_state_event_data_t state_update;
         state_update.evt_type = STATE_EVENT_DNS_OK;
         state_update.data = &ipaddr;
@@ -112,7 +111,6 @@ static void app_dns_handler(char * hostname, ip_addr_t * ipaddr, void * arg)
     else
     {
         // Start application state machine from beginning.
-        bsp_board_led_on(0);
         app_state_event_data_t state_update;
         state_update.evt_type = STATE_EVENT_DNS_FAIL;
         err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
@@ -130,7 +128,7 @@ void app_dns_lookup(char * p_hostname)
     if (m_dns_state == STATE_DNS_IDLE)
     {
         m_dns_state = STATE_DNS_QUERYING;
-        err_code = dns_gethostbyname(&p_hostname, &m_broker_addr, &app_dns_handler, NULL);
+        err_code = dns_gethostbyname(p_hostname, &m_broker_addr, &app_dns_handler, NULL);
         
         if (err_code == ERR_INPROGRESS) {
             m_dns_state = STATE_DNS_RESOLVING;

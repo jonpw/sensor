@@ -174,7 +174,7 @@ static void on_ipv6_medium_evt(ipv6_medium_evt_t * p_ipv6_medium_evt)
         {
             APPL_LOG("Physical layer: disconnected.");
             // TODO: notify someone?
-            //connectable_mode_enter();
+            connectable_mode_enter();
             break;
         }
         default:

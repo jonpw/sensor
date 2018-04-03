@@ -140,6 +140,9 @@ static void nfc_callback(void          * context,
     {
         case NFC_T4T_EVENT_FIELD_ON:
             //TODO: enter NFC state in main app
+            err_code = ndef_file_load(m_ndef_msg_buf, sizeof(m_ndef_msg_buf));
+            APP_ERROR_CHECK(err_code);
+            
             nfc_state = NFC_STATE_FIELD_ON;
             err_code       = app_sched_event_put(NULL, 0, scheduler_nfc_field_change);
             APP_ERROR_CHECK(err_code);

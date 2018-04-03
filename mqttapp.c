@@ -134,7 +134,6 @@ static void app_mqtt_connect(ip_addr_t * ipaddr)
     //memcpy(m_app_mqtt_client.p_user_name, mqtt_username, strlen(mqtt_username));
     m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
     m_app_mqtt_client.p_security_settings  = &m_tls_keys;
-    
     UNUSED_VARIABLE(mqtt_connect(&m_app_mqtt_client));
 }
 

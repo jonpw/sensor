@@ -146,7 +146,7 @@ static void leds_init(void)
  */
 static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 {
-    /*UNUSED_PARAMETER(wall_clock_value);
+    UNUSED_PARAMETER(wall_clock_value);
     if (m_do_ind_err == true)
     {
         // Flash LED_THREE for three periods if error occurs.
@@ -162,7 +162,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         }
     }
 
-    switch (m_display_state)
+    /*switch (m_display_state)
     {
         case LEDS_INACTIVE:
         {
@@ -189,6 +189,13 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         {
             bsp_board_led_off(0);
             bsp_board_led_invert(1);
+            bsp_board_led_off(2);
+            break;
+        }
+        case LEDS_MQTT_FAIL:
+        {
+            bsp_board_led_on(0);
+            bsp_board_led_off(1);
             bsp_board_led_off(2);
             break;
         }
@@ -486,6 +493,11 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_DNS_FAIL;
         m_app_state = STATE_APP_FAULT;
     }
+    else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT_FAILED)
+    {
+        m_display_state = LEDS_MQTT_FAIL;
+        m_app_state = STATE_APP_FAULT;
+    }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
     {   
         m_display_state = LEDS_ACTIVE_IDLE;
@@ -567,28 +579,14 @@ int main(void)
 
     // Enter main loop.
     for (;;)
-    {
-        //bsp_board_led_invert(0);
-        //if (strcmp(broker_hostname, "test") == 0) bsp_board_leds_on();
-        
+    {      
         app_sched_execute();
 
         if (NRF_LOG_PROCESS() == false)
         {
-        
-            //bsp_board_led_on(1);
-            //bsp_board_led_off(2);
             // Sleep waiting for an application event.
-            //nrf_delay_ms(50);
             err_code = sd_app_evt_wait();
             APP_ERROR_CHECK(err_code);
-            /*for (x=0;x<err_code-NRF_ERROR_BASE_NUM;x++)
-            {
-                bsp_board_led_invert(1);
-                nrf_delay_ms(100);
-            }
-            nrf_delay_ms(1000);*/
-
         }
     }
 }
