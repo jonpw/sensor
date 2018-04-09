@@ -93,7 +93,7 @@
 #define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
 #define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */
 
-#define BROKER_HOSTNAME "broker.hivemq.org"
+#define BROKER_HOSTNAME "archer.local"
 #define MSG_BUTTON_PRESSED "pressed"
 
 #define TOPIC_BUTTON_1  "button/1/event"
@@ -171,12 +171,12 @@ typedef enum
 
 /** Modify m_broker_addr according to your setup.
  *  The address provided below is a place holder.  */
-extern ip_addr_t m_broker_addr;
+
 
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
 
-#define APP_ENABLE_LOGS                     0                                                       /**< Enable logs in the application. */
+#define APP_ENABLE_LOGS                     1                                                       /**< Enable logs in the application. */
 
 #if (APP_ENABLE_LOGS == 1)
 

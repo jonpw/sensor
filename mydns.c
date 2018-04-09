@@ -76,6 +76,8 @@
 #include "lwip/ip_addr.h"
 
 static volatile dns_state_t   m_dns_state = STATE_DNS_IDLE;                                         /**< State of application state machine. */
+ip_addr_t mydns;
+ip_addr_t   ipaddr_last_dns;
 
 /**@brief DNS6 module event handler.
  *
@@ -128,12 +130,14 @@ void app_dns_lookup(char * p_hostname)
     if (m_dns_state == STATE_DNS_IDLE)
     {
         m_dns_state = STATE_DNS_QUERYING;
-        err_code = dns_gethostbyname(p_hostname, &m_broker_addr, &app_dns_handler, NULL);
+        err_code = dns_gethostbyname(p_hostname, &ipaddr_last_dns, &app_dns_handler, NULL);
         
         if (err_code == ERR_INPROGRESS) {
+            APPL_LOG("mydns: query in progress");
             m_dns_state = STATE_DNS_RESOLVING;
         } else if (err_code == ERR_OK) {
-            app_dns_handler(p_hostname, &m_broker_addr, NULL);
+            APPL_LOG("mydns: query was cached");
+            app_dns_handler(p_hostname, &ipaddr_last_dns, NULL);
         }
     }
 }
@@ -143,15 +147,15 @@ void app_dns_lookup(char * p_hostname)
 int dns_main_init(void)
 {
     uint32_t err_code;
-    ip_addr_t mydns;
-    IP6_ADDR(&mydns, DNS_SERVER_X0, DNS_SERVER_X1, DNS_SERVER_X2, DNS_SERVER_X3);
+    
+    IP6_ADDR(&mydns, PP_HTONL(DNS_SERVER_X0), PP_HTONL(DNS_SERVER_X1), PP_HTONL(DNS_SERVER_X2), PP_HTONL(DNS_SERVER_X3));
     dns_setserver(0, &mydns);
     m_dns_state = STATE_DNS_IDLE;
 
     //memcpy(&m_dns_server, APP_DNS_SERVER_ADDR, sizeof(APP_DNS_SERVER_ADDR)); // unsure
     //dns_init();
 
-    APPL_LOG("Init complete.");
+    APPL_LOG("mydns init complete");
 
 }
 

@@ -78,22 +78,27 @@
 #include "mqttapp.h"
 
 //char broker_hostname[32] = "broker.hivemq.org";
-char broker_hostname[32] = "test.mosquitto.org";
+char broker_hostname[32] = "archer.local";
 
 uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
 
 // TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
-char                           m_client_id[] = "testapp";                         /**< Unique MQTT client identifier. */
+char                           m_client_id[] = "testapp123456";                         /**< Unique MQTT client identifier. */
 
-uint8_t identity[] = {0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79};
-uint8_t shared_secret[] = {0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b};
-//char * mqtt_username[] = "user";
-//char * mqtt_passwd[] = "pass";
+//uint8_t identity[] = {0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79};
+const uint8_t identity[] = "testapp123456";
+const uint8_t shared_secret[] = {0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b};
+
+char mqtt_username[16] = "user";
+char mqtt_password[16] = "pass";
+mqtt_username_t m_mqtt_username = {.p_utf_str = &mqtt_username, .utf_strlen = 0};
+mqtt_password_t m_mqtt_password = {.p_utf_str = &mqtt_password, .utf_strlen = 0};
+
 
 nrf_tls_preshared_key_t m_preshared_key = {
     .p_identity     = &identity[0],
     .p_secret_key   = &shared_secret[0],
-    .identity_len   = 15,
+    .identity_len   = 13,
     .secret_key_len = 9
 };
 
@@ -115,6 +120,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
 //TODO: Preliminary mqtt_begin
 void mqtt_begin(ip_addr_t * ipaddr)
 {
+    APPL_LOG("mqtt_begin: Connecting to %32X", ipaddr->addr);
     mqtt_state = STATE_MQTT_CONNECTING;
     app_mqtt_connect(ipaddr);
 }
@@ -122,19 +128,24 @@ void mqtt_begin(ip_addr_t * ipaddr)
 /**@brief Connect to MQTT broker. */
 static void app_mqtt_connect(ip_addr_t * ipaddr)
 {
+    uint32_t err_code;
     mqtt_client_init(&m_app_mqtt_client);
     memcpy(m_app_mqtt_client.broker_addr.u32, ipaddr->addr, IPV6_ADDR_SIZE);
     m_app_mqtt_client.broker_port          = m_broker_port;
     m_app_mqtt_client.evt_cb               = app_mqtt_evt_handler;
     m_app_mqtt_client.client_id.p_utf_str  = (uint8_t *)m_client_id;
     m_app_mqtt_client.client_id.utf_strlen = strlen(m_client_id);
-    m_app_mqtt_client.p_password           = NULL;
-    m_app_mqtt_client.p_user_name          = NULL;
+    m_mqtt_password.utf_strlen = strlen(m_mqtt_password.p_utf_str);
+    m_app_mqtt_client.p_password           = &m_mqtt_password;
+    m_mqtt_username.utf_strlen = strlen(m_mqtt_username.p_utf_str);
+    m_app_mqtt_client.p_user_name          = &m_mqtt_username;
     //memcpy(m_app_mqtt_client.p_password, mqtt_password, strlen(mqtt_password));
     //memcpy(m_app_mqtt_client.p_user_name, mqtt_username, strlen(mqtt_username));
-    m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
+    //m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
+    m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_NON_SECURE;
     m_app_mqtt_client.p_security_settings  = &m_tls_keys;
-    UNUSED_VARIABLE(mqtt_connect(&m_app_mqtt_client));
+    err_code = mqtt_connect(&m_app_mqtt_client);
+    APPL_LOG("app_mqtt_connect: mqtt_connect returned %i", err_code);
 }
 
 
@@ -144,6 +155,7 @@ static void app_mqtt_connect(ip_addr_t * ipaddr)
  */
 void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
 {
+    uint32_t err_code;
     // Set topic to be published.
     mqtt_publish_param_t param;
 
@@ -156,8 +168,8 @@ void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
     param.dup_flag                       = 0;
     param.retain_flag                    = 0;
 
-    uint32_t err_code = mqtt_publish(&m_app_mqtt_client, &param);
-    //APPL_LOG("mqtt_publish result 0x%08lx", err_code);
+    err_code = mqtt_publish(&m_app_mqtt_client, &param);
+    APPL_LOG("mqtt_publish result 0x%08lx", err_code);
 
     if (err_code == NRF_SUCCESS)
     {
@@ -174,6 +186,7 @@ void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
 /**@brief Subscribe with the broker. */
 static void app_mqtt_subscribe(mqtt_topic_t * topic)
 {
+    uint32_t err_code;
     /*
     {
         .topic =
@@ -192,7 +205,8 @@ static void app_mqtt_subscribe(mqtt_topic_t * topic)
     };
     m_sub_message_id++;
 
-    uint32_t err_code = mqtt_subscribe(&m_app_mqtt_client, &subscription_list);
+    err_code = mqtt_subscribe(&m_app_mqtt_client, &subscription_list);
+    APPL_LOG("mqtt_subscribe result 0x%08lx", err_code);
 
 
     if (err_code == NRF_SUCCESS)
@@ -205,6 +219,7 @@ static void app_mqtt_subscribe(mqtt_topic_t * topic)
 /**@brief Unsubscribe with the broker. */
 static void app_mqtt_unsubscribe(mqtt_topic_t * topic)
 {
+    uint32_t err_code;
 
     /*mqtt_topic_t topic =
     {
@@ -224,7 +239,8 @@ static void app_mqtt_unsubscribe(mqtt_topic_t * topic)
     };
     m_sub_message_id++;
 
-    uint32_t err_code = mqtt_unsubscribe(&m_app_mqtt_client, &subscription_list);
+    err_code = mqtt_unsubscribe(&m_app_mqtt_client, &subscription_list);
+    APPL_LOG("mqtt_unsubscribe result 0x%08lx", err_code);
 
     if (err_code == NRF_SUCCESS)
     {
@@ -236,13 +252,16 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
 {
     uint32_t err_code;
     app_state_event_data_t state_update;
+    char const * p_desc = nrf_strerror_get(p_evt->result);
+    APPL_LOG ("app_mqtt_evt_handler: called with err_code=%s", p_desc);
+
 
     switch (p_evt->id)
     {
         case MQTT_EVT_CONNACK:
         {
             APPL_LOG (">> MQTT_EVT_CONNACK, result %08lx", p_evt->result);
-            if (p_evt->result == NRF_SUCCESS)
+            if (p_evt->result == MQTT_CONNECTION_ACCEPTED)
             {
                 mqtt_state = STATE_MQTT_CONNECTED;
 
@@ -255,7 +274,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                     },
                     .qos = MQTT_QoS_1_ATLEAST_ONCE
                 };
-                app_mqtt_subscribe(&topic);
+                //app_mqtt_subscribe(&topic);
 
                 // TODO: Can we tell if session is continued?
                 // TODO: Sub to default topics (<sensor>/#)
@@ -349,6 +368,8 @@ int mqtt_app_init(void)
     uint32_t err_code;
 
     err_code = mqtt_init();
+    char const * p_desc = nrf_strerror_get(err_code);
+    APPL_LOG ("mqtt_app_init: mqtt_init() returned %s", p_desc);
     APP_ERROR_CHECK(err_code);
 }
 

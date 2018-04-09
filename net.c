@@ -87,7 +87,6 @@
 #include "net.h"
 #include "main.h"
  
-static ipv6_medium_instance_t m_ipv6_medium;
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
 //static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/

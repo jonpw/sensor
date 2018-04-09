@@ -289,7 +289,7 @@
 // <e> IOT_BLE_IPSP_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef IOT_BLE_IPSP_CONFIG_LOG_ENABLED
-#define IOT_BLE_IPSP_CONFIG_LOG_ENABLED 0
+#define IOT_BLE_IPSP_CONFIG_LOG_ENABLED 1
 #endif
 // <o> IOT_BLE_IPSP_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -300,7 +300,7 @@
 // <4=> Debug 
 
 #ifndef IOT_BLE_IPSP_CONFIG_LOG_LEVEL
-#define IOT_BLE_IPSP_CONFIG_LOG_LEVEL 3
+#define IOT_BLE_IPSP_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> IOT_BLE_IPSP_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2073,7 +2073,7 @@
 // <e> IOT_BLE_6LOWPAN_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef IOT_BLE_6LOWPAN_CONFIG_LOG_ENABLED
-#define IOT_BLE_6LOWPAN_CONFIG_LOG_ENABLED 0
+#define IOT_BLE_6LOWPAN_CONFIG_LOG_ENABLED 1
 #endif
 // <o> IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -2084,7 +2084,7 @@
 // <4=> Debug 
 
 #ifndef IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL
-#define IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL 3
+#define IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> IOT_BLE_6LOWPAN_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2146,7 +2146,7 @@
 // <e> IOT_CONTEXT_MANAGER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef IOT_CONTEXT_MANAGER_CONFIG_LOG_ENABLED
-#define IOT_CONTEXT_MANAGER_CONFIG_LOG_ENABLED 0
+#define IOT_CONTEXT_MANAGER_CONFIG_LOG_ENABLED 1
 #endif
 // <o> IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -2157,7 +2157,7 @@
 // <4=> Debug 
 
 #ifndef IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL
-#define IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL 3
+#define IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> IOT_CONTEXT_MANAGER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2230,7 +2230,7 @@
 // <e> IOT_PBUFFER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef IOT_PBUFFER_CONFIG_LOG_ENABLED
-#define IOT_PBUFFER_CONFIG_LOG_ENABLED 0
+#define IOT_PBUFFER_CONFIG_LOG_ENABLED 1
 #endif
 // <o> IOT_PBUFFER_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -2315,7 +2315,7 @@
 // <e> IPV6_MEDIUM_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef IPV6_MEDIUM_CONFIG_LOG_ENABLED
-#define IPV6_MEDIUM_CONFIG_LOG_ENABLED 0
+#define IPV6_MEDIUM_CONFIG_LOG_ENABLED 1
 #endif
 // <o> IPV6_MEDIUM_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -2326,7 +2326,7 @@
 // <4=> Debug 
 
 #ifndef IPV6_MEDIUM_CONFIG_LOG_LEVEL
-#define IPV6_MEDIUM_CONFIG_LOG_LEVEL 3
+#define IPV6_MEDIUM_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> IPV6_MEDIUM_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2559,7 +2559,7 @@
 // <4=> Debug 
 
 #ifndef UDP6_CONFIG_LOG_LEVEL
-#define UDP6_CONFIG_LOG_LEVEL 3
+#define UDP6_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> UDP6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2666,7 +2666,7 @@
 // <e> NCFGS_CONFIG_LOG_ENABLED - ble_ncfgs - BLE Node Configuration Service
 //==========================================================
 #ifndef NCFGS_CONFIG_LOG_ENABLED
-#define NCFGS_CONFIG_LOG_ENABLED 0
+#define NCFGS_CONFIG_LOG_ENABLED 1
 #endif
 // <o> NCFGS_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -2677,7 +2677,7 @@
 // <4=> Debug 
 
 #ifndef NCFGS_CONFIG_LOG_LEVEL
-#define NCFGS_CONFIG_LOG_LEVEL 3
+#define NCFGS_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> NCFGS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -3641,7 +3641,7 @@
 // <e> NRF_LOG_BACKEND_RTT_ENABLED - nrf_log_backend_rtt - Log RTT backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_RTT_ENABLED
-#define NRF_LOG_BACKEND_RTT_ENABLED 0
+#define NRF_LOG_BACKEND_RTT_ENABLED 1
 #endif
 // <o> NRF_LOG_BACKEND_RTT_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings. 
 // <i> Size of the buffer is a trade-off between RAM usage and processing.
@@ -4082,7 +4082,7 @@
 // <e> COMMON_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef COMMON_CONFIG_LOG_ENABLED
-#define COMMON_CONFIG_LOG_ENABLED 0
+#define COMMON_CONFIG_LOG_ENABLED 1
 #endif
 // <o> COMMON_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -4093,7 +4093,7 @@
 // <4=> Debug 
 
 #ifndef COMMON_CONFIG_LOG_LEVEL
-#define COMMON_CONFIG_LOG_LEVEL 3
+#define COMMON_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> COMMON_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -5585,7 +5585,7 @@
 // <4=> Debug 
 
 #ifndef NRF_SDH_BLE_LOG_LEVEL
-#define NRF_SDH_BLE_LOG_LEVEL 3
+#define NRF_SDH_BLE_LOG_LEVEL 4
 #endif
 
 // <o> NRF_SDH_BLE_INFO_COLOR  - ANSI escape code prefix.
@@ -5636,7 +5636,7 @@
 // <4=> Debug 
 
 #ifndef NRF_SDH_LOG_LEVEL
-#define NRF_SDH_LOG_LEVEL 3
+#define NRF_SDH_LOG_LEVEL 4
 #endif
 
 // <o> NRF_SDH_INFO_COLOR  - ANSI escape code prefix.
@@ -5687,7 +5687,7 @@
 // <4=> Debug 
 
 #ifndef NRF_SDH_SOC_LOG_LEVEL
-#define NRF_SDH_SOC_LOG_LEVEL 3
+#define NRF_SDH_SOC_LOG_LEVEL 4
 #endif
 
 // <o> NRF_SDH_SOC_INFO_COLOR  - ANSI escape code prefix.
@@ -6479,7 +6479,7 @@
 // <e> HAL_NFC_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef HAL_NFC_CONFIG_LOG_ENABLED
-#define HAL_NFC_CONFIG_LOG_ENABLED 0
+#define HAL_NFC_CONFIG_LOG_ENABLED 1
 #endif
 // <o> HAL_NFC_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -6490,7 +6490,7 @@
 // <4=> Debug 
 
 #ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 3
+#define HAL_NFC_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -7236,7 +7236,7 @@
 // <e> MQTT_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef MQTT_CONFIG_LOG_ENABLED
-#define MQTT_CONFIG_LOG_ENABLED 0
+#define MQTT_CONFIG_LOG_ENABLED 1
 #endif
 // <o> MQTT_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -7247,7 +7247,7 @@
 // <4=> Debug 
 
 #ifndef MQTT_CONFIG_LOG_LEVEL
-#define MQTT_CONFIG_LOG_LEVEL 3
+#define MQTT_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> MQTT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -7304,6 +7304,178 @@
 #ifndef MQTT_MAX_PACKET_LENGTH
 #define MQTT_MAX_PACKET_LENGTH 128
 #endif
+
+
+//==========================================================
+// <e> NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED - lwip - lwIP stack for nRF5x
+//==========================================================
+#ifndef NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED
+#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 1
+#endif
+// <o> NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL
+#define NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL 4
+#endif
+
+// <o> NRF_LWIP_DRIVER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_LWIP_DRIVER_CONFIG_INFO_COLOR
+#define NRF_LWIP_DRIVER_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR
+#define NRF_LWIP_DRIVER_CONFIG_DEBUG_COLOR 0
+#endif
+
+#ifndef IOT_NRF_DRIVER_CONFIG_LOG_LEVEL
+#define IOT_NRF_DRIVER_CONFIG_LOG_LEVEL 4
+#endif
+
+#ifndef IOT_NRF_DRIVER_CONFIG_INFO_COLOR
+#define IOT_NRF_DRIVER_CONFIG_INFO_COLOR 0
+#endif
+
+#ifndef IOT_NRF_DRIVER_CONFIG_DEBUG_COLOR
+#define IOT_NRF_DRIVER_CONFIG_DEBUG_COLOR 0
+#endif
+// </e>
+
+// </h> 
+//==========================================================
+
+// <h> nRF_BLE 
+
+// <h> nRF_TLS 
+
+//==========================================================
+// <e> TLS_CONFIG_LOG_ENABLED - nrf_tls - TLS library
+//==========================================================
+#ifndef TLS_CONFIG_LOG_ENABLED
+#define TLS_CONFIG_LOG_ENABLED 1
+#endif
+// <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef TLS_CONFIG_LOG_LEVEL
+#define TLS_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef TLS_CONFIG_INFO_COLOR
+#define TLS_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> TLS_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef TLS_CONFIG_DEBUG_COLOR
+#define TLS_CONFIG_DEBUG_COLOR 0
+#endif
+
+// <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
+ 
+// <0=> Off 
+// <1=> Error 
+// <2=> Warning 
+// <3=> Info 
+// <4=> Debug 
+
+#ifndef TLS_CONFIG_LOG_LEVEL
+#define TLS_CONFIG_LOG_LEVEL 3
+#endif
+
+// <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef TLS_CONFIG_INFO_COLOR
+#define TLS_CONFIG_INFO_COLOR 0
+#endif
+
+// <o> TLS_CONFIG_DEBUG_COLOR  - ANSI escape code prefix.
+ 
+// <0=> Default 
+// <1=> Black 
+// <2=> Red 
+// <3=> Green 
+// <4=> Yellow 
+// <5=> Blue 
+// <6=> Magenta 
+// <7=> Cyan 
+// <8=> White 
+
+#ifndef TLS_CONFIG_DEBUG_COLOR
+#define TLS_CONFIG_DEBUG_COLOR 0
+#endif
+
+// </e>
+
+// </h> 
+//==========================================================
+
+
 
 #endif //SDK_CONFIG_H
 

@@ -95,8 +95,8 @@ eui64_t                                     eui64_local_iid;                    
 // TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
 extern char                           m_client_id[32];                         /**< Unique MQTT client identifier. */
 
-extern uint8_t identity[15];
-extern uint8_t shared_secret[9];
+extern const uint8_t identity[15];
+extern const uint8_t shared_secret[9];
 
 extern nrf_tls_preshared_key_t m_preshared_key;
 extern nrf_tls_key_settings_t m_tls_keys;

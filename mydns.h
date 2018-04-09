@@ -82,6 +82,15 @@
 #define DNS_SERVER_X1             0x00000000
 #define DNS_SERVER_X2             0x021583FF
 #define DNS_SERVER_X3             0xFEED6AAD
+//#define DNS_SERVER_X3             0x0000FE80
+//#define DNS_SERVER_X2             0x00000000
+//#define DNS_SERVER_X1             0x83FF0215
+//#define DNS_SERVER_X0             0x6AADFEED
+//#define DNS_SERVER_X0             0x20010DB8
+//#define DNS_SERVER_X1             0x00000000
+//#define DNS_SERVER_X2             0x00000000
+//#define DNS_SERVER_X3             0x00000001
+
 //#define DNS_SERVER_ADDRESS(ipaddr) (ip6_addr_set(ipaddr, APP_DNS_SERVER_ADDR))
 
 /**@brief Application's state. */
@@ -93,11 +102,10 @@ typedef enum
 } dns_state_t;
 
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
-extern ip_addr_t m_dns_server;
-extern ip_addr_t m_dns_result;
 /**@brief Addresses used in sample application. */
 
 extern int dns_main_init(void);
 extern void app_dns_lookup(char * p_hostname);
+extern ip_addr_t ipaddr_last_dns;
 
 #endif

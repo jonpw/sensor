@@ -89,6 +89,7 @@
 #include "net.h"
 #include "mqttapp.h"
 #include "mydns.h"
+#include "nrf_temp.h"
 
 //static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
@@ -98,7 +99,9 @@ static display_state_t                      m_display_state = LEDS_INACTIVE;    
 static bool                                 m_led_state  = false;                                   /**< LED state. This is the topic being published by the example MQTT client. */
 static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
-ip_addr_t   m_broker_addr;
+
+    int32_t volatile temp;
+
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -162,7 +165,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         }
     }
 
-    /*switch (m_display_state)
+    switch (m_display_state)
     {
         case LEDS_INACTIVE:
         {
@@ -218,16 +221,16 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         {
             break;
         }
-    }*/
+    }
 }
+
+void app_sched_pub_temp(void);
 
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
-    //bsp_board_led_on(0);
-    //nrf_delay_ms(50);
-    //bsp_board_led_off(0);
+    uint32_t err_code;
     ip_addr_t ipaddr;
-    IP6_ADDR(&ipaddr, 0x200141d0, 0x000A3A10, 0x00000000, 0x00000001);
+    IP6_ADDR(&ipaddr, PP_HTONL(DNS_SERVER_X0), PP_HTONL(DNS_SERVER_X1), PP_HTONL(DNS_SERVER_X2), PP_HTONL(DNS_SERVER_X3));
     if (button_action == APP_BUTTON_PUSH)
     {
         switch (pin_no)
@@ -271,13 +274,9 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }
             case BSP_BUTTON_3:
             {
-                mqtt_publish_message_t pubmsg;
-                pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
-                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_4;
-                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_4);
-                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
-                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);
+                err_code       = app_sched_event_put(NULL, 0, app_sched_pub_temp);
+                NRF_LOG_INFO("button error:%d", err_code);
+                APP_ERROR_CHECK(err_code);
                 break;
             }            
             default:
@@ -335,6 +334,49 @@ static void iot_timer_tick_callback(void * p_context)
 
     uint32_t err_code = iot_timer_update();
     APP_ERROR_CHECK(err_code);
+}
+
+int32_t app_temp_read(void);
+
+void app_sched_pub_temp(void)
+{
+    int32_t atemp;
+    atemp = app_temp_read();
+    char tempstr[8];
+    itoa(tempstr, atemp, 8);
+    mqtt_publish_message_t pubmsg;
+    pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
+    pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_4;
+    pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_4);
+    pubmsg.payload.p_bin_str = tempstr;
+    pubmsg.payload.bin_strlen = strlen(tempstr);
+    app_mqtt_publish(&pubmsg);
+}
+
+int32_t app_temp_read(void)
+{
+    NRF_LOG_INFO("temp_read");
+
+
+    NRF_TEMP->TASKS_START = 1; /** Start the temperature measurement. */
+        NRF_LOG_INFO("temp_readb");
+
+    /* Busy wait while temperature measurement is not finished, you can skip waiting if you enable interrupt for DATARDY event and read the result in the interrupt. */
+    /*lint -e{845} // A zero has been given as right argument to operator '|'" */
+    while (NRF_TEMP->EVENTS_DATARDY == 0)
+    {
+
+    }
+    NRF_TEMP->EVENTS_DATARDY = 0;
+
+    /**@note Workaround for PAN_028 rev2.0A anomaly 29 - TEMP: Stop task clears the TEMP register. */
+        NRF_LOG_INFO("temp_read2");
+    temp = (nrf_temp_read() / 4);
+
+    /**@note Workaround for PAN_028 rev2.0A anomaly 30 - TEMP: Temp module analog front end does not power down when DATARDY event occurs. */
+    NRF_TEMP->TASKS_STOP = 1; /** Stop the temperature measurement. */
+
+    NRF_LOG_INFO("Actual temperature: %d", (int)temp);
 }
 
 
@@ -401,73 +443,6 @@ static void log_init(void)
 // sub-states should be updated before calling this
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size)
 {
-   /* if (m_app_state == STATE_APP_IDLE)
-    {
-        m_display_state = LEDS_IF_DOWN;
-        if (p_event_data->evt_type == STATE_EVENT_GO)
-        {        
-            m_app_state = STATE_APP_CONNECTABLE;
-        }
-    } else if (m_app_state == STATE_APP_CONNECTABLE)
-    {
-        if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
-        {
-            m_display_state = LEDS_IF_UP;
-            dns_lookup(BROKER_HOSTNAME);
-            m_app_state = STATE_APP_DNS_LOOKUP;
-        }
-    } else if (m_app_state == STATE_APP_DNS_LOOKUP)
-    {
-        m_display_state = LEDS_BROKER_DNS;
-        if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
-        {
-            //memcpy(m_broker_addr.u8, ((ip_addr_t *)(p_event_data->data))->addr, 4*4); // todo: not sure if correct
-            mqtt_begin(); // todo: should we pass a param for the dns result?
-            m_app_state = STATE_APP_MQTT_CONNECTING;
-        }
-    } else if (m_app_state == STATE_APP_MQTT_CONNECTING)
-    {
-        m_display_state = LEDS_ACTIVE_IDLE;
-        if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
-        {
-            // todo: should we handle initial pubs here?
-            m_app_state = STATE_APP_ACTIVE_IDLE;
-        }
-    } else if (m_app_state == STATE_APP_ACTIVE_IDLE)
-    {
-        m_display_state = LEDS_CONNECTABLE;
-        if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
-            {
-                //todo: reconnect or wait a bit?
-                m_app_state = STATE_APP_FAULT;
-            }
-        else if (p_event_data->evt_type == STATE_EVENT_CONNECTION_LOST)
-        {
-            //todo: reconnect? 
-            m_app_state = STATE_APP_FAULT;
-        }
-    } else if (m_app_state == STATE_APP_NFC)
-    {
-        if (p_event_data->evt_type == STATE_EVENT_NFC_RESUME)
-            {
-                m_display_state = LEDS_ACTIVE_IDLE;
-                //todo: reconnect or wait a bit?
-                m_app_state = STATE_APP_FAULT;
-            }
-        else if (p_event_data->evt_type == STATE_EVENT_NFC_RESET)
-        {
-            m_display_state = LEDS_INACTIVE;
-            //app_mqtt_stop();
-            //net_stop();
-            m_display_state = LEDS_IF_DOWN;
-            m_app_state = STATE_APP_IDLE;
-        }
-    } else if (p_event_data->evt_type == STATE_EVENT_NFC) // async NFC event
-    {
-        m_display_state = LEDS_NFC;
-        m_app_state = STATE_APP_NFC;
-        // todo: pause everything?
-    }*/
     ip_addr_t * ipaddr = BROKER_MOSQUITTO;
     if (p_event_data->evt_type == STATE_EVENT_GO)
     {        
@@ -484,7 +459,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        //memcpy(m_broker_addr.u8, ((ip_addr_t *)(p_event_data->data))->addr, 4*4); // todo: not sure if correct
+        ip6_addr_copy(*ipaddr, ipaddr_last_dns); // todo: not sure if correct
         mqtt_begin(ipaddr); // todo: should we pass a param for the dns result?
         m_app_state = STATE_APP_MQTT_CONNECTING;
     }
@@ -507,7 +482,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        mqtt_begin(ipaddr);
+        //mqtt_begin(ipaddr);
         m_app_state = STATE_APP_FAULT;
     }   
     else if (p_event_data->evt_type == STATE_EVENT_CONNECTION_LOST)
@@ -558,6 +533,8 @@ int main(void)
     timers_init();
     iot_timer_init();
     button_init();
+    nrf_temp_init();
+
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
