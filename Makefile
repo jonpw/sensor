@@ -54,6 +54,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/crc16/crc16.c \
   $(SDK_ROOT)/components/libraries/fds/fds.c \
   $(SDK_ROOT)/components/libraries/hardfault/hardfault_implementation.c \
+  $(SDK_ROOT)/components/libraries/spi_mngr/nrf_spi_mngr.c \
   $(SDK_ROOT)/components/libraries/mem_manager/mem_manager.c \
   $(SDK_ROOT)/components/libraries/util/nrf_assert.c \
   $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c \
@@ -72,6 +73,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/drivers_nrf/gpiote/nrf_drv_gpiote.c \
   $(SDK_ROOT)/components/drivers_nrf/rng/nrf_drv_rng.c \
   $(SDK_ROOT)/components/drivers_nrf/uart/nrf_drv_uart.c \
+  $(SDK_ROOT)/components/drivers_nrf/spi_master/nrf_drv_spi.c \
   $(SDK_ROOT)/components/drivers_nrf/hal/nrf_nvmc.c \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh.c \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh_ble.c \
@@ -84,6 +86,7 @@ SRC_FILES += \
   $(PROJ_DIR)/mydns.c \
   $(PROJ_DIR)/writable_ndef_msg.c \
   $(PROJ_DIR)/ndef_file_m.c \
+  $(PROJ_DIR)/bma280-spi.c \
   $(SDK_ROOT)/external/cJSON/cJSON.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_msg.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_rec.c \
@@ -186,6 +189,7 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   $(PROJ_DIR)/config \
+  $(PROJ_DIR)/BMA2x2_driver \
   $(SDK_ROOT)/components/iot/errno \
   $(SDK_ROOT)/components/libraries/csense_drv \
   $(SDK_ROOT)/components/iot/medium \
@@ -308,6 +312,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ble/ble_services/ble_hrs_c \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(SDK_ROOT)/components/libraries/usbd/class/hid \
+  $(SDK_ROOT)/components/libraries/spi_mngr \
   $(SDK_ROOT)/components/drivers_nrf/qdec \
   $(SDK_ROOT)/components/drivers_nrf/ppi \
   $(SDK_ROOT)/components/libraries/bsp \
@@ -348,6 +353,7 @@ CFLAGS += -DNRF52832_XXAA
 CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DNRF_SD_BLE_API_VERSION=5
 CFLAGS += -DNRF_TLS_MAX_INSTANCE_COUNT=1
+CFLAGS += -DDEBUG=1
 CFLAGS += -DS132
 CFLAGS += -DSOFTDEVICE_PRESENT
 CFLAGS += -DSWI_DISABLE0

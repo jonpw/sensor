@@ -534,7 +534,7 @@ int main(void)
     iot_timer_init();
     button_init();
     nrf_temp_init();
-
+    bma280_spi_init();
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;

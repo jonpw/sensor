@@ -3545,6 +3545,13 @@
 #define SLIP_ENABLED 0
 #endif
 
+// <q> NRF_SPI_MNGR_ENABLED  - nrf_spi_mngr - SPI transaction manager
+ 
+
+#ifndef NRF_SPI_MNGR_ENABLED
+#define NRF_SPI_MNGR_ENABLED 1
+#endif
+
 // <h> nrf_cli - Command line interface
 
 //==========================================================

@@ -38,7 +38,9 @@
  * 
  */
 
-//#include "bma2x2.h"
+#ifndef BMA280_SPI_H
+#define BMA280_SPI_H
+
 #include "app_util_platform.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
@@ -49,60 +51,21 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_spi_mngr.h"
-#include "bma280-spi.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4
 
-uint8_t       m_master_data_0[1] = {0x80};           /**< TX buffer. */
-uint8_t       m_master_buffer_rx[2];    /**< RX buffer. */
+extern uint8_t       m_master_data_0[];           /**< TX buffer. */
+extern uint8_t       m_master_buffer_rx[];    /**< RX buffer. */
 
-NRF_SPI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, SPI_INSTANCE);
+// SPI0 (with transaction manager) initialization.
+nrf_drv_spi_config_t const bma_spi_config;
 
-nrf_drv_spi_config_t const bma_spi_config =
-{
-    .sck_pin        = BMA280_SCK_PIN,
-    .mosi_pin       = BMA280_MOSI_PIN,
-    .miso_pin       = BMA280_MISO_PIN,
-    .ss_pin         = BMA280_SS_PIN,
-    .irq_priority   = APP_IRQ_PRIORITY_LOWEST,
-    .orc            = 0x00,
-    .frequency      = NRF_DRV_SPI_FREQ_8M,
-    .mode           = NRF_DRV_SPI_MODE_3,
-    .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
-};
+nrf_spi_mngr_transfer_t const transfers[];
 
-nrf_spi_mngr_transfer_t const transfers[] =
-{
-    NRF_SPI_MNGR_TRANSFER(m_master_data_0, sizeof(m_master_data_0), m_master_buffer_rx, sizeof(m_master_buffer_rx))
-};
+nrf_spi_mngr_transaction_t transaction_1;
 
-nrf_spi_mngr_transaction_t transaction_1 =
-{
-    .begin_callback      = bma280_spi_begin,
-    .end_callback        = bma280_spi_end,
-    .p_user_data         = transfers,
-    .p_transfers         = transfers,
-    .number_of_transfers = sizeof(transfers) / sizeof(transfers[0]),
-    .p_required_spi_cfg  = &bma_spi_config
-};
+void bma280_spi_begin(void *p_user_data);
+void bma280_spi_end(ret_code_t result, void *p_user_data);
 
-    // SPI0 (with transaction manager) initialization.
-
-void bma280_spi_begin(void *p_user_data)
-{
-    // nothing
-}
-
-void bma280_spi_end(ret_code_t result, void *p_user_data)
-{
-    APPL_LOG("spi txcv result = %s", nrf_strerror_get(result));
-    APPL_LOG("temp = %X", *(m_master_buffer_rx));
-}
-
-
-void bma280_spi_init(void)
-{
-    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
-    APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &transaction_1));
-}
+#endif
