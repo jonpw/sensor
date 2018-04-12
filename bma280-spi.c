@@ -54,10 +54,12 @@
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4
 
-uint8_t       m_master_data_0[1] = {0x80};           /**< TX buffer. */
-uint8_t       m_master_buffer_rx[2];    /**< RX buffer. */
+uint8_t       m_master_data_0[] = {0x82};           /**< TX buffer. */
+uint8_t       m_master_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
 
 NRF_SPI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, SPI_INSTANCE);
+
+accdata_t accdata;
 
 nrf_drv_spi_config_t const bma_spi_config =
 {
@@ -66,7 +68,7 @@ nrf_drv_spi_config_t const bma_spi_config =
     .miso_pin       = BMA280_MISO_PIN,
     .ss_pin         = BMA280_SS_PIN,
     .irq_priority   = APP_IRQ_PRIORITY_LOWEST,
-    .orc            = 0x00,
+    .orc            = 0xFF,
     .frequency      = NRF_DRV_SPI_FREQ_8M,
     .mode           = NRF_DRV_SPI_MODE_3,
     .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
@@ -97,12 +99,21 @@ void bma280_spi_begin(void *p_user_data)
 void bma280_spi_end(ret_code_t result, void *p_user_data)
 {
     APPL_LOG("spi txcv result = %s", nrf_strerror_get(result));
-    APPL_LOG("temp = %X", *(m_master_buffer_rx));
+    accdata.x = *(int16_t*)((&m_master_buffer_rx[1]))>>2;
+    accdata.y = *(int16_t*)((&m_master_buffer_rx[3]))>>2;
+    accdata.z = *(int16_t*)((&m_master_buffer_rx[5]))>>2;
+    accdata.t = m_master_buffer_rx[7]*0.5f+23.0f;
+    APPL_LOG("x = %i, y = %i, z = %i, t = %d", accdata.x, accdata.y, accdata.z, accdata.t);
+   ret_code_t err_code = app_sched_event_put(NULL, 0, app_sched_pub_temp);
+
 }
 
+void bma280_spi_get(void)
+{
+    APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &transaction_1));
+}
 
 void bma280_spi_init(void)
 {
     APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
-    APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &transaction_1));
 }

@@ -81,6 +81,8 @@
 #include "ndef_file_m.h"
 #include "nfc_ndef_msg.h"
 
+#include "cJSON.h"
+
 #include "nrf_delay.h"
 #include "iot_common.h"
 
@@ -90,7 +92,7 @@
 #include "mqttapp.h"
 #include "mydns.h"
 #include "nrf_temp.h"
-
+#include "bma280-spi.h"
 //static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
 
@@ -336,49 +338,25 @@ static void iot_timer_tick_callback(void * p_context)
     APP_ERROR_CHECK(err_code);
 }
 
-int32_t app_temp_read(void);
-
 void app_sched_pub_temp(void)
 {
-    int32_t atemp;
-    atemp = app_temp_read();
-    char tempstr[8];
-    itoa(tempstr, atemp, 8);
+    char * json_string;
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "x", accdata.x);
+    cJSON_AddNumberToObject(root, "y", accdata.y);
+    cJSON_AddNumberToObject(root, "z", accdata.z);
+    cJSON_AddNumberToObject(root, "t", accdata.t);
+    json_string = cJSON_Print(root);
+    cJSON_Delete(root);
+
     mqtt_publish_message_t pubmsg;
     pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
-    pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_4;
-    pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_4);
-    pubmsg.payload.p_bin_str = tempstr;
-    pubmsg.payload.bin_strlen = strlen(tempstr);
+    pubmsg.topic.topic.p_utf_str = "archer/data";
+    pubmsg.topic.topic.utf_strlen = strlen("archer/data");
+    pubmsg.payload.p_bin_str = json_string;
+    pubmsg.payload.bin_strlen = strlen(json_string);
     app_mqtt_publish(&pubmsg);
 }
-
-int32_t app_temp_read(void)
-{
-    NRF_LOG_INFO("temp_read");
-
-
-    NRF_TEMP->TASKS_START = 1; /** Start the temperature measurement. */
-        NRF_LOG_INFO("temp_readb");
-
-    /* Busy wait while temperature measurement is not finished, you can skip waiting if you enable interrupt for DATARDY event and read the result in the interrupt. */
-    /*lint -e{845} // A zero has been given as right argument to operator '|'" */
-    while (NRF_TEMP->EVENTS_DATARDY == 0)
-    {
-
-    }
-    NRF_TEMP->EVENTS_DATARDY = 0;
-
-    /**@note Workaround for PAN_028 rev2.0A anomaly 29 - TEMP: Stop task clears the TEMP register. */
-        NRF_LOG_INFO("temp_read2");
-    temp = (nrf_temp_read() / 4);
-
-    /**@note Workaround for PAN_028 rev2.0A anomaly 30 - TEMP: Temp module analog front end does not power down when DATARDY event occurs. */
-    NRF_TEMP->TASKS_STOP = 1; /** Stop the temperature measurement. */
-
-    NRF_LOG_INFO("Actual temperature: %d", (int)temp);
-}
-
 
 /**@brief Function for the Timer initialization.
  *

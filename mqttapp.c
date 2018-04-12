@@ -269,12 +269,12 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 {
                     .topic =
                     {
-                        .p_utf_str  = TOPIC_DEBUG,
-                        .utf_strlen = strlen(TOPIC_DEBUG)
+                        .p_utf_str  = "archer/sample",
+                        .utf_strlen = strlen("archer/sample")
                     },
                     .qos = MQTT_QoS_1_ATLEAST_ONCE
                 };
-                //app_mqtt_subscribe(&topic);
+                app_mqtt_subscribe(&topic);
 
                 // TODO: Can we tell if session is continued?
                 // TODO: Sub to default topics (<sensor>/#)
@@ -319,13 +319,15 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 }
             }*/
 
-            if (strcmp(p_evt->param.publish.message.payload.p_bin_str, TOPIC_BUTTON_1) == 0)
-            {
+            //if (strcmp(p_evt->param.publish.message.payload.p_bin_str, TOPIC_BUTTON_1) == 0)
+            //{
+//
+            //} else if (strcmp(p_evt->param.publish.message.payload.p_bin_str, TOPIC_BUTTON_2) == 0)
+            //{
+//            
+            //}
 
-            } else if (strcmp(p_evt->param.publish.message.payload.p_bin_str, TOPIC_BUTTON_2) == 0)
-            {
-            
-            }
+            bma280_spi_get();
 
             // handle acknowledgement, if required (QoS terminates here)
             if (p_evt->param.publish.message.topic.qos == MQTT_QoS_1_ATLEAST_ONCE)

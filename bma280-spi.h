@@ -58,6 +58,15 @@
 extern uint8_t       m_master_data_0[];           /**< TX buffer. */
 extern uint8_t       m_master_buffer_rx[];    /**< RX buffer. */
 
+typedef struct
+{
+    int16_t x;
+    int16_t y;
+    int16_t z;
+    float t;
+} accdata_t;
+
+extern accdata_t accdata;
 // SPI0 (with transaction manager) initialization.
 nrf_drv_spi_config_t const bma_spi_config;
 
@@ -67,5 +76,6 @@ nrf_spi_mngr_transaction_t transaction_1;
 
 void bma280_spi_begin(void *p_user_data);
 void bma280_spi_end(ret_code_t result, void *p_user_data);
+extern void bma280_spi_get(void);
 
 #endif
