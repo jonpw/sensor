@@ -88,6 +88,11 @@ extern "C" {
 #define TOPIC_BUTTON_3	"button3"
 #define TOPIC_BUTTON_4	"button4"
 
+#define TOPIC_CONTROL "archer/sample"
+
+#define BROKER_HOSTNAME "archer.local"
+#define MSG_BUTTON_PRESSED "pressed"
+
 #define RX_PIN_NUMBER  15
 #define TX_PIN_NUMBER  16
 #define CTS_PIN_NUMBER 17

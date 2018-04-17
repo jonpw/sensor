@@ -289,7 +289,7 @@
 // <e> IOT_BLE_IPSP_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef IOT_BLE_IPSP_CONFIG_LOG_ENABLED
-#define IOT_BLE_IPSP_CONFIG_LOG_ENABLED 1
+#define IOT_BLE_IPSP_CONFIG_LOG_ENABLED 0
 #endif
 // <o> IOT_BLE_IPSP_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -300,7 +300,7 @@
 // <4=> Debug 
 
 #ifndef IOT_BLE_IPSP_CONFIG_LOG_LEVEL
-#define IOT_BLE_IPSP_CONFIG_LOG_LEVEL 4
+#define IOT_BLE_IPSP_CONFIG_LOG_LEVEL 3
 #endif
 
 // <o> IOT_BLE_IPSP_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -468,7 +468,7 @@
 // <4=> Debug 
 
 #ifndef APP_USBD_CONFIG_LOG_LEVEL
-#define APP_USBD_CONFIG_LOG_LEVEL 3
+#define APP_USBD_CONFIG_LOG_LEVEL 0
 #endif
 
 // <o> APP_USBD_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2084,7 +2084,7 @@
 // <4=> Debug 
 
 #ifndef IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL
-#define IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL 4
+#define IOT_BLE_6LOWPAN_CONFIG_LOG_LEVEL 3
 #endif
 
 // <o> IOT_BLE_6LOWPAN_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2157,7 +2157,7 @@
 // <4=> Debug 
 
 #ifndef IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL
-#define IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL 4
+#define IOT_CONTEXT_MANAGER_CONFIG_LOG_LEVEL 3
 #endif
 
 // <o> IOT_CONTEXT_MANAGER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2241,7 +2241,7 @@
 // <4=> Debug 
 
 #ifndef IOT_PBUFFER_CONFIG_LOG_LEVEL
-#define IOT_PBUFFER_CONFIG_LOG_LEVEL 3
+#define IOT_PBUFFER_CONFIG_LOG_LEVEL 1
 #endif
 
 // <o> IOT_PBUFFER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2326,7 +2326,7 @@
 // <4=> Debug 
 
 #ifndef IPV6_MEDIUM_CONFIG_LOG_LEVEL
-#define IPV6_MEDIUM_CONFIG_LOG_LEVEL 4
+#define IPV6_MEDIUM_CONFIG_LOG_LEVEL 1
 #endif
 
 // <o> IPV6_MEDIUM_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2559,7 +2559,7 @@
 // <4=> Debug 
 
 #ifndef UDP6_CONFIG_LOG_LEVEL
-#define UDP6_CONFIG_LOG_LEVEL 4
+#define UDP6_CONFIG_LOG_LEVEL 2
 #endif
 
 // <o> UDP6_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2626,7 +2626,7 @@
 // <4=> Debug 
 
 #ifndef COMMISSIONING_CONFIG_LOG_LEVEL
-#define COMMISSIONING_CONFIG_LOG_LEVEL 3
+#define COMMISSIONING_CONFIG_LOG_LEVEL 0
 #endif
 
 // <o> COMMISSIONING_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -2677,7 +2677,7 @@
 // <4=> Debug 
 
 #ifndef NCFGS_CONFIG_LOG_LEVEL
-#define NCFGS_CONFIG_LOG_LEVEL 4
+#define NCFGS_CONFIG_LOG_LEVEL 1
 #endif
 
 // <o> NCFGS_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -3178,7 +3178,6 @@
 #endif
 // <o> MEMORY_MANAGER_SMALL_BLOCK_COUNT - Size of each memory blocks identified as 'small' block.  <0-255> 
 
-
 #ifndef MEMORY_MANAGER_SMALL_BLOCK_COUNT
 #define MEMORY_MANAGER_SMALL_BLOCK_COUNT 8
 #endif
@@ -3194,7 +3193,7 @@
 
 
 #ifndef MEMORY_MANAGER_MEDIUM_BLOCK_COUNT
-#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 4
+#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 16
 #endif
 
 // <o> MEMORY_MANAGER_MEDIUM_BLOCK_SIZE -  Size of each memory blocks identified as 'medium' block. 
@@ -3222,7 +3221,7 @@
 
 
 #ifndef MEMORY_MANAGER_XLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 0
+#define MEMORY_MANAGER_XLARGE_BLOCK_COUNT 4
 #endif
 
 // <o> MEMORY_MANAGER_XLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra large' block. 
@@ -3236,14 +3235,14 @@
 
 
 #ifndef MEMORY_MANAGER_XXLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 0
+#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 1
 #endif
 
 // <o> MEMORY_MANAGER_XXLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra large' block. 
 // <i>  Size of each memory blocks identified as 'extra extra large' block. Memory block are recommended to be word-sized.
 
 #ifndef MEMORY_MANAGER_XXLARGE_BLOCK_SIZE
-#define MEMORY_MANAGER_XXLARGE_BLOCK_SIZE 3444
+#define MEMORY_MANAGER_XXLARGE_BLOCK_SIZE 4096
 #endif
 
 // <o> MEMORY_MANAGER_XSMALL_BLOCK_COUNT - Size of each memory blocks identified as 'extra small' block.  <0-255> 
@@ -3277,7 +3276,7 @@
 // <e> MEM_MANAGER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef MEM_MANAGER_CONFIG_LOG_ENABLED
-#define MEM_MANAGER_CONFIG_LOG_ENABLED 0
+#define MEM_MANAGER_CONFIG_LOG_ENABLED 1
 #endif
 // <o> MEM_MANAGER_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -3718,7 +3717,7 @@
 // <e> NRF_LOG_USES_COLORS - If enabled then ANSI escape code for colors is prefixed to every string
 //==========================================================
 #ifndef NRF_LOG_USES_COLORS
-#define NRF_LOG_USES_COLORS 0
+#define NRF_LOG_USES_COLORS 1
 #endif
 // <o> NRF_LOG_COLOR_DEFAULT  - ANSI escape code prefix.
  
@@ -3890,7 +3889,7 @@
 // <4=> Debug 
 
 #ifndef NRF_MPU_CONFIG_LOG_LEVEL
-#define NRF_MPU_CONFIG_LOG_LEVEL 3
+#define NRF_MPU_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> NRF_MPU_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -3941,7 +3940,7 @@
 // <4=> Debug 
 
 #ifndef NRF_STACK_GUARD_CONFIG_LOG_LEVEL
-#define NRF_STACK_GUARD_CONFIG_LOG_LEVEL 3
+#define NRF_STACK_GUARD_CONFIG_LOG_LEVEL 1
 #endif
 
 // <o> NRF_STACK_GUARD_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -3992,7 +3991,7 @@
 // <4=> Debug 
 
 #ifndef TASK_MANAGER_CONFIG_LOG_LEVEL
-#define TASK_MANAGER_CONFIG_LOG_LEVEL 3
+#define TASK_MANAGER_CONFIG_LOG_LEVEL 1
 #endif
 
 // <o> TASK_MANAGER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -4100,7 +4099,7 @@
 // <4=> Debug 
 
 #ifndef COMMON_CONFIG_LOG_LEVEL
-#define COMMON_CONFIG_LOG_LEVEL 4
+#define COMMON_CONFIG_LOG_LEVEL 3
 #endif
 
 // <o> COMMON_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -5592,7 +5591,7 @@
 // <4=> Debug 
 
 #ifndef NRF_SDH_BLE_LOG_LEVEL
-#define NRF_SDH_BLE_LOG_LEVEL 4
+#define NRF_SDH_BLE_LOG_LEVEL 1
 #endif
 
 // <o> NRF_SDH_BLE_INFO_COLOR  - ANSI escape code prefix.
@@ -5643,7 +5642,7 @@
 // <4=> Debug 
 
 #ifndef NRF_SDH_LOG_LEVEL
-#define NRF_SDH_LOG_LEVEL 4
+#define NRF_SDH_LOG_LEVEL 1
 #endif
 
 // <o> NRF_SDH_INFO_COLOR  - ANSI escape code prefix.
@@ -5694,7 +5693,7 @@
 // <4=> Debug 
 
 #ifndef NRF_SDH_SOC_LOG_LEVEL
-#define NRF_SDH_SOC_LOG_LEVEL 4
+#define NRF_SDH_SOC_LOG_LEVEL 1
 #endif
 
 // <o> NRF_SDH_SOC_INFO_COLOR  - ANSI escape code prefix.
@@ -6497,7 +6496,7 @@
 // <4=> Debug 
 
 #ifndef HAL_NFC_CONFIG_LOG_LEVEL
-#define HAL_NFC_CONFIG_LOG_LEVEL 4
+#define HAL_NFC_CONFIG_LOG_LEVEL 1
 #endif
 
 // <o> HAL_NFC_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -7254,7 +7253,7 @@
 // <4=> Debug 
 
 #ifndef MQTT_CONFIG_LOG_LEVEL
-#define MQTT_CONFIG_LOG_LEVEL 4
+#define MQTT_CONFIG_LOG_LEVEL 3
 #endif
 
 // <o> MQTT_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -7317,7 +7316,7 @@
 // <e> NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED - lwip - lwIP stack for nRF5x
 //==========================================================
 #ifndef NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED
-#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 1
+#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -7328,7 +7327,7 @@
 // <4=> Debug 
 
 #ifndef NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL
-#define NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL 4
+#define NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL 2
 #endif
 
 // <o> NRF_LWIP_DRIVER_CONFIG_INFO_COLOR  - ANSI escape code prefix.
@@ -7398,7 +7397,7 @@
 // <4=> Debug 
 
 #ifndef TLS_CONFIG_LOG_LEVEL
-#define TLS_CONFIG_LOG_LEVEL 3
+#define TLS_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> TLS_CONFIG_INFO_COLOR  - ANSI escape code prefix.

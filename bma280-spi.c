@@ -102,10 +102,9 @@ void bma280_spi_end(ret_code_t result, void *p_user_data)
     accdata.x = *(int16_t*)((&m_master_buffer_rx[1]))>>2;
     accdata.y = *(int16_t*)((&m_master_buffer_rx[3]))>>2;
     accdata.z = *(int16_t*)((&m_master_buffer_rx[5]))>>2;
-    accdata.t = m_master_buffer_rx[7]*0.5f+23.0f;
+    accdata.t = ((int8_t)(m_master_buffer_rx[7])*0.5f)+23.0f;
     APPL_LOG("x = %i, y = %i, z = %i, t = %d", accdata.x, accdata.y, accdata.z, accdata.t);
    ret_code_t err_code = app_sched_event_put(NULL, 0, app_sched_pub_temp);
-
 }
 
 void bma280_spi_get(void)

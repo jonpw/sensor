@@ -152,6 +152,7 @@ int dns_main_init(void)
     dns_setserver(0, &mydns);
     m_dns_state = STATE_DNS_IDLE;
 
+    IP6_ADDR(&ipaddr_last_dns, PP_HTONL(DNS_SERVER_X0), PP_HTONL(DNS_SERVER_X1), PP_HTONL(DNS_SERVER_X2), PP_HTONL(DNS_SERVER_X3));
     //memcpy(&m_dns_server, APP_DNS_SERVER_ADDR, sizeof(APP_DNS_SERVER_ADDR)); // unsure
     //dns_init();
 

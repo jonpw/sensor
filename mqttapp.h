@@ -93,9 +93,9 @@ typedef enum
 
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 // TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
-extern char                           m_client_id[32];                         /**< Unique MQTT client identifier. */
+extern char                           m_client_id[16];                         /**< Unique MQTT client identifier. */
 
-extern const uint8_t identity[15];
+extern const uint8_t identity[16];
 extern const uint8_t shared_secret[9];
 
 extern nrf_tls_preshared_key_t m_preshared_key;
@@ -107,5 +107,8 @@ void mqtt_begin(ip_addr_t * ipaddr);
 int mqtt_app_init(void);
 
 void app_mqtt_publish(mqtt_publish_message_t * pubmsg);
+void app_mqtt_subscribe(mqtt_topic_t * topic);
+void app_mqtt_unsubscribe(mqtt_topic_t * topic);
+
 
 #endif

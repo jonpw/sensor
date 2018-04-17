@@ -252,7 +252,7 @@ static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
     cJSON_AddStringToObject(root, "broker", broker_hostname);
     cJSON_AddNumberToObject(root, "port", m_broker_port);
     cJSON_AddStringToObject(root, "client", m_client_id);
-    cJSON_AddStringToObject(root, "dns", (dns_getserver(0))->addr[0]);
+    cJSON_AddStringToObject(root, "dns", (dns_getserver(0))->addr);
 
 
     json_string = cJSON_Print(root);

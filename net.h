@@ -89,7 +89,6 @@
 #include "iot_common.h"
 
 eui64_t                       eui64_local_iid;                                                      /**< Local EUI64 value that is used as the IID for*/
-eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 
 void nrf_driver_interface_up(iot_interface_t const * p_interface);
 

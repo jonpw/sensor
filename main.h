@@ -78,7 +78,7 @@
 
 // project's includes
 
-#define SCHED_MAX_EVENT_DATA_SIZE           32                                                      /**< Maximum size of scheduler events. */
+#define SCHED_MAX_EVENT_DATA_SIZE           48                                                      /**< Maximum size of scheduler events. */
 #define SCHED_QUEUE_SIZE                    192                                                     /**< Maximum number of events in the scheduler queue. */
 
 //#define STATE_APP_INTERVAL              APP_TIMER_TICKS(1500)                                       /**< Interval for executing application state machine. */
@@ -92,14 +92,6 @@
 
 #define LWIP_SYS_TICK_MS                    10                                                      /**< Interval for timer used as trigger to send. */
 #define LED_BLINK_INTERVAL_MS               300                                                     /**< LED blinking interval. */
-
-#define BROKER_HOSTNAME "archer.local"
-#define MSG_BUTTON_PRESSED "pressed"
-
-#define TOPIC_BUTTON_1  "button/1/event"
-#define TOPIC_BUTTON_2  "button/2/event"
-#define TOPIC_BUTTON_3  "button/3/event"
-#define TOPIC_BUTTON_4  "button/4/event"
 
 #define INITIAL_BROKER_ADDR        (u32_t){0x20010DB8, 0x00000000, 0x00000000, 0x00000001}
 #define BROKER_MOSQUITTO           (u32_t){0x200141d0, 0x000A3A10, 0x00000000, 0x00000001}

@@ -101,9 +101,14 @@ static display_state_t                      m_display_state = LEDS_INACTIVE;    
 static bool                                 m_led_state  = false;                                   /**< LED state. This is the topic being published by the example MQTT client. */
 static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
+static uint8_t                              m_led_divide = 0;
 
-    int32_t volatile temp;
-
+static const char * m_topic_button_1 = TOPIC_BUTTON_1;
+static const char * m_topic_button_2 = TOPIC_BUTTON_2;
+static const char * m_topic_button_3 = TOPIC_BUTTON_3;
+static const char * m_topic_button_4 = TOPIC_BUTTON_4;
+static const char * m_topic_control = TOPIC_CONTROL;
+static const char * m_message_pressed = MSG_BUTTON_PRESSED;
 
 /**@brief Callback function for asserts in the SoftDevice.
  *
@@ -151,6 +156,15 @@ static void leds_init(void)
  */
 static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
 {
+    if (m_led_divide < 8)
+    {
+        ++m_led_divide;    
+    }
+    else
+    {
+        m_led_divide = 0;
+    }
+    
     UNUSED_PARAMETER(wall_clock_value);
     if (m_do_ind_err == true)
     {
@@ -207,7 +221,16 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
         case LEDS_ACTIVE_IDLE:
         {
             bsp_board_led_off(0);
-            bsp_board_led_on(1);
+
+            if (m_led_divide == 0)
+            {
+            bsp_board_led_on(1);    
+            }
+            else
+            {
+             bsp_board_led_off(1);       
+            }
+            
             bsp_board_led_off(2);
             break;
         }
@@ -231,54 +254,49 @@ void app_sched_pub_temp(void);
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
     uint32_t err_code;
-    ip_addr_t ipaddr;
-    IP6_ADDR(&ipaddr, PP_HTONL(DNS_SERVER_X0), PP_HTONL(DNS_SERVER_X1), PP_HTONL(DNS_SERVER_X2), PP_HTONL(DNS_SERVER_X3));
+
     if (button_action == APP_BUTTON_PUSH)
     {
         switch (pin_no)
         {
             case BSP_BUTTON_0:
-            {/*
+            {
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
-                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_1;
-                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_1);
-                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
-                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);*/
-                    app_dns_lookup(BROKER_HOSTNAME);
-
+                pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_1);
+                pubmsg.topic.topic.utf_strlen = strlen(pubmsg.topic.topic.p_utf_str);
+                pubmsg.payload.p_bin_str = strcpy(pubmsg.payload.p_bin_str, m_message_pressed);
+                pubmsg.payload.bin_strlen = strlen(pubmsg.payload.p_bin_str);
+                app_mqtt_publish(&pubmsg);
                 break;
+
             }
             case BSP_BUTTON_1:
-            {/*
+            {
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
-                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_2;
-                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_2);
-                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
-                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);*/
-            app_dns_lookup(BROKER_HOSTNAME);
+                pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_2);
+                pubmsg.topic.topic.utf_strlen = strlen(pubmsg.topic.topic.p_utf_str);
+                pubmsg.payload.p_bin_str = strcpy(pubmsg.payload.p_bin_str, m_message_pressed);
+                pubmsg.payload.bin_strlen = strlen(pubmsg.payload.p_bin_str);
+                app_mqtt_publish(&pubmsg);
                 break;
             }
             case BSP_BUTTON_2:
-            {/*
+            {
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
-                pubmsg.topic.topic.p_utf_str = (uint8_t *)TOPIC_BUTTON_3;
-                pubmsg.topic.topic.utf_strlen = strlen(TOPIC_BUTTON_3);
-                pubmsg.payload.p_bin_str = MSG_BUTTON_PRESSED;
-                pubmsg.payload.bin_strlen = strlen(MSG_BUTTON_PRESSED);
-                app_mqtt_publish(&pubmsg);*/
-                mqtt_begin(&ipaddr);
+                pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_3);
+                pubmsg.topic.topic.utf_strlen = strlen(pubmsg.topic.topic.p_utf_str);
+                pubmsg.payload.p_bin_str = strcpy(pubmsg.payload.p_bin_str, m_message_pressed);
+                pubmsg.payload.bin_strlen = strlen(pubmsg.payload.p_bin_str);
+                app_mqtt_publish(&pubmsg);                
                 break;
             }
             case BSP_BUTTON_3:
             {
-                err_code       = app_sched_event_put(NULL, 0, app_sched_pub_temp);
-                NRF_LOG_INFO("button error:%d", err_code);
-                APP_ERROR_CHECK(err_code);
+        mqtt_begin(&ipaddr_last_dns);
+
                 break;
             }            
             default:
@@ -346,7 +364,7 @@ void app_sched_pub_temp(void)
     cJSON_AddNumberToObject(root, "y", accdata.y);
     cJSON_AddNumberToObject(root, "z", accdata.z);
     cJSON_AddNumberToObject(root, "t", accdata.t);
-    json_string = cJSON_Print(root);
+    json_string = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);
 
     mqtt_publish_message_t pubmsg;
@@ -432,13 +450,15 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_CONNECTED;
         //app_dns_lookup(broker_hostname);
         //mqtt_begin(ipaddr);
+        nrf_delay_ms(1000);
+        mqtt_begin(&ipaddr_last_dns);
         m_app_state = STATE_APP_DNS_LOOKUP;
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        ip6_addr_copy(*ipaddr, ipaddr_last_dns); // todo: not sure if correct
-        mqtt_begin(ipaddr); // todo: should we pass a param for the dns result?
+        //ip6_addr_copy(*ipaddr, ipaddr_last_dns); // todo: not sure if correct
+        //mqtt_begin(ipaddr); // todo: should we pass a param for the dns result?
         m_app_state = STATE_APP_MQTT_CONNECTING;
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_FAIL)
@@ -454,13 +474,25 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
     {   
         m_display_state = LEDS_ACTIVE_IDLE;
-        // todo: should we handle initial pubs here?
         m_app_state = STATE_APP_ACTIVE_IDLE;
+
+        mqtt_topic_t topic =
+        {
+            .topic =
+            {
+                .p_utf_str  = m_topic_control,
+                .utf_strlen = strlen(m_topic_control)
+            },
+            .qos = MQTT_QoS_1_ATLEAST_ONCE
+        };
+        app_mqtt_subscribe(&topic);
+
+        // todo: should we handle initial pubs here?
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        //mqtt_begin(ipaddr);
+        mqtt_begin(&ipaddr_last_dns);
         m_app_state = STATE_APP_FAULT;
     }   
     else if (p_event_data->evt_type == STATE_EVENT_CONNECTION_LOST)
@@ -511,7 +543,7 @@ int main(void)
     timers_init();
     iot_timer_init();
     button_init();
-    nrf_temp_init();
+    //    nrf_temp_init(); // sd memory conflict issue
     bma280_spi_init();
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
