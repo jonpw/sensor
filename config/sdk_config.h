@@ -3207,7 +3207,7 @@
 
 
 #ifndef MEMORY_MANAGER_LARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 2
+#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 4
 #endif
 
 // <o> MEMORY_MANAGER_LARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'large' block. 
@@ -3235,7 +3235,7 @@
 
 
 #ifndef MEMORY_MANAGER_XXLARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 1
+#define MEMORY_MANAGER_XXLARGE_BLOCK_COUNT 2
 #endif
 
 // <o> MEMORY_MANAGER_XXLARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'extra extra large' block. 
@@ -7386,7 +7386,7 @@
 // <e> TLS_CONFIG_LOG_ENABLED - nrf_tls - TLS library
 //==========================================================
 #ifndef TLS_CONFIG_LOG_ENABLED
-#define TLS_CONFIG_LOG_ENABLED 1
+#define TLS_CONFIG_LOG_ENABLED 0
 #endif
 // <o> TLS_CONFIG_LOG_LEVEL  - Default Severity level
  

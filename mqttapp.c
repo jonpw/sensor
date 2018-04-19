@@ -114,6 +114,8 @@ static mqtt_state_t                     mqtt_state = STATE_MQTT_IDLE;           
 static uint8_t                              m_ind_err_count = 0;
 static uint16_t                             m_message_counter = 1;                                  /**< Message counter used to generated message ids for MQTT messages. */
 static uint16_t                             m_sub_message_id = 1;
+uint32_t dev_id_hi = NRF_FICR->DEVICEID[1];
+uint32_t dev_id_lo = NRF_FICR->DEVICEID[0];
 
 static uint8_t app_mqtt_connect(ip_addr_t * ipaddr);
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt);
@@ -123,10 +125,13 @@ void mqtt_begin(ip_addr_t * ipaddr)
 {
     uint32_t err_code;
     APPL_LOG("mqtt_begin: Connecting to %08X%08X%08X%08X", ipaddr->addr[0], ipaddr->addr[1], ipaddr->addr[2], ipaddr->addr[3]);
+    if (mqtt_state == STATE_MQTT_CONNECTING)
+    {
+        APPL_LOG("Already connecting...")
+        return;
+    }
     mqtt_state = STATE_MQTT_CONNECTING;
     err_code = app_mqtt_connect(ipaddr);
-
-
 }
 
 /**@brief Connect to MQTT broker. */
@@ -137,7 +142,7 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr)
     memcpy(m_app_mqtt_client.broker_addr.u32, ipaddr->addr, IPV6_ADDR_SIZE);
     m_app_mqtt_client.broker_port          = m_broker_port;
     m_app_mqtt_client.evt_cb               = app_mqtt_evt_handler;
-    m_app_mqtt_client.client_id.p_utf_str  = (uint8_t *)m_client_id;
+    m_app_mqtt_client.client_id.p_utf_str  = m_client_id;
     m_app_mqtt_client.client_id.utf_strlen = strlen(m_client_id);
     m_mqtt_password.utf_strlen = strlen(m_mqtt_password.p_utf_str);
     m_app_mqtt_client.p_password           = &m_mqtt_password;
@@ -145,7 +150,17 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr)
     m_app_mqtt_client.p_user_name          = &m_mqtt_username;
     m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
     m_app_mqtt_client.p_security_settings  = &m_tls_keys;
+    m_app_mqtt_client.p_will_topic.p_utf_str  = "archer/will"
+    m_app_mqtt_client.p_will_topic.utf_strlen = strlen(m_app_mqtt_client.p_will_topic.p_utf_str);
+    m_app_mqtt_client.p_will_message.p_bin_str  = sprintf(m_app_mqtt_client.p_will_message.p_bin_str, "%08X%08X", dev_id_hi, dev_id_lo);
+    m_app_mqtt_client.p_will_message.bin_strlen = strlen(m_app_mqtt_client.p_will_message.p_bin_str);
     err_code = mqtt_connect(&m_app_mqtt_client);
+    APPL_LOG("connecting u:%s p:%s cid:%s id:%s psk:%s",
+                     m_app_mqtt_client.p_user_name->p_utf_str, 
+                     m_app_mqtt_client.p_password->p_utf_str, 
+                     m_app_mqtt_client.client_id.p_utf_str, 
+                     m_app_mqtt_client.p_security_settings->p_psk->p_identity,
+                     m_app_mqtt_client.p_security_settings->p_psk->p_secret_key)
     APPL_LOG("app_mqtt_connect: mqtt_connect returned %X", err_code);
     return err_code;
 }
@@ -366,10 +381,8 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
 int mqtt_app_init(void)
 {
     uint32_t err_code = NRF_SUCCESS;
-    uint32_t dev_id_hi = NRF_FICR->DEVICEID[1];
-    uint32_t dev_id_lo = NRF_FICR->DEVICEID[0];
     sprintf(m_client_id, "%08X%08X", dev_id_hi, dev_id_lo);
-    APPL_LOG("mqtt_app_init: complete, clientid:%016X", m_client_id);
+    APPL_LOG("mqtt_app_init: complete, clientid:%s", (char*)m_client_id);
     err_code = mqtt_init();
     char const * p_desc = nrf_strerror_get(err_code);
     APPL_LOG ("mqtt_app_init: mqtt_init() returned %s", p_desc);

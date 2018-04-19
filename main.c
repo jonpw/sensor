@@ -255,8 +255,15 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
     uint32_t err_code;
 
+
     if (button_action == APP_BUTTON_PUSH)
     {
+            if (m_app_state == STATE_APP_DNS_LOOKUP)
+            {
+                mqtt_begin(&ipaddr_last_dns);
+                return;
+            }
+
         switch (pin_no)
         {
             case BSP_BUTTON_0:
@@ -295,8 +302,13 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }
             case BSP_BUTTON_3:
             {
-        mqtt_begin(&ipaddr_last_dns);
-
+                mqtt_publish_message_t pubmsg;
+                pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
+                pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_4);
+                pubmsg.topic.topic.utf_strlen = strlen(pubmsg.topic.topic.p_utf_str);
+                pubmsg.payload.p_bin_str = strcpy(pubmsg.payload.p_bin_str, m_message_pressed);
+                pubmsg.payload.bin_strlen = strlen(pubmsg.payload.p_bin_str);
+                app_mqtt_publish(&pubmsg);                
                 break;
             }            
             default:
@@ -450,8 +462,8 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_CONNECTED;
         //app_dns_lookup(broker_hostname);
         //mqtt_begin(ipaddr);
-        nrf_delay_ms(1000);
-        mqtt_begin(&ipaddr_last_dns);
+        //nrf_delay_ms(1000);
+        //mqtt_begin(&ipaddr_last_dns);
         m_app_state = STATE_APP_DNS_LOOKUP;
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)

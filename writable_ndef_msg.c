@@ -253,15 +253,16 @@ void parse_configuration_data (char * configdata)
 
         cJSON * identity = cJSON_GetObjectItem(root, "identity");
         cJSON * shared_secret = cJSON_GetObjectItem(root, "shared_secret");
-        nrf_tls_preshared_key_t m_preshared_key;
-        m_preshared_key.p_identity = identity->valuestring;
-        m_preshared_key.p_secret_key = shared_secret->valuestring;
-        m_preshared_key.identity_len = 15;
-        m_preshared_key.secret_key_len = 9;
-        m_tls_keys.p_psk = &m_preshared_key;
+        
+        //nrf_tls_preshared_key_t m_preshared_key;
+        //strcpy(m_preshared_key.p_identity, identity->valuestring);
+        //m_preshared_key.identity_len = strlen(m_preshared_key.p_identity);
+        //strcpy(m_preshared_key.p_secret_key, shared_secret->valuestring);
+        //m_preshared_key.secret_key_len = strlen(m_preshared_key.p_secret_key);
+        //m_tls_keys.p_psk = &m_preshared_key;
 
         cJSON * broker = cJSON_GetObjectItem(root, "broker");
-        cJSON * port = cJSON_GetObjectItem(root, "port");
+        cJSON * port   = cJSON_GetObjectItem(root, "port");
         cJSON * client = cJSON_GetObjectItem(root, "client");
 
         strcpy(broker_hostname, broker->valuestring);
