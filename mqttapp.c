@@ -150,7 +150,7 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr)
     m_app_mqtt_client.p_user_name          = &m_mqtt_username;
     m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
     m_app_mqtt_client.p_security_settings  = &m_tls_keys;
-    m_app_mqtt_client.p_will_topic.p_utf_str  = "archer/will"
+    m_app_mqtt_client.p_will_topic.p_utf_str  = "archer/will";
     m_app_mqtt_client.p_will_topic.utf_strlen = strlen(m_app_mqtt_client.p_will_topic.p_utf_str);
     m_app_mqtt_client.p_will_message.p_bin_str  = sprintf(m_app_mqtt_client.p_will_message.p_bin_str, "%08X%08X", dev_id_hi, dev_id_lo);
     m_app_mqtt_client.p_will_message.bin_strlen = strlen(m_app_mqtt_client.p_will_message.p_bin_str);

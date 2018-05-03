@@ -38,7 +38,9 @@
  * 
  */
 
-//#include "bma2x2.h"
+#ifndef BMA280_SPI_H
+#define BMA280_SPI_H
+
 #include "app_util_platform.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
@@ -49,70 +51,37 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_spi_mngr.h"
-#include "bma280-spi.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4
 
-uint8_t       m_master_data_0[] = {0x82};           /**< TX buffer. */
-uint8_t       m_master_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
+extern uint8_t       m_master_data_0[];           /**< TX buffer. */
+extern uint8_t       m_master_buffer_rx[];    /**< RX buffer. */
 
-NRF_SPI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, SPI_INSTANCE);
+/*extern uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND lm75b_conf_reg_addr;
+extern uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND lm75b_temp_reg_addr;
+extern uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND lm75b_tos_reg_addr;
+extern uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND lm75b_thyst_reg_addr;*/
 
-accdata_t accdata;
+#define VL53_READ(p_reg_addr, p_buffer, byte_cnt) \
+    NRF_TWI_MNGR_WRITE(TWI_ADDR_VL53, p_reg_addr, 1,        NRF_TWI_MNGR_NO_STOP), \
+    NRF_TWI_MNGR_READ (TWI_ADDR_VL53, p_buffer,   byte_cnt, 0)
 
-nrf_drv_spi_config_t const bma_spi_config =
-{
-    .sck_pin        = BMA280_SCK_PIN,
-    .mosi_pin       = BMA280_MOSI_PIN,
-    .miso_pin       = BMA280_MISO_PIN,
-    .ss_pin         = BMA280_SS_PIN,
-    .irq_priority   = APP_IRQ_PRIORITY_LOWEST,
-    .orc            = 0xFF,
-    .frequency      = NRF_DRV_SPI_FREQ_8M,
-    .mode           = NRF_DRV_SPI_MODE_3,
-    .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
-};
+#define VL53_READ_TEMP(p_buffer) \
+    VL53_READ(&vl53_temp_reg_addr, p_buffer, 2)
 
-nrf_spi_mngr_transfer_t const transfers[] =
-{
-    NRF_SPI_MNGR_TRANSFER(m_master_data_0, sizeof(m_master_data_0), m_master_buffer_rx, sizeof(m_master_buffer_rx))
-};
+extern accdata_t accdata;
+// SPI0 (with transaction manager) initialization.
+nrf_drv_spi_config_t const bma_spi_config;
 
-nrf_spi_mngr_transaction_t transaction_1 =
-{
-    .begin_callback      = bma280_spi_begin,
-    .end_callback        = bma280_spi_end,
-    .p_user_data         = transfers,
-    .p_transfers         = transfers,
-    .number_of_transfers = sizeof(transfers) / sizeof(transfers[0]),
-    .p_required_spi_cfg  = &bma_spi_config
-};
+#define LM75B_INIT_TRANSFER_COUNT 1
 
-    // SPI0 (with transaction manager) initialization.
+extern nrf_twi_mngr_transfer_t const vl53_init_transfers[VL53_INIT_TRANSFER_COUNT];
 
-void bma280_spi_begin(void *p_user_data)
-{
-    // nothing
-}
+nrf_spi_mngr_transaction_t transaction_1;
 
-void bma280_spi_end(ret_code_t result, void *p_user_data)
-{
-    APPL_LOG("spi txcv result = %s", nrf_strerror_get(result));
-    accdata.x = *(int16_t*)((&m_master_buffer_rx[1]))>>2;
-    accdata.y = *(int16_t*)((&m_master_buffer_rx[3]))>>2;
-    accdata.z = *(int16_t*)((&m_master_buffer_rx[5]))>>2;
-    accdata.t = ((int8_t)(m_master_buffer_rx[7])*0.5f)+23.0f;
-    APPL_LOG("x = %i, y = %i, z = %i, t = %d", accdata.x, accdata.y, accdata.z, accdata.t);
-   ret_code_t err_code = app_sched_event_put(NULL, 0, app_sched_pub_temp);
-}
+void bma280_spi_begin(void *p_user_data);
+void bma280_spi_end(ret_code_t result, void *p_user_data);
+extern void bma280_spi_get(void);
 
-void bma280_spi_get(void)
-{
-    APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &transaction_1));
-}
-
-void bma280_spi_init(void)
-{
-    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
-}
+#endif

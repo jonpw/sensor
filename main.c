@@ -460,17 +460,12 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_CONNECTED)
     {
         m_display_state = LEDS_CONNECTED;
-        //app_dns_lookup(broker_hostname);
-        //mqtt_begin(ipaddr);
-        //nrf_delay_ms(1000);
-        //mqtt_begin(&ipaddr_last_dns);
         m_app_state = STATE_APP_DNS_LOOKUP;
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        //ip6_addr_copy(*ipaddr, ipaddr_last_dns); // todo: not sure if correct
-        //mqtt_begin(ipaddr); // todo: should we pass a param for the dns result?
+        mqtt_begin(&ipaddr_last_dns);
         m_app_state = STATE_APP_MQTT_CONNECTING;
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_FAIL)
@@ -481,13 +476,13 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT_FAILED)
     {
         m_display_state = LEDS_MQTT_FAIL;
+        mqtt_begin(&ipaddr_last_dns);
         m_app_state = STATE_APP_FAULT;
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
     {   
         m_display_state = LEDS_ACTIVE_IDLE;
         m_app_state = STATE_APP_ACTIVE_IDLE;
-
         mqtt_topic_t topic =
         {
             .topic =
@@ -498,7 +493,6 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
             .qos = MQTT_QoS_1_ATLEAST_ONCE
         };
         app_mqtt_subscribe(&topic);
-
         // todo: should we handle initial pubs here?
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
