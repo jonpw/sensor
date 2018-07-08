@@ -99,9 +99,9 @@ extern "C" {
 #define RTS_PIN_NUMBER 18	
 #define HWFC           false
 
-#define BMA280_SCK_PIN   28  // SPI clock GPIO pin number.
-#define BMA280_MOSI_PIN  30  // SPI Master Out Slave In GPIO pin number.
-#define BMA280_MISO_PIN  29  // SPI Master In Slave Out GPIO pin number.
+#define SPI_SCK_PIN   28  // SPI clock GPIO pin number.
+#define SPI_MOSI_PIN  30  // SPI Master Out Slave In GPIO pin number.
+#define SPI_MISO_PIN  29  // SPI Master In Slave Out GPIO pin number.
 #define BMA280_SS_PIN    24  // SPI Slave Select GPIO pin number.
 
 // Low frequency clock source to be used by the SoftDevice

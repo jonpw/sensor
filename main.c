@@ -92,7 +92,8 @@
 #include "mqttapp.h"
 #include "mydns.h"
 #include "nrf_temp.h"
-#include "bma280-spi.h"
+#include "app-spi.h"
+
 //static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
 
@@ -416,7 +417,8 @@ static void iot_timer_init(void)
     static const iot_timer_client_t list_of_clients[] =
     {
         {system_timer_callback,   LWIP_SYS_TICK_MS},
-        {blink_timeout_handler,   LED_BLINK_INTERVAL_MS}
+        {blink_timeout_handler,   LED_BLINK_INTERVAL_MS},
+        {}
     };
 
     // The list of IoT Timer clients is declared as a constant.
@@ -550,7 +552,9 @@ int main(void)
     iot_timer_init();
     button_init();
     //    nrf_temp_init(); // sd memory conflict issue
+    #ifdef PCA252432
     bma280_spi_init();
+    #endif
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
@@ -569,6 +573,13 @@ int main(void)
     //APP_ERROR_CHECK(err_code);
 
     bsp_board_leds_off();
+
+    #ifdef PCA662504
+    hvac_init();
+    // bme680_init();
+    // 
+    #endif
+
 
     // Enter main loop.
     for (;;)

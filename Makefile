@@ -86,7 +86,7 @@ SRC_FILES += \
   $(PROJ_DIR)/mydns.c \
   $(PROJ_DIR)/writable_ndef_msg.c \
   $(PROJ_DIR)/ndef_file_m.c \
-  $(PROJ_DIR)/bma280-spi.c \
+  $(PROJ_DIR)/app-spi.c \
   $(SDK_ROOT)/external/cJSON/cJSON.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_msg.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_rec.c \

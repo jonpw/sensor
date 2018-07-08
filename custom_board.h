@@ -41,11 +41,11 @@
 #define CUSTOM_BOARD_H
 
 #if defined(BOARD_252432)
-  #include "pca252432.h"
-#else
-#if defined(BOARD_662504)
+ 	#include "pca252432.h"
+#elif defined(BOARD_662504)
 	#include "pca662504.h"
-#error "Board is not defined"
+#else
+#error "Board is not defined" 
 #endif
- 
+
 #endif

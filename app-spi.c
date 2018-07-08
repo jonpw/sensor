@@ -49,13 +49,11 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_spi_mngr.h"
-#include "bma280-spi.h"
+#include "app-spi.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4
 
-uint8_t       m_master_data_0[] = {0x82};           /**< TX buffer. */
-uint8_t       m_master_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
 
 NRF_SPI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, SPI_INSTANCE);
 
@@ -94,19 +92,40 @@ nrf_drv_spi_config_t const bme_spi_config =
 
 #endif
 
-nrf_spi_mngr_transfer_t const transfers[] =
+uint8_t       m_master_data_0[] = {0x82};           /**< TX buffer. */
+uint8_t       m_master_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
+
+nrf_spi_mngr_transfer_t const bma_transfers[] =
 {
     NRF_SPI_MNGR_TRANSFER(m_master_data_0, sizeof(m_master_data_0), m_master_buffer_rx, sizeof(m_master_buffer_rx))
+};
+
+uint8_t       bme_data_tx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};           /**< TX buffer. */
+uint8_t       bme_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
+
+nrf_spi_mngr_transfer_t const bme_transfers[] =
+{
+    NRF_SPI_MNGR_TRANSFER(bme_data_tx, sizeof(bme_data_tx), bme_buffer_rx, sizeof(bme_buffer_rx))
 };
 
 nrf_spi_mngr_transaction_t transaction_1 =
 {
     .begin_callback      = bma280_spi_begin,
     .end_callback        = bma280_spi_end,
-    .p_user_data         = transfers,
-    .p_transfers         = transfers,
-    .number_of_transfers = sizeof(transfers) / sizeof(transfers[0]),
+    .p_user_data         = bma_transfers,
+    .p_transfers         = bma_transfers,
+    .number_of_transfers = sizeof(bma_transfers) / sizeof(bma_transfers[0]),
     .p_required_spi_cfg  = &bma_spi_config
+};
+
+nrf_spi_mngr_transaction_t transaction_2 =
+{
+    .begin_callback      = NULL,
+    .end_callback        = NULL,
+    .p_user_data         = bme_transfers,
+    .p_transfers         = bme_transfers,
+    .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
+    .p_required_spi_cfg  = &bme_spi_config
 };
 
     // SPI0 (with transaction manager) initialization.
@@ -136,3 +155,75 @@ void bma280_spi_init(void)
 {
     APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
 }
+
+/*!
+ * @brief           Write operation in either I2C or SPI
+ *
+ * param[in]        dev_addr        I2C or SPI device address
+ * param[in]        reg_addr        register address
+ * param[in]        reg_data_ptr    pointer to the data to be written
+ * param[in]        data_len        number of bytes to be written
+ *
+ * @return          result of the bus communication function
+ */
+int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len)
+{
+    uint32_t err_code;
+    bme_data_tx[0] = reg_addr;
+    memcpy(reg_data_ptr, bme_data_tx+1, data_len);
+    bme_transfers[0].tx_data_length = data_len + 1;
+    bme_transfers[0].rx_data_length = data_len + 2;
+    err_code = nrf_twi_mngr_perform(&m_nrf_twi_mngr, bme_spi_config, bme_transfers, 1, NULL);
+    return err_code;
+}
+
+/*!
+ * @brief           Read operation in either I2C or SPI
+ *
+ * param[in]        dev_addr        I2C or SPI device address
+ * param[in]        reg_addr        register address
+ * param[out]       reg_data_ptr    pointer to the memory to be used to store the read data
+ * param[in]        data_len        number of bytes to be read
+ *
+ * @return          result of the bus communication function
+ */
+int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len)
+{
+    uint32_t err_code;
+    bme_data_tx[0] = (reg_addr | 0x80);
+    bme_transfers[0].tx_data_length = 1;
+    bme_transfers[0].rx_data_length = data_len+1;
+    err_code = nrf_twi_mngr_perform(&m_nrf_twi_mngr, bme_spi_config, bme_transfers, 1, NULL);
+    memcpy(bme_buffer_rx+1, reg_data_ptr, data_len);
+    return err_code;
+}
+
+/*!
+ * @brief           System specific implementation of sleep function
+ *
+ * @param[in]       t_ms    time in milliseconds
+ *
+ * @return          none
+ */
+void bme_680_sleep(uint32_t t_ms)
+{
+    nrf_delay(t_ms);
+    // ...
+    // Please insert system specific function sleep or delay for t_ms milliseconds
+    // ...
+}
+
+/*!
+ * @brief           Capture the system time in microseconds
+ *
+ * @return          system_current_time    current system timestamp in microseconds
+ */
+int64_t get_timestamp_us()
+{
+    int64_t system_current_time = 0;
+    // ...
+    // Please insert system specific function to retrieve a timestamp (in microseconds)
+    // ...
+    return system_current_time;
+}
+

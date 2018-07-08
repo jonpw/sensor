@@ -38,8 +38,8 @@
  * 
  */
 
-#ifndef BMA280_SPI_H
-#define BMA280_SPI_H
+#ifndef HVAC_H
+#define HVAC_H
 
 #include "app_util_platform.h"
 #include "nrf_gpio.h"
@@ -50,32 +50,69 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-#include "nrf_spi_mngr.h"
 
-#define SPI_INSTANCE  0 /**< SPI instance index. */
-#define SPI_MNGR_QUEUE_SIZE 4
+// HVAC MITSUBISHI_
+#define HVAC_MITSUBISHI_HDR_MARK    3400
+#define HVAC_MITSUBISHI_HDR_SPACE   1750
+#define HVAC_MITSUBISHI_BIT_MARK    450
+#define HVAC_MITSUBISHI_ONE_SPACE   1300
+#define HVAC_MISTUBISHI_ZERO_SPACE  420
+#define HVAC_MITSUBISHI_RPT_MARK    440
+#define HVAC_MITSUBISHI_RPT_SPACE   17100 // Above original iremote limit
 
-extern uint8_t       m_master_data_0[];           /**< TX buffer. */
-extern uint8_t       m_master_buffer_rx[];    /**< RX buffer. */
+extern void constructCommand(
+      HvacMode                  HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode
+      int                       HVAC_Temp,           // Example 21  (°c)
+      HvacFanMode               HVAC_FanMode,        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
+      HvacVanneMode             HVAC_VanneMode,      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
+      int                       OFF                  // Example false
+);
+typedef enum HvacMode {
+  HVAC_HOT,
+  HVAC_COLD,
+  HVAC_DRY,
+  HVAC_FAN, // used for Panasonic only
+  HVAC_AUTO
+} HvacMode_t; // HVAC  MODE
 
-typedef struct
-{
-    int16_t x;
-    int16_t y;
-    int16_t z;
-    float t;
-} accdata_t;
+typedef enum HvacFanMode {
+  FAN_SPEED_1,
+  FAN_SPEED_2,
+  FAN_SPEED_3,
+  FAN_SPEED_4,
+  FAN_SPEED_5,
+  FAN_SPEED_AUTO,
+  FAN_SPEED_SILENT
+} HvacFanMode_;  // HVAC  FAN MODE
 
-extern accdata_t accdata;
-// SPI0 (with transaction manager) initialization.
-nrf_drv_spi_config_t const bma_spi_config;
+typedef enum HvacVanneMode {
+  VANNE_AUTO,
+  VANNE_H1,
+  VANNE_H2,
+  VANNE_H3,
+  VANNE_H4,
+  VANNE_H5,
+  VANNE_AUTO_MOVE
+} HvacVanneMode_;  // HVAC  VANNE MODE
 
-nrf_spi_mngr_transfer_t const transfers[];
+typedef enum HvacWideVanneMode {
+  WIDE_LEFT_END,
+  WIDE_LEFT,
+  WIDE_MIDDLE,
+  WIDE_RIGHT,
+  WIDE_RIGHT_END,
+  WIDE_SWING
+} HvacWideVanneMode_t;  // HVAC  WIDE VANNE MODE
 
-nrf_spi_mngr_transaction_t transaction_1;
+typedef enum HvacAreaMode {
+  AREA_SWING,
+  AREA_LEFT,
+  AREA_AUTO,
+  AREA_RIGHT
+} HvacAreaMode_t;  // HVAC  WIDE VANNE MODE
 
-void bma280_spi_begin(void *p_user_data);
-void bma280_spi_end(ret_code_t result, void *p_user_data);
-extern void bma280_spi_get(void);
-
-#endif
+typedef enum HvacProfileMode {
+  NORMAL,
+  QUIET,
+  BOOST
+} HvacProfileMode_t; // HVAC PANASONIC OPTION MODE

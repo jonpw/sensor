@@ -51,7 +51,7 @@
 #include "nrf_spi_mngr.h"
 #include "bma280-spi.h"
 
-#define TWI_INSTANCE  0 /**< SPI instance index. */
+#define TWI_INSTANCE  0 /**< TWI instance index. */
 #define TWI_MNGR_QUEUE_SIZE 4
 
 uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND vl53_conf_reg_addr  = VL53_REG_CONF;
@@ -62,11 +62,11 @@ uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND vl53_thyst_reg_addr = VL53_REG_THYST;
 uint8_t       twi_trans_vl53_reg[]  = {0x00};           /**< TX buffer. */
 uint8_t       twi_trans_vl53_buff[] = {0x00};    /**< RX buffer. */
 
-NRF_TWI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, SPI_INSTANCE);
+NRF_TWI_MNGR_DEF(m_nrf_twi_mngr, TWI_MNGR_QUEUE_SIZE, TWI_INSTANCE);
 
 accdata_t accdata;
 
-nrf_drv_twi_config_t const vl53_twi_config =
+nrf_drv_twi_config_t const app_twi_config =
 {
     .scl                = I2C_SCL,
     .sda                = I2C_SDA,
@@ -86,7 +86,16 @@ nrf_twi_mngr_transaction_t transaction_1 =
     .p_user_data         = NULL,
     .p_transfers         = transfers,
     .number_of_transfers = sizeof(transfers) / sizeof(transfers[0]),
-    .p_required_twi_cfg  = &bma_spi_config
+    .p_required_twi_cfg  = &bma_twi_config
+};
+
+nrf_twi_mngr_transaction_t transaction_1 =
+{
+    .callback            = twi_vl53_callback,
+    .p_user_data         = NULL,
+    .p_transfers         = transfers,
+    .number_of_transfers = sizeof(transfers) / sizeof(transfers[0]),
+    .p_required_twi_cfg  = &bma_twi_config
 };
 
     // SPI0 (with transaction manager) initialization.
@@ -103,5 +112,6 @@ void twi_vl53_get(void)
 
 void app_twi_init(void)
 {
-    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_twi_mngr, &vl53_twi_config));
+    APP_ERROR_CHECK(nrf_twi_mngr_init(&m_nrf_twi_mngr, &vl53_twi_config));
 }
+

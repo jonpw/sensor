@@ -114,8 +114,8 @@ static mqtt_state_t                     mqtt_state = STATE_MQTT_IDLE;           
 static uint8_t                              m_ind_err_count = 0;
 static uint16_t                             m_message_counter = 1;                                  /**< Message counter used to generated message ids for MQTT messages. */
 static uint16_t                             m_sub_message_id = 1;
-uint32_t dev_id_hi = NRF_FICR->DEVICEID[1];
-uint32_t dev_id_lo = NRF_FICR->DEVICEID[0];
+uint32_t dev_id_hi = (const uint32_t)NRF_FICR->DEVICEID[1];
+uint32_t dev_id_lo = (const uint32_t)NRF_FICR->DEVICEID[0];
 
 static uint8_t app_mqtt_connect(ip_addr_t * ipaddr);
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt);

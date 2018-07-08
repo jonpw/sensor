@@ -76,9 +76,10 @@
   #include "custom_board.h"
 #elif defined(BOARD_252432)
   #include "pca252432.h"
+#elif defined(BOARD_662504)
+  #include "pca662504.h"
 #else
 #error "Board is not defined"
-
 #endif
 
 #ifdef __cplusplus

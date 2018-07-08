@@ -67,12 +67,26 @@ extern uint8_t NRF_TWI_MNGR_BUFFER_LOC_IND lm75b_thyst_reg_addr;*/
     NRF_TWI_MNGR_WRITE(TWI_ADDR_VL53, p_reg_addr, 1,        NRF_TWI_MNGR_NO_STOP), \
     NRF_TWI_MNGR_READ (TWI_ADDR_VL53, p_buffer,   byte_cnt, 0)
 
+#define BNO055_READ(p_reg_addr, p_buffer, byte_cnt) \
+    NRF_TWI_MNGR_WRITE(TWI_ADDR_BNO055, p_reg_addr, 1,        NRF_TWI_MNGR_NO_STOP), \
+    NRF_TWI_MNGR_READ (TWI_ADDR_BNO055, p_buffer,   byte_cnt, 0)
+
+#define SI705X_READ(p_reg_addr, p_buffer, byte_cnt) \
+    NRF_TWI_MNGR_WRITE(TWI_ADDR_SI705x, p_reg_addr, 1,        NRF_TWI_MNGR_NO_STOP), \
+    NRF_TWI_MNGR_READ (TWI_ADDR_SI705x, p_buffer,   byte_cnt, 0)
+
+#define AM88XX_READ(p_reg_addr, p_buffer, byte_cnt) \
+    NRF_TWI_MNGR_WRITE(TWI_ADDR_AM88xx, p_reg_addr, 1,        NRF_TWI_MNGR_NO_STOP), \
+    NRF_TWI_MNGR_READ (TWI_ADDR_AM88xx, p_buffer,   byte_cnt, 0)
+
+#define LTR329_READ(p_reg_addr, p_buffer, byte_cnt) \
+    NRF_TWI_MNGR_WRITE(TWI_ADDR_LTR329, p_reg_addr, 1,        NRF_TWI_MNGR_NO_STOP), \
+    NRF_TWI_MNGR_READ (TWI_ADDR_LTR329, p_buffer,   byte_cnt, 0)
+
 #define VL53_READ_TEMP(p_buffer) \
     VL53_READ(&vl53_temp_reg_addr, p_buffer, 2)
 
-extern accdata_t accdata;
-// SPI0 (with transaction manager) initialization.
-nrf_drv_spi_config_t const bma_spi_config;
+nrf_drv_twi_config_t const app_twi_config;
 
 #define LM75B_INIT_TRANSFER_COUNT 1
 
@@ -80,8 +94,7 @@ extern nrf_twi_mngr_transfer_t const vl53_init_transfers[VL53_INIT_TRANSFER_COUN
 
 nrf_spi_mngr_transaction_t transaction_1;
 
-void bma280_spi_begin(void *p_user_data);
-void bma280_spi_end(ret_code_t result, void *p_user_data);
+extern void twi_vl53_callback(ret_code_t result, void *p_user_data);
 extern void bma280_spi_get(void);
 
 #endif
