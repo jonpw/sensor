@@ -114,8 +114,8 @@ static mqtt_state_t                     mqtt_state = STATE_MQTT_IDLE;           
 static uint8_t                              m_ind_err_count = 0;
 static uint16_t                             m_message_counter = 1;                                  /**< Message counter used to generated message ids for MQTT messages. */
 static uint16_t                             m_sub_message_id = 1;
-uint32_t dev_id_hi = (const uint32_t)NRF_FICR->DEVICEID[1];
-uint32_t dev_id_lo = (const uint32_t)NRF_FICR->DEVICEID[0];
+uint32_t dev_id_hi;
+uint32_t dev_id_lo;
 
 static uint8_t app_mqtt_connect(ip_addr_t * ipaddr);
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt);
@@ -150,10 +150,10 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr)
     m_app_mqtt_client.p_user_name          = &m_mqtt_username;
     m_app_mqtt_client.transport_type       = MQTT_TRANSPORT_SECURE;
     m_app_mqtt_client.p_security_settings  = &m_tls_keys;
-    m_app_mqtt_client.p_will_topic.p_utf_str  = "archer/will";
+/*    m_app_mqtt_client.p_will_topic.p_utf_str  = "archer/will";
     m_app_mqtt_client.p_will_topic.utf_strlen = strlen(m_app_mqtt_client.p_will_topic.p_utf_str);
     m_app_mqtt_client.p_will_message.p_bin_str  = sprintf(m_app_mqtt_client.p_will_message.p_bin_str, "%08X%08X", dev_id_hi, dev_id_lo);
-    m_app_mqtt_client.p_will_message.bin_strlen = strlen(m_app_mqtt_client.p_will_message.p_bin_str);
+    m_app_mqtt_client.p_will_message.bin_strlen = strlen(m_app_mqtt_client.p_will_message.p_bin_str);*/
     err_code = mqtt_connect(&m_app_mqtt_client);
     APPL_LOG("connecting u:%s p:%s cid:%s id:%s psk:%s",
                      m_app_mqtt_client.p_user_name->p_utf_str, 
@@ -340,7 +340,9 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
 //            
             //}
 
+            #if defined(PCA252432)
             bma280_spi_get();
+            #endif
 
             // handle acknowledgement, if required (QoS terminates here)
             if (p_evt->param.publish.message.topic.qos == MQTT_QoS_1_ATLEAST_ONCE)
@@ -380,6 +382,8 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
  */
 int mqtt_app_init(void)
 {
+    uint32_t dev_id_hi = NRF_FICR->DEVICEID[1];
+    uint32_t dev_id_lo = NRF_FICR->DEVICEID[0];
     uint32_t err_code = NRF_SUCCESS;
     sprintf(m_client_id, "%08X%08X", dev_id_hi, dev_id_lo);
     APPL_LOG("mqtt_app_init: complete, clientid:%s", (char*)m_client_id);

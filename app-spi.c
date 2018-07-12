@@ -59,7 +59,7 @@ NRF_SPI_MNGR_DEF(m_nrf_spi_mngr, SPI_MNGR_QUEUE_SIZE, SPI_INSTANCE);
 
 accdata_t accdata;
 
-#if defined(BOARD_662504) || defined(BOARD_252432)
+#if defined(PCA252432)
 nrf_drv_spi_config_t const bma_spi_config =
 {
     .sck_pin        = SPI_SCK_PIN,
@@ -73,39 +73,12 @@ nrf_drv_spi_config_t const bma_spi_config =
     .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
 };
 
-#endif
-
-#if defined(BOARD_662504)
-
-nrf_drv_spi_config_t const bme_spi_config =
-{
-    .sck_pin        = SPI_SCK_PIN,
-    .mosi_pin       = SPI_MOSI_PIN,
-    .miso_pin       = SPI_MISO_PIN,
-    .ss_pin         = BME680_SS_PIN,
-    .irq_priority   = APP_IRQ_PRIORITY_LOWEST,
-    .orc            = 0xFF,
-    .frequency      = NRF_DRV_SPI_FREQ_8M,
-    .mode           = NRF_DRV_SPI_MODE_3,
-    .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
-};
-
-#endif
-
 uint8_t       m_master_data_0[] = {0x82};           /**< TX buffer. */
 uint8_t       m_master_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
 
-nrf_spi_mngr_transfer_t const bma_transfers[] =
+nrf_spi_mngr_transfer_t bma_transfers[] =
 {
     NRF_SPI_MNGR_TRANSFER(m_master_data_0, sizeof(m_master_data_0), m_master_buffer_rx, sizeof(m_master_buffer_rx))
-};
-
-uint8_t       bme_data_tx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};           /**< TX buffer. */
-uint8_t       bme_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
-
-nrf_spi_mngr_transfer_t const bme_transfers[] =
-{
-    NRF_SPI_MNGR_TRANSFER(bme_data_tx, sizeof(bme_data_tx), bme_buffer_rx, sizeof(bme_buffer_rx))
 };
 
 nrf_spi_mngr_transaction_t transaction_1 =
@@ -117,18 +90,6 @@ nrf_spi_mngr_transaction_t transaction_1 =
     .number_of_transfers = sizeof(bma_transfers) / sizeof(bma_transfers[0]),
     .p_required_spi_cfg  = &bma_spi_config
 };
-
-nrf_spi_mngr_transaction_t transaction_2 =
-{
-    .begin_callback      = NULL,
-    .end_callback        = NULL,
-    .p_user_data         = bme_transfers,
-    .p_transfers         = bme_transfers,
-    .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
-    .p_required_spi_cfg  = &bme_spi_config
-};
-
-    // SPI0 (with transaction manager) initialization.
 
 void bma280_spi_begin(void *p_user_data)
 {
@@ -156,6 +117,43 @@ void bma280_spi_init(void)
     APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
 }
 
+#endif
+
+#if defined(PCA662504)
+
+nrf_drv_spi_config_t const bme_spi_config =
+{
+    .sck_pin        = SPI_SCK_PIN,
+    .mosi_pin       = SPI_MOSI_PIN,
+    .miso_pin       = SPI_MISO_PIN,
+    .ss_pin         = BME680_SS_PIN,
+    .irq_priority   = APP_IRQ_PRIORITY_LOWEST,
+    .orc            = 0xFF,
+    .frequency      = NRF_DRV_SPI_FREQ_8M,
+    .mode           = NRF_DRV_SPI_MODE_3,
+    .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
+};
+
+uint8_t       bme_data_tx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};           /**< TX buffer. */
+uint8_t       bme_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
+
+nrf_spi_mngr_transfer_t bme_transfers[] =
+{
+    NRF_SPI_MNGR_TRANSFER(bme_data_tx, sizeof(bme_data_tx), bme_buffer_rx, sizeof(bme_buffer_rx))
+};
+
+nrf_spi_mngr_transaction_t bme_transaction =
+{
+    .begin_callback      = NULL,
+    .end_callback        = NULL,
+    .p_user_data         = bme_transfers,
+    .p_transfers         = bme_transfers,
+    .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
+    .p_required_spi_cfg  = &bme_spi_config
+};
+
+    // SPI0 (with transaction manager) initialization.
+
 /*!
  * @brief           Write operation in either I2C or SPI
  *
@@ -170,10 +168,14 @@ int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, u
 {
     uint32_t err_code;
     bme_data_tx[0] = reg_addr;
-    memcpy(reg_data_ptr, bme_data_tx+1, data_len);
-    bme_transfers[0].tx_data_length = data_len + 1;
-    bme_transfers[0].rx_data_length = data_len + 2;
-    err_code = nrf_twi_mngr_perform(&m_nrf_twi_mngr, bme_spi_config, bme_transfers, 1, NULL);
+    memcpy(bme_data_tx+1, reg_data_ptr, data_len);
+    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].tx_length = data_len + 1;
+    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].rx_length = data_len + 2;
+    err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
+    while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
+    {
+        // nothing
+    }
     return err_code;
 }
 
@@ -191,9 +193,13 @@ int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, ui
 {
     uint32_t err_code;
     bme_data_tx[0] = (reg_addr | 0x80);
-    bme_transfers[0].tx_data_length = 1;
-    bme_transfers[0].rx_data_length = data_len+1;
-    err_code = nrf_twi_mngr_perform(&m_nrf_twi_mngr, bme_spi_config, bme_transfers, 1, NULL);
+    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].tx_length = 1;
+    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].rx_length = data_len+1;
+    err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
+    while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
+    {
+        // nothing
+    }
     memcpy(bme_buffer_rx+1, reg_data_ptr, data_len);
     return err_code;
 }
@@ -208,9 +214,6 @@ int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, ui
 void bme_680_sleep(uint32_t t_ms)
 {
     nrf_delay(t_ms);
-    // ...
-    // Please insert system specific function sleep or delay for t_ms milliseconds
-    // ...
 }
 
 /*!
@@ -221,9 +224,10 @@ void bme_680_sleep(uint32_t t_ms)
 int64_t get_timestamp_us()
 {
     int64_t system_current_time = 0;
-    // ...
-    // Please insert system specific function to retrieve a timestamp (in microseconds)
-    // ...
+    uint32_t app_time_ticks = app_timer_cnt_get();
+    system_current_time = app_time_ticks * 1000000 / APP_TIMER_CLOCK_FREQ;
     return system_current_time;
 }
+
+#endif
 

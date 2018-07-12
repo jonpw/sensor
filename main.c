@@ -92,7 +92,9 @@
 #include "mqttapp.h"
 #include "mydns.h"
 #include "nrf_temp.h"
-#include "app-spi.h"
+//#include "app-spi.h"
+
+#include "hvac.h"
 
 //static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
@@ -104,8 +106,10 @@ static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
 static uint8_t                              m_led_divide = 0;
 
+#if defined(PCA252432)
 static const char * m_topic_button_1 = TOPIC_BUTTON_1;
 static const char * m_topic_button_2 = TOPIC_BUTTON_2;
+#endif
 static const char * m_topic_button_3 = TOPIC_BUTTON_3;
 static const char * m_topic_button_4 = TOPIC_BUTTON_4;
 static const char * m_topic_control = TOPIC_CONTROL;
@@ -267,6 +271,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 
         switch (pin_no)
         {
+            #if defined(PCA252432)
             case BSP_BUTTON_0:
             {
                 mqtt_publish_message_t pubmsg;
@@ -290,15 +295,18 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
                 app_mqtt_publish(&pubmsg);
                 break;
             }
+            #endif
+
             case BSP_BUTTON_2:
             {
-                mqtt_publish_message_t pubmsg;
+                hvac_transmit();
+                /*mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
                 pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_3);
                 pubmsg.topic.topic.utf_strlen = strlen(pubmsg.topic.topic.p_utf_str);
                 pubmsg.payload.p_bin_str = strcpy(pubmsg.payload.p_bin_str, m_message_pressed);
                 pubmsg.payload.bin_strlen = strlen(pubmsg.payload.p_bin_str);
-                app_mqtt_publish(&pubmsg);                
+                app_mqtt_publish(&pubmsg);*/
                 break;
             }
             case BSP_BUTTON_3:
@@ -325,8 +333,10 @@ static void button_init(void)
 
     static app_button_cfg_t buttons[] =
     {
+        #if defined(PCA252432)
         {BSP_BUTTON_0, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
         {BSP_BUTTON_1, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
+        #endif
         {BSP_BUTTON_2, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
         {BSP_BUTTON_3, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
     };
@@ -368,7 +378,7 @@ static void iot_timer_tick_callback(void * p_context)
     uint32_t err_code = iot_timer_update();
     APP_ERROR_CHECK(err_code);
 }
-
+#if defined(PCA252432)
 void app_sched_pub_temp(void)
 {
     char * json_string;
@@ -388,6 +398,7 @@ void app_sched_pub_temp(void)
     pubmsg.payload.bin_strlen = strlen(json_string);
     app_mqtt_publish(&pubmsg);
 }
+#endif
 
 /**@brief Function for the Timer initialization.
  *
@@ -553,7 +564,7 @@ int main(void)
     button_init();
     //    nrf_temp_init(); // sd memory conflict issue
     #ifdef PCA252432
-    bma280_spi_init();
+//    bma280_spi_init();
     #endif
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));

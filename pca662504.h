@@ -69,24 +69,20 @@ extern "C" {
 #define BUTTONS_NUMBER 2
 
 #define BUTTON_START   12
-#define BUTTON_1       12
-#define BUTTON_2       13
-#define BUTTON_3       0
-#define BUTTON_4       0
+#define BUTTON_3       12
+#define BUTTON_4       13
 #define BUTTON_STOP    13
 #define BUTTON_PULL    NRF_GPIO_PIN_PULLUP
 
 #define BUTTONS_ACTIVE_STATE 0
 
-#define BUTTONS_LIST { BUTTON_1, BUTTON_2 }
+#define BUTTONS_LIST { BUTTON_3, BUTTON_4 }
 
-#define BSP_BUTTON_0   BUTTON_1
-#define BSP_BUTTON_1   BUTTON_2
 #define BSP_BUTTON_2   BUTTON_3
 #define BSP_BUTTON_3   BUTTON_4
 
-#define TOPIC_BUTTON_1	"button1"
-#define TOPIC_BUTTON_2	"button2"
+#define TOPIC_BUTTON_3	"button3"
+#define TOPIC_BUTTON_4	"button4"
 
 #define TOPIC_CONTROL "archer/sample"
 

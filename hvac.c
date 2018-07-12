@@ -50,13 +50,16 @@
 #include "nrf_log_default_backends.h"
 #include "nrf_spi_mngr.h"
 #include "hvac.h"
+#include "app_pwm.h"
+#include "nrf_drv_pwm.h"
 
-uint32_t err_code;
+static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0);
+
 nrf_drv_pwm_config_t const config0 =
 {
     .output_pins =
     {
-        IR_LED | NRF_DRV_PWM_PIN_INVERTED, // channel 0
+        GIO1 | NRF_DRV_PWM_PIN_INVERTED, // channel 0
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 1
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 2
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 3
@@ -68,12 +71,6 @@ nrf_drv_pwm_config_t const config0 =
     .load_mode    = NRF_PWM_LOAD_WAVE_FORM,
     .step_mode    = NRF_PWM_STEP_AUTO
 };
-err_code = nrf_drv_pwm_init(&m_pwm0, &config0, NULL);
-if (err_code != NRF_SUCCESS)
-{
-    // Initialization failed. Take recovery action.
-}
-
 
 nrf_pwm_values_common_t seq_values[144*4+2] = {};
 
@@ -104,76 +101,76 @@ static void event_handler(nrf_drv_pwm_evt_type_t event_type)
 /* Send IR command to Mitsubishi HVAC - sendHvacMitsubishi
 /***************************************************************************/
 void constructCommand(
-  HvacMode                HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode
+  HvacMode_t                HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode
   int                     HVAC_Temp,           // Example 21  (°c)
-  HvacFanMode             HVAC_FanMode,        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
-  HvacVanneMode           HVAC_VanneMode,      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
+  HvacFanMode_t             HVAC_FanMode,        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
+  HvacVanneMode_t           HVAC_VanneMode,      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
   int                     OFF                  // Example false
 )
 {
 
     //#define  HVAC_MITSUBISHI_DEBUG;  // Un comment to access DEBUG information through Serial Interface
 
-    byte mask = 1; //our bitmask
-    byte data[18] = { 0x23, 0xCB, 0x26, 0x01, 0x00, 0x20, 0x08, 0x06, 0x30, 0x45, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F };
+    uint8_t mask = 1; //our bitmask
+    uint8_t data[18] = { 0x23, 0xCB, 0x26, 0x01, 0x00, 0x20, 0x08, 0x06, 0x30, 0x45, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F };
     // data array is a valid trame, only byte to be chnaged will be updated.
 
-    byte i;
+    uint8_t i;
 
     // Byte 6 - On / Off
     if (OFF) {
-        data[5] = (byte) 0x0; // Turn OFF HVAC
+        data[5] = (uint8_t) 0x0; // Turn OFF HVAC
     } else {
-        data[5] = (byte) 0x20; // Tuen ON HVAC
+        data[5] = (uint8_t) 0x20; // Tuen ON HVAC
     }
 
   // Byte 7 - Mode
     switch (HVAC_Mode)
     {
-        case HVAC_HOT:   data[6] = (byte) 0x08; break;
-        case HVAC_COLD:  data[6] = (byte) 0x18; break;
-        case HVAC_DRY:   data[6] = (byte) 0x10; break;
-        case HVAC_AUTO:  data[6] = (byte) 0x20; break;
+        case HVAC_HOT:   data[6] = (uint8_t) 0x08; break;
+        case HVAC_COLD:  data[6] = (uint8_t) 0x18; break;
+        case HVAC_DRY:   data[6] = (uint8_t) 0x10; break;
+        case HVAC_AUTO:  data[6] = (uint8_t) 0x20; break;
         default: break;
     }
 
     // Byte 8 - Temperature
     // Check Min Max For Hot Mode
-    byte Temp;
+    uint8_t Temp;
     if (HVAC_Temp > 31) { Temp = 31;}
     else if (HVAC_Temp < 16) { Temp = 16; } 
     else { Temp = HVAC_Temp; };
-    data[7] = (byte) Temp - 16;
+    data[7] = (uint8_t) Temp - 16;
 
   // Byte 10 - FAN / VANNE
     switch (HVAC_FanMode)
     {
-        case FAN_SPEED_1:       data[9] = (byte) B00000001; break;
-        case FAN_SPEED_2:       data[9] = (byte) B00000010; break;
-        case FAN_SPEED_3:       data[9] = (byte) B00000011; break;
-        case FAN_SPEED_4:       data[9] = (byte) B00000100; break;
-        case FAN_SPEED_5:       data[9] = (byte) B00000100; break; //No FAN speed 5 for MITSUBISHI so it is consider as Speed 4
-        case FAN_SPEED_AUTO:    data[9] = (byte) B10000000; break;
-        case FAN_SPEED_SILENT:  data[9] = (byte) B00000101; break;
+        case FAN_SPEED_1:       data[9] = (uint8_t) 0x01; break;
+        case FAN_SPEED_2:       data[9] = (uint8_t) 0x02; break;
+        case FAN_SPEED_3:       data[9] = (uint8_t) 0x03; break;
+        case FAN_SPEED_4:       data[9] = (uint8_t) 0x04; break;
+        case FAN_SPEED_5:       data[9] = (uint8_t) 0x04; break; //No FAN speed 5 for MITSUBISHI so it is consider as Speed 4
+        case FAN_SPEED_AUTO:    data[9] = (uint8_t) 0x80; break;
+        case FAN_SPEED_SILENT:  data[9] = (uint8_t) 0x05; break;
         default: break;
     }
 
     switch (HVAC_VanneMode)
     {
-        case VANNE_AUTO:        data[9] = (byte) data[9] | B01000000; break;
-        case VANNE_H1:          data[9] = (byte) data[9] | B01001000; break;
-        case VANNE_H2:          data[9] = (byte) data[9] | B01010000; break;
-        case VANNE_H3:          data[9] = (byte) data[9] | B01011000; break;
-        case VANNE_H4:          data[9] = (byte) data[9] | B01100000; break;
-        case VANNE_H5:          data[9] = (byte) data[9] | B01101000; break;
-        case VANNE_AUTO_MOVE:   data[9] = (byte) data[9] | B01111000; break;
+        case VANNE_AUTO:        data[9] = (uint8_t) data[9] | 0x40 ; break;
+        case VANNE_H1:          data[9] = (uint8_t) data[9] | 0x48 ; break;
+        case VANNE_H2:          data[9] = (uint8_t) data[9] | 0x50 ; break;
+        case VANNE_H3:          data[9] = (uint8_t) data[9] | 0x58 ; break;
+        case VANNE_H4:          data[9] = (uint8_t) data[9] | 0x60 ; break;
+        case VANNE_H5:          data[9] = (uint8_t) data[9] | 0x68 ; break;
+        case VANNE_AUTO_MOVE:   data[9] = (uint8_t) data[9] | 0x78 ; break;
         default: break;
     }
 
     // Byte 18 - CRC
     data[17] = 0;
     for (i = 0; i < 17; i++) {
-        data[17] = (byte) data[i] + data[17];  // CRC is a simple bits addition
+        data[17] = (uint8_t) data[i] + data[17];  // CRC is a simple bits addition
     }
 
       // Header for the Packet

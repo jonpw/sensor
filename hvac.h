@@ -56,17 +56,10 @@
 #define HVAC_MITSUBISHI_HDR_SPACE   1750
 #define HVAC_MITSUBISHI_BIT_MARK    450
 #define HVAC_MITSUBISHI_ONE_SPACE   1300
-#define HVAC_MISTUBISHI_ZERO_SPACE  420
+#define HVAC_MITSUBISHI_ZERO_SPACE  420
 #define HVAC_MITSUBISHI_RPT_MARK    440
 #define HVAC_MITSUBISHI_RPT_SPACE   17100 // Above original iremote limit
 
-extern void constructCommand(
-      HvacMode                  HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode
-      int                       HVAC_Temp,           // Example 21  (°c)
-      HvacFanMode               HVAC_FanMode,        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
-      HvacVanneMode             HVAC_VanneMode,      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
-      int                       OFF                  // Example false
-);
 typedef enum HvacMode {
   HVAC_HOT,
   HVAC_COLD,
@@ -83,7 +76,7 @@ typedef enum HvacFanMode {
   FAN_SPEED_5,
   FAN_SPEED_AUTO,
   FAN_SPEED_SILENT
-} HvacFanMode_;  // HVAC  FAN MODE
+} HvacFanMode_t;  // HVAC  FAN MODE
 
 typedef enum HvacVanneMode {
   VANNE_AUTO,
@@ -93,7 +86,7 @@ typedef enum HvacVanneMode {
   VANNE_H4,
   VANNE_H5,
   VANNE_AUTO_MOVE
-} HvacVanneMode_;  // HVAC  VANNE MODE
+} HvacVanneMode_t;  // HVAC  VANNE MODE
 
 typedef enum HvacWideVanneMode {
   WIDE_LEFT_END,
@@ -116,3 +109,13 @@ typedef enum HvacProfileMode {
   QUIET,
   BOOST
 } HvacProfileMode_t; // HVAC PANASONIC OPTION MODE
+
+extern void constructCommand(
+      HvacMode_t                  HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode
+      int                       HVAC_Temp,           // Example 21  (°c)
+      HvacFanMode_t               HVAC_FanMode,        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
+      HvacVanneMode_t             HVAC_VanneMode,      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
+      int                       OFF                  // Example false
+);
+
+#endif

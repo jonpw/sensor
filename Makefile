@@ -72,6 +72,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/drivers_nrf/common/nrf_drv_common.c \
   $(SDK_ROOT)/components/drivers_nrf/gpiote/nrf_drv_gpiote.c \
   $(SDK_ROOT)/components/drivers_nrf/rng/nrf_drv_rng.c \
+  $(SDK_ROOT)/components/drivers_nrf/pwm/nrf_drv_pwm.c \
   $(SDK_ROOT)/components/drivers_nrf/uart/nrf_drv_uart.c \
   $(SDK_ROOT)/components/drivers_nrf/spi_master/nrf_drv_spi.c \
   $(SDK_ROOT)/components/drivers_nrf/hal/nrf_nvmc.c \
@@ -87,6 +88,7 @@ SRC_FILES += \
   $(PROJ_DIR)/writable_ndef_msg.c \
   $(PROJ_DIR)/ndef_file_m.c \
   $(PROJ_DIR)/app-spi.c \
+  $(PROJ_DIR)/hvac.c \
   $(SDK_ROOT)/external/cJSON/cJSON.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_msg.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_rec.c \
@@ -343,7 +345,8 @@ OPT = -O3 -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
-CFLAGS += -DBOARD_252432
+#CFLAGS += -DBOARD_252432
+CFLAGS += -DBOARD_662504
 CFLAGS += -DBOARD_CUSTOM
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
