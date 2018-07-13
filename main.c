@@ -106,12 +106,13 @@ static bool                                 m_do_ind_err = false;
 static uint8_t                              m_ind_err_count = 0;
 static uint8_t                              m_led_divide = 0;
 
-#if defined(PCA252432)
+
 static const char * m_topic_button_1 = TOPIC_BUTTON_1;
 static const char * m_topic_button_2 = TOPIC_BUTTON_2;
-#endif
+#if defined(PCA252432)
 static const char * m_topic_button_3 = TOPIC_BUTTON_3;
 static const char * m_topic_button_4 = TOPIC_BUTTON_4;
+#endif
 static const char * m_topic_control = TOPIC_CONTROL;
 static const char * m_message_pressed = MSG_BUTTON_PRESSED;
 
@@ -271,7 +272,6 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 
         switch (pin_no)
         {
-            #if defined(PCA252432)
             case BSP_BUTTON_0:
             {
                 mqtt_publish_message_t pubmsg;
@@ -286,17 +286,19 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }
             case BSP_BUTTON_1:
             {
+                hvac_transmit();
+                /*
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
                 pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_2);
                 pubmsg.topic.topic.utf_strlen = strlen(pubmsg.topic.topic.p_utf_str);
                 pubmsg.payload.p_bin_str = strcpy(pubmsg.payload.p_bin_str, m_message_pressed);
                 pubmsg.payload.bin_strlen = strlen(pubmsg.payload.p_bin_str);
-                app_mqtt_publish(&pubmsg);
+                app_mqtt_publish(&pubmsg);*/
                 break;
             }
-            #endif
-
+        
+            #if defined(PCA252432)
             case BSP_BUTTON_2:
             {
                 hvac_transmit();
@@ -320,6 +322,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
                 app_mqtt_publish(&pubmsg);                
                 break;
             }            
+            #endif
             default:
                 break;
         }
@@ -333,12 +336,13 @@ static void button_init(void)
 
     static app_button_cfg_t buttons[] =
     {
-        #if defined(PCA252432)
+        
         {BSP_BUTTON_0, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
         {BSP_BUTTON_1, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
-        #endif
+        #if defined(PCA252432)
         {BSP_BUTTON_2, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
         {BSP_BUTTON_3, APP_BUTTON_ACTIVE_LOW, NRF_GPIO_PIN_PULLUP, button_event_handler},
+        #endif
     };
 
     #define BUTTON_DETECTION_DELAY APP_TIMER_TICKS(10)
@@ -348,7 +352,7 @@ static void button_init(void)
 
     err_code = app_button_enable();
     APP_ERROR_CHECK(err_code);
-    nrf_gpio_cfg(BSP_BUTTON_3, NRF_GPIO_PIN_DIR_INPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
+    //nrf_gpio_cfg(BSP_BUTTON_3, NRF_GPIO_PIN_DIR_INPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
 }
 
 /**@brief Timer callback used for periodic servicing of LwIP protocol timers.
@@ -428,8 +432,7 @@ static void iot_timer_init(void)
     static const iot_timer_client_t list_of_clients[] =
     {
         {system_timer_callback,   LWIP_SYS_TICK_MS},
-        {blink_timeout_handler,   LED_BLINK_INTERVAL_MS},
-        {}
+        {blink_timeout_handler,   LED_BLINK_INTERVAL_MS}
     };
 
     // The list of IoT Timer clients is declared as a constant.

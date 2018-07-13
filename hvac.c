@@ -115,7 +115,7 @@ void constructCommand(
     uint8_t data[18] = { 0x23, 0xCB, 0x26, 0x01, 0x00, 0x20, 0x08, 0x06, 0x30, 0x45, 0x67, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F };
     // data array is a valid trame, only byte to be chnaged will be updated.
 
-    uint8_t i;
+    uint8_t i, j;
 
     // Byte 6 - On / Off
     if (OFF) {
@@ -175,29 +175,34 @@ void constructCommand(
 
       // Header for the Packet
     i = 0;
-    seq_values[i]=HVAC_MITSUBISHI_HDR_MARK;
-    seq_values[i+3]=HVAC_MITSUBISHI_HDR_SPACE+HVAC_MITSUBISHI_HDR_MARK;
+    seq_values[i*4]=HVAC_MITSUBISHI_HDR_MARK;
+    seq_values[i*4+3]=HVAC_MITSUBISHI_HDR_SPACE+HVAC_MITSUBISHI_HDR_MARK;
+    //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
     i++;
-    for (i = 0; i < 18; i++) {
+    for (j = 0; j < 18; j++) {
         // Send all Bits from Byte Data in Reverse Order
-        for (mask = 00000001; mask > 0; mask <<= 1) { //iterate through bit mask
-            if (data[i] & mask) { // Bit ONE
-                seq_values[i]=HVAC_MITSUBISHI_BIT_MARK;
-                seq_values[i+3]=HVAC_MITSUBISHI_ONE_SPACE+HVAC_MITSUBISHI_BIT_MARK;
+        for (mask = 0x01; mask > 0; mask <<= 1) { //iterate through bit mask
+            if (data[j] & mask) { // Bit ONE
+                seq_values[i*4]=HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i*4+3]=HVAC_MITSUBISHI_ONE_SPACE+HVAC_MITSUBISHI_BIT_MARK;
+                //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
                 i++;
             }
             else { // Bit ZERO
-                seq_values[i]=HVAC_MITSUBISHI_BIT_MARK;
-                seq_values[i+3]=HVAC_MITSUBISHI_ZERO_SPACE+HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i*4]=HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i*4+3]=HVAC_MITSUBISHI_ZERO_SPACE+HVAC_MITSUBISHI_BIT_MARK;
+                //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
                 i++;
             }
         //Next bits
         }
     }
     // End of Packet and retransmission of the Packet
-    seq_values[i]=HVAC_MITSUBISHI_RPT_MARK;
-    seq_values[i+3]=HVAC_MITSUBISHI_RPT_SPACE+HVAC_MITSUBISHI_RPT_MARK;
+    seq_values[i*4]=HVAC_MITSUBISHI_RPT_MARK;
+    seq_values[i*4+3]=HVAC_MITSUBISHI_RPT_SPACE+HVAC_MITSUBISHI_RPT_MARK;
+    //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
     i++;
+    APPL_LOG("seqs:%i",i);
 }
 
 void hvac_transmit(void)
@@ -206,10 +211,11 @@ void hvac_transmit(void)
     nrf_drv_pwm_simple_playback(&m_pwm0, &seq, 3, 0);
     nrf_drv_pwm_simple_playback(&m_pwm0, &seq, 3, NRF_DRV_PWM_FLAG_LOOP);*/
     constructCommand(HVAC_COLD, 24, FAN_SPEED_AUTO, VANNE_AUTO, false);
-    nrf_drv_pwm_complex_playback(&m_pwm0, &seq, &seq, 1, 0);
+    nrf_drv_pwm_complex_playback(&m_pwm0, &seq, &seq, 1, NRF_DRV_PWM_FLAG_STOP );
 }
 
 void hvac_init(void)
 {
     APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, NULL));
+    nrf_gpio_cfg(GIO1, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
 }
