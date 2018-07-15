@@ -81,7 +81,14 @@ extern char broker_hostname[32];
 
 extern uint16_t m_broker_port;       /**< Port number of MQTT Broker being used. */
 
+extern char topic_base[32];
+
 #define TOPIC_DEBUG                         "debug/1234/#"
+#define TOPIC_HVAC_MODE 					"hvac/mode"
+#define TOPIC_HVAC_TEMP						"hvac/temp"
+#define TOPIC_HVAC_FAN_MODE					"hvac/fan"
+#define TOPIC_HVAC_VANNE_MODE				"hvac/vanne"
+#define TOPIC_HVAC_POWER					"hvac/power"
 
 /**@brief Application state with respect to MQTT. */
 typedef enum

@@ -95,6 +95,7 @@ char mqtt_password[16] = "pass";
 mqtt_username_t m_mqtt_username = {.p_utf_str = &mqtt_username, .utf_strlen = 0};
 mqtt_password_t m_mqtt_password = {.p_utf_str = &mqtt_password, .utf_strlen = 0};
 
+char topic_base[32];
 
 nrf_tls_preshared_key_t m_preshared_key = {
     .p_identity     = &identity[0],
@@ -340,8 +341,69 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
 //            
             //}
 
+            // our topics first
+            if (strstr(p_evt->param.publish.message.topic.topic.p_utf_str, topic_base) == p_evt->param.publish.message.topic.topic.p_utf_str)
+            {
+                uint8_t * ourtopic;
+                ourtopic = p_evt->param.publish.message.topic.topic.p_utf_str + strlen(topic_base);
+
+            }
             #if defined(PCA252432)
-            bma280_spi_get();
+            if (strcmp(ourtopic, TOPIC_BMA280_DO_SAMPLE) == 0)
+            {
+                bma280_spi_get();
+            }
+            #endif
+
+            #if defined(HVAC_IR)
+            if (strcmp(ourtopic, TOPIC_HVAC_MODE) == 0)
+            {
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "hot") == 0) m_hvac_mode = HVAC_HOT;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "cold") == 0) m_hvac_mode = HVAC_COLD;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "dry") == 0) m_hvac_mode = HVAC_DRY;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "fan") == 0) m_hvac_mode = HVAC_FAN;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "auto") == 0) m_hvac_mode = HVAC_AUTO;
+                hvac_transmit();
+            }
+
+            if (strcmp(ourtopic, TOPIC_HVAC_TEMP) == 0)
+            {
+                uint8_t hvac_ir_temp = strtoul(p_evt->param.publish.message.payload.p_bin_str);
+                if (hvac_ir_temp > 31) hvac_ir_temp = 31;
+                if (hvac_ir_temp < 16) hvac_ir_temp = 16;
+                hvac_transmit();
+            }
+
+            if (strcmp(ourtopic, TOPIC_HVAC_FAN_MODE) == 0)
+            {
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "1") == 0) m_hvac_fanmode = FAN_SPEED_1;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "2") == 0) m_hvac_fanmode = FAN_SPEED_2;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "3") == 0) m_hvac_fanmode = FAN_SPEED_3;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "4") == 0) m_hvac_fanmode = FAN_SPEED_4;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "5") == 0) m_hvac_fanmode = FAN_SPEED_5;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "auto") == 0) m_hvac_fanmode = FAN_SPEED_AUTO;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "silent") == 0) m_hvac_fanmode = FAN_SPEED_SILENT;
+                hvac_transmit();
+            }
+
+            if (strcmp(ourtopic, TOPIC_HVAC_VANNE_MODE) == 0)
+            {
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "auto") == 0) m_hvac_vannemode = VANNE_AUTO;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "1") == 0) m_hvac_vannemode = VANNE_H1;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "2") == 0) m_hvac_vannemode = VANNE_H2;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "3") == 0) m_hvac_vannemode = VANNE_H3;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "4") == 0) m_hvac_vannemode = VANNE_H4;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "5") == 0) m_hvac_vannemode = VANNE_H5;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "auto_move") == 0) m_hvac_vannemode = VANNE_AUTO_MOVE;
+                hvac_transmit();
+            }
+
+            if (strcmp(ourtopic, TOPIC_HVAC_POWER) == 0)
+            {
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "on") == 0) m_hvac_off = false;
+                if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "off") == 0) m_hvac_off = true;
+                hvac_transmit();
+            }
             #endif
 
             // handle acknowledgement, if required (QoS terminates here)
@@ -384,13 +446,14 @@ int mqtt_app_init(void)
 {
     uint32_t dev_id_hi = NRF_FICR->DEVICEID[1];
     uint32_t dev_id_lo = NRF_FICR->DEVICEID[0];
+    sprintf(topic_base, "@%X%X/", dev_id_hi, dev_id_lo);
+    APPL_LOG("topic_base: %s", topic_base);
     uint32_t err_code = NRF_SUCCESS;
     sprintf(m_client_id, "%08X%08X", dev_id_hi, dev_id_lo);
     APPL_LOG("mqtt_app_init: complete, clientid:%s", (char*)m_client_id);
     err_code = mqtt_init();
     char const * p_desc = nrf_strerror_get(err_code);
     APPL_LOG ("mqtt_app_init: mqtt_init() returned %s", p_desc);
-
 }
 
 /**

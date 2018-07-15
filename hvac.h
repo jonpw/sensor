@@ -40,6 +40,7 @@
 
 #ifndef HVAC_H
 #define HVAC_H
+#define HVAC_IR
 
 #include "app_util_platform.h"
 #include "nrf_gpio.h"
@@ -59,6 +60,7 @@
 #define HVAC_MITSUBISHI_ZERO_SPACE  420
 #define HVAC_MITSUBISHI_RPT_MARK    440
 #define HVAC_MITSUBISHI_RPT_SPACE   17100 // Above original iremote limit
+
 
 typedef enum HvacMode {
   HVAC_HOT,
@@ -109,6 +111,12 @@ typedef enum HvacProfileMode {
   QUIET,
   BOOST
 } HvacProfileMode_t; // HVAC PANASONIC OPTION MODE
+
+extern HvacMode_t                m_hvac_mode;           // Example HVAC_HOT  HvacMitsubishiMode
+extern int                     m_hvac_temp;           // Example 21  (°c)
+extern HvacFanMode_t             m_hvac_fanmode;        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
+extern HvacVanneMode_t           m_hvac_vannemode;      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
+extern int                     m_hvac_off;                  // Example false
 
 extern void constructCommand(
       HvacMode_t                  HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode

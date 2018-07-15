@@ -67,12 +67,12 @@ nrf_drv_pwm_config_t const config0 =
     .irq_priority = APP_IRQ_PRIORITY_LOW,
     .base_clock   = NRF_PWM_CLK_1MHz,
     .count_mode   = NRF_PWM_MODE_UP,
-    .top_value    = 1000,
+    .top_value    = 20000,
     .load_mode    = NRF_PWM_LOAD_WAVE_FORM,
     .step_mode    = NRF_PWM_STEP_AUTO
 };
 
-nrf_pwm_values_common_t seq_values[144*4+2] = {};
+static nrf_pwm_values_wave_form_t seq_values[18*8+2] = {};
 
 nrf_pwm_sequence_t const seq =
 {
@@ -82,6 +82,11 @@ nrf_pwm_sequence_t const seq =
     .end_delay       = 0
 };
 
+extern HvacMode_t                m_hvac_mode = HVAC_COLD;           // Example HVAC_HOT  HvacMitsubishiMode
+extern int                     m_hvac_temp = 24;           // Example 21  (°c)
+extern HvacFanMode_t             m_hvac_fanmode = FAN_SPEED_AUTO;        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
+extern HvacVanneMode_t           m_hvac_vannemode = VANNE_AUTO;      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
+extern int                     m_hvac_off = false;                  // Example false
 
 static void event_handler(nrf_drv_pwm_evt_type_t event_type)
 {
@@ -175,22 +180,22 @@ void constructCommand(
 
       // Header for the Packet
     i = 0;
-    seq_values[i*4]=HVAC_MITSUBISHI_HDR_MARK;
-    seq_values[i*4+3]=HVAC_MITSUBISHI_HDR_SPACE+HVAC_MITSUBISHI_HDR_MARK;
-    //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
+    seq_values[i].channel_0=HVAC_MITSUBISHI_HDR_MARK;
+    seq_values[i].counter_top=HVAC_MITSUBISHI_HDR_SPACE+HVAC_MITSUBISHI_HDR_MARK;
+    APPL_LOG("dat:%i/%i",seq_values[i].channel_0,seq_values[i].counter_top);
     i++;
     for (j = 0; j < 18; j++) {
         // Send all Bits from Byte Data in Reverse Order
         for (mask = 0x01; mask > 0; mask <<= 1) { //iterate through bit mask
             if (data[j] & mask) { // Bit ONE
-                seq_values[i*4]=HVAC_MITSUBISHI_BIT_MARK;
-                seq_values[i*4+3]=HVAC_MITSUBISHI_ONE_SPACE+HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i].channel_0=HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i].counter_top=HVAC_MITSUBISHI_ONE_SPACE+HVAC_MITSUBISHI_BIT_MARK;
                 //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
                 i++;
             }
             else { // Bit ZERO
-                seq_values[i*4]=HVAC_MITSUBISHI_BIT_MARK;
-                seq_values[i*4+3]=HVAC_MITSUBISHI_ZERO_SPACE+HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i].channel_0=HVAC_MITSUBISHI_BIT_MARK;
+                seq_values[i].counter_top=HVAC_MITSUBISHI_ZERO_SPACE+HVAC_MITSUBISHI_BIT_MARK;
                 //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
                 i++;
             }
@@ -198,11 +203,12 @@ void constructCommand(
         }
     }
     // End of Packet and retransmission of the Packet
-    seq_values[i*4]=HVAC_MITSUBISHI_RPT_MARK;
-    seq_values[i*4+3]=HVAC_MITSUBISHI_RPT_SPACE+HVAC_MITSUBISHI_RPT_MARK;
-    //APPL_LOG("dat:%X/%X",seq_values[i],seq_values[i+3]);
+    seq_values[i].channel_0=HVAC_MITSUBISHI_RPT_MARK;
+    seq_values[i].counter_top=HVAC_MITSUBISHI_RPT_SPACE+HVAC_MITSUBISHI_RPT_MARK;
+    APPL_LOG("dat:%i/%i",seq_values[i].channel_0,seq_values[i].counter_top);
     i++;
     APPL_LOG("seqs:%i",i);
+    APPL_LOG("dat:%i/%i %i/%i",seq_values[0].channel_0,seq_values[0].counter_top,seq_values[1].channel_0,seq_values[1].counter_top);
 }
 
 void hvac_transmit(void)
@@ -210,12 +216,22 @@ void hvac_transmit(void)
     /*
     nrf_drv_pwm_simple_playback(&m_pwm0, &seq, 3, 0);
     nrf_drv_pwm_simple_playback(&m_pwm0, &seq, 3, NRF_DRV_PWM_FLAG_LOOP);*/
-    constructCommand(HVAC_COLD, 24, FAN_SPEED_AUTO, VANNE_AUTO, false);
-    nrf_drv_pwm_complex_playback(&m_pwm0, &seq, &seq, 1, NRF_DRV_PWM_FLAG_STOP );
+    constructCommand(m_hvac_mode, m_hvac_temp, m_hvac_fanmode, m_hvac_vannemode, m_hvac_off);
+    nrf_drv_pwm_complex_playback(&m_pwm0, &seq, &seq, 1, NRF_DRV_PWM_FLAG_STOP);
+}
+
+void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
+{
+    if (event_type == NRF_DRV_PWM_EVT_FINISHED)
+    {
+        nrf_drv_pwm_stop(&m_pwm0, 0);
+        APPL_LOG("pwm done");
+    }
+    APPL_LOG("pwm evt %X", event_type);
 }
 
 void hvac_init(void)
 {
-    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, NULL));
-    nrf_gpio_cfg(GIO1, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
+    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_handler));
+    //nrf_gpio_cfg(GIO1, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
 }
