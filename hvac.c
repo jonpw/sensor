@@ -53,7 +53,9 @@
 #include "app_pwm.h"
 #include "nrf_drv_pwm.h"
 
-static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0);
+static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0); // for data
+static nrf_drv_pwm_t m_pwm1 = NRF_DRV_PWM_INSTANCE(1); // for carrier
+
 
 nrf_drv_pwm_config_t const config0 =
 {
@@ -72,12 +74,38 @@ nrf_drv_pwm_config_t const config0 =
     .step_mode    = NRF_PWM_STEP_AUTO
 };
 
+nrf_drv_pwm_config_t const config1 =
+{
+    .output_pins =
+    {
+        GIO2 | NRF_DRV_PWM_PIN_INVERTED, // channel 0
+        NRF_DRV_PWM_PIN_NOT_USED,             // channel 1
+        NRF_DRV_PWM_PIN_NOT_USED,             // channel 2
+        NRF_DRV_PWM_PIN_NOT_USED,             // channel 3
+    },
+    .irq_priority = APP_IRQ_PRIORITY_LOW,
+    .base_clock   = NRF_PWM_CLK_1MHz,
+    .count_mode   = NRF_PWM_MODE_UP,
+    .top_value    = 26,
+    .load_mode    = NRF_PWM_LOAD_COMMON,
+    .step_mode    = NRF_PWM_STEP_AUTO
+};
+
 static nrf_pwm_values_wave_form_t seq_values[18*8+2] = {};
+static nrf_pwm_values_common_t seq_carrier[1] = {};
 
 nrf_pwm_sequence_t const seq =
 {
     .values.p_common = seq_values,
     .length          = NRF_PWM_VALUES_LENGTH(seq_values),
+    .repeats         = 0,
+    .end_delay       = 0
+};
+
+nrf_pwm_sequence_t const carrier =
+{
+    .values.p_common = seq_carrier,
+    .length          = NRF_PWM_VALUES_LENGTH(seq_carrier),
     .repeats         = 0,
     .end_delay       = 0
 };
@@ -218,6 +246,7 @@ void hvac_transmit(void)
     nrf_drv_pwm_simple_playback(&m_pwm0, &seq, 3, NRF_DRV_PWM_FLAG_LOOP);*/
     constructCommand(m_hvac_mode, m_hvac_temp, m_hvac_fanmode, m_hvac_vannemode, m_hvac_off);
     nrf_drv_pwm_complex_playback(&m_pwm0, &seq, &seq, 1, NRF_DRV_PWM_FLAG_STOP);
+    nrf_drv_pwm_simple_playback(&m_pwm1, &carrier, 1, NRF_DRV_PWM_FLAG_LOOP);
 }
 
 void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
@@ -233,5 +262,6 @@ void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
 void hvac_init(void)
 {
     APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_handler));
+    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm1, &config1, pwm_handler));
     //nrf_gpio_cfg(GIO1, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
 }
