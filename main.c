@@ -590,7 +590,7 @@ int main(void)
 
     #ifdef PCA662504
     hvac_init();
-    // bme680_init();
+    //bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, config_load_fct config_load)
     // 
     #endif
 

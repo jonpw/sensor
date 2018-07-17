@@ -84,6 +84,8 @@ static fds_record_t       m_record;                 /**< Record description used
 static fds_record_desc_t    bsec_file_desc;
 static fds_record_t         bsec_record;
 
+static fds_record_desc_t    bsec_config_file_desc;
+static fds_record_t         bsec_config_record;
 
 /**
  * @brief   Prepare record structure for write or update request.
@@ -107,6 +109,16 @@ static void bsec_file_prepare_record(uint8_t const * p_buff, uint32_t size)
     // Set up record.
     m_record.file_id           = FILE_ID;
     m_record.key               = BSEC_REC_KEY;
+    m_record.data.p_data       = p_buff;
+    // max size is BSEC_MAX_STATE_BLOB_SIZE
+    m_record.data.length_words = BYTES_TO_WORDS(size); // Align data length to 4 bytes.
+}
+
+static void bsec_config_file_prepare_record(uint8_t const * p_buff, uint32_t size)
+{
+    // Set up record.
+    m_record.file_id           = FILE_ID;
+    m_record.key               = BSEC_CONFIG_REC_KEY;
     m_record.data.p_data       = p_buff;
     // max size is BSEC_MAX_STATE_BLOB_SIZE
     m_record.data.length_words = BYTES_TO_WORDS(size); // Align data length to 4 bytes.
@@ -170,6 +182,28 @@ static ret_code_t bsec_file_create(uint8_t const * p_buff, uint32_t size)
     return err_code;
 }
 
+static ret_code_t bsec_config_file_create(uint8_t const * p_buff, uint32_t size)
+{
+    ret_code_t err_code;
+
+    // Prepare record structure.
+    bsec_config_file_prepare_record(p_buff, size);
+
+    // Create FLASH file with NDEF message.
+    // TODO: This is volatile, so hope it doesnt get interrupted with ndef writes
+    err_code = fds_record_write(&bsec_config_record_desc, &bsec_config_record);
+    if (err_code == FDS_ERR_NO_SPACE_IN_FLASH)
+    {
+        // If there is no space, preserve write request and call Garbage Collector.
+        m_pending_write      = true;
+        m_pending_msg_size   = size;
+        m_p_pending_msg_buff = p_buff;
+        NRF_LOG_INFO("FDS has no free space left, Garbage Collector triggered!");
+        err_code = fds_gc();
+    }
+
+    return err_code;
+}
 
 /**
  * @brief   Flash Data Storage(FDS) event handler.
@@ -295,6 +329,26 @@ ret_code_t bsec_file_update(uint8_t const * p_buff, uint32_t size)
     return err_code;
 }
 
+ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size)
+{
+    ret_code_t err_code;
+
+    // Prepare record structure.
+    bsec_config_file_prepare_record(p_buff, size);
+
+    // Update FLASH file with new NDEF message.
+    err_code = fds_record_update(&bsec_config_record_desc, &bsec_config_record);
+    if (err_code == FDS_ERR_NO_SPACE_IN_FLASH)
+    {
+        // If there is no space, preserve update request and call Garbage Collector.
+        m_pending_update     = true;
+        m_pending_msg_size   = size;
+        m_p_pending_msg_buff = p_buff;
+        NRF_LOG_INFO("FDS has no space left, Garbage Collector triggered!");
+        err_code = fds_gc();
+    }
+    return err_code;
+}
 
 static ret_code_t ndef_file_compose(uint8_t * p_buff, uint32_t size)
 {
@@ -358,6 +412,40 @@ ret_code_t ndef_file_default_message(uint8_t * p_buff, uint32_t * p_size)
 }
 
 uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
+{
+    ret_code_t         err_code;
+    uint8_t count;
+    fds_find_token_t   ftok;
+    fds_flash_record_t flash_record;
+
+    // Always clear token before running new file/record search.
+    memset(&ftok, 0x00, sizeof(fds_find_token_t));
+    count = 0;
+
+    // If there is no record with given key and file ID,
+    // create default message and store in FLASH.
+    // Create default NDEF message.
+    
+    VERIFY_SUCCESS(err_code);
+
+    // Search for NDEF message in FLASH.
+    err_code = fds_record_find(FILE_ID, BSEC_REC_KEY, &bsec_record, &ftok);
+
+    if (err_code == FDS_ERR_NOT_FOUND)
+    {
+        NRF_LOG_INFO("BSEC file record not found, returning zero bytes.", err_code);
+
+        // Create record with default NDEF message.
+        count = 0;
+    }
+    else
+    {
+        count = bsec_record_desc->size;
+    }
+    return count;
+}
+
+uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size)
 {
     ret_code_t         err_code;
     uint8_t count;

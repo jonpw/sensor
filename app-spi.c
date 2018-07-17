@@ -211,7 +211,7 @@ int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, ui
  *
  * @return          none
  */
-void bme_680_sleep(uint32_t t_ms)
+void bme680_sleep(uint32_t t_ms)
 {
     nrf_delay(t_ms);
 }

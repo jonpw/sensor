@@ -150,9 +150,12 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
  * @param[in]   save_intvl          interval at which BSEC state should be saved (in samples)
  *
  * @return      return_values_init	struct with the result of the API and the BSEC library
- */ 
-void bsec_iot_loop(sleep_fct sleep, get_timestamp_us_fct get_timestamp_us, output_ready_fct output_ready,
-    state_save_fct state_save, uint32_t save_intvl);
+ */
+
+void bsec_iot_init2(sleep_fct sleep_b, get_timestamp_us_fct get_timestamp_us_b, output_ready_fct output_ready_b,
+                    state_save_fct state_save_b, uint32_t save_intvl_b);
+
+void bsec_iot_loop();
 
 #ifdef __cplusplus
 }
