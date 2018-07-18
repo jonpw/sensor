@@ -67,6 +67,8 @@ NRF_LOG_MODULE_REGISTER();
 
 #define FILE_ID 0x1111                              /**< NDEF message file ID. */
 #define REC_KEY 0x2222                              /**< NDEF message record KEY. */
+#define BSEC_REC_KEY 0x3333
+#define BSEC_CONFIG_REC_KEY 0x4444
 
 static const uint8_t m_url[] =                      /**< Default NDEF message: URL "nordicsemi.com". */
     {'n', 'o', 'r', 'd', 'i', 'c', 's', 'e', 'm', 'i', '.', 'c', 'o', 'm'};
@@ -81,10 +83,10 @@ static uint8_t const * m_p_pending_msg_buff = NULL; /**< Pending write/update re
 static fds_record_desc_t  m_record_desc;            /**< Record descriptor. */
 static fds_record_t       m_record;                 /**< Record description used for writes. */
 
-static fds_record_desc_t    bsec_file_desc;
+static fds_record_desc_t    bsec_record_desc;
 static fds_record_t         bsec_record;
 
-static fds_record_desc_t    bsec_config_file_desc;
+static fds_record_desc_t    bsec_config_record_desc;
 static fds_record_t         bsec_config_record;
 
 /**
@@ -440,7 +442,7 @@ uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
     }
     else
     {
-        count = bsec_record_desc->size;
+        count = bsec_record.data.length_words*4;
     }
     return count;
 }
@@ -474,7 +476,7 @@ uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size)
     }
     else
     {
-        count = bsec_record_desc->size;
+        count = bsec_record.data.length_words*4;
     }
     return count;
 }

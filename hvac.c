@@ -246,7 +246,7 @@ void hvac_transmit(void)
     nrf_drv_pwm_simple_playback(&m_pwm0, &seq, 3, NRF_DRV_PWM_FLAG_LOOP);*/
     constructCommand(m_hvac_mode, m_hvac_temp, m_hvac_fanmode, m_hvac_vannemode, m_hvac_off);
     nrf_drv_pwm_complex_playback(&m_pwm0, &seq, &seq, 1, NRF_DRV_PWM_FLAG_STOP);
-    nrf_drv_pwm_simple_playback(&m_pwm1, &carrier, 1, NRF_DRV_PWM_FLAG_LOOP);
+    nrf_drv_pwm_simple_playback(&m_pwm1, &carrier, 200, NRF_DRV_PWM_FLAG_LOOP);
 }
 
 void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
