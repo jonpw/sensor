@@ -61,7 +61,7 @@ nrf_drv_pwm_config_t const config0 =
 {
     .output_pins =
     {
-        GIO1 | NRF_DRV_PWM_PIN_INVERTED, // channel 0
+        GIO2, // channel 0
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 1
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 2
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 3
@@ -78,7 +78,7 @@ nrf_drv_pwm_config_t const config1 =
 {
     .output_pins =
     {
-        GIO2 | NRF_DRV_PWM_PIN_INVERTED, // channel 0
+        GIO1, // channel 0
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 1
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 2
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 3
@@ -253,7 +253,7 @@ void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
 {
     if (event_type == NRF_DRV_PWM_EVT_FINISHED)
     {
-        nrf_drv_pwm_stop(&m_pwm0, 0);
+        nrf_drv_pwm_stop(&m_pwm1, 0);
         APPL_LOG("pwm done");
     }
     APPL_LOG("pwm evt %X", event_type);
@@ -261,7 +261,9 @@ void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
 
 void hvac_init(void)
 {
+    nrf_gpio_cfg(GIO2, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_NOPULL, NRF_GPIO_PIN_H0D1, NRF_GPIO_PIN_NOSENSE);
     APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_handler));
-    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm1, &config1, pwm_handler));
+    seq_carrier[0] = 13;
+    APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm1, &config1, NULL));
     //nrf_gpio_cfg(GIO1, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
 }

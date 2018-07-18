@@ -79,19 +79,19 @@
 #include "mydns.h"
 
 //char broker_hostname[32] = "broker.hivemq.org";
-char broker_hostname[32] = "archer.local";
+char broker_hostname[32] = DEFAULT_BROKER;
 
-uint16_t m_broker_port = 8883;       /**< Port number of MQTT Broker being used. */
+uint16_t m_broker_port = DEFAULT_BROKER_PORT;       /**< Port number of MQTT Broker being used. */
 
 // TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
 char                           m_client_id[16];                         /**< Unique MQTT client identifier. */
 
 //uint8_t identity[] = {0x43, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x74, 0x79};
-const uint8_t identity[] = "testapp123456";
-const uint8_t shared_secret[] = {0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b};
+const uint8_t identity[] = DEFAULT_IDENTITY;
+const uint8_t shared_secret[] = DEFAULT_SHARED_SECRET;
 
-char mqtt_username[16] = "user";
-char mqtt_password[16] = "pass";
+char mqtt_username[16] = DEFAULT_MQTT_USER;
+char mqtt_password[16] = DEFAULT_MQTT_PASS;
 mqtt_username_t m_mqtt_username = {.p_utf_str = &mqtt_username, .utf_strlen = 0};
 mqtt_password_t m_mqtt_password = {.p_utf_str = &mqtt_password, .utf_strlen = 0};
 

@@ -286,7 +286,7 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }
             case BSP_BUTTON_1:
             {
-                hvac_transmit();
+                mqtt_begin(&ipaddr_last_dns);
                 /*
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
@@ -477,6 +477,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     {
         m_display_state = LEDS_CONNECTED;
         m_app_state = STATE_APP_DNS_LOOKUP;
+        //mqtt_begin(&ipaddr_last_dns);
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
     {
@@ -493,7 +494,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     {
         m_display_state = LEDS_MQTT_FAIL;
         mqtt_begin(&ipaddr_last_dns);
-        m_app_state = STATE_APP_FAULT;
+        m_app_state = STATE_APP_MQTT_CONNECTING;
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
     {   
@@ -503,8 +504,8 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         {
             .topic =
             {
-                .p_utf_str  = m_topic_control,
-                .utf_strlen = strlen(m_topic_control)
+                .p_utf_str  = TOPIC_HVAC,
+                .utf_strlen = strlen(TOPIC_HVAC)
             },
             .qos = MQTT_QoS_1_ATLEAST_ONCE
         };
