@@ -61,7 +61,7 @@ nrf_drv_pwm_config_t const config0 =
 {
     .output_pins =
     {
-        GIO2, // channel 0
+        GIO2  | NRF_DRV_PWM_PIN_INVERTED, // channel 0
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 1
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 2
         NRF_DRV_PWM_PIN_NOT_USED,             // channel 3

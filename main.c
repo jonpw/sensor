@@ -286,7 +286,8 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             }
             case BSP_BUTTON_1:
             {
-                mqtt_begin(&ipaddr_last_dns);
+                //mqtt_begin(&ipaddr_last_dns);
+                hvac_transmit();
                 /*
                 mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
