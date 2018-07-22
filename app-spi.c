@@ -50,6 +50,9 @@
 #include "nrf_log_default_backends.h"
 #include "nrf_spi_mngr.h"
 #include "app-spi.h"
+#include "bsec_integration.h"
+#include "ndef_file_m.h"
+
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4
@@ -112,10 +115,7 @@ void bma280_spi_get(void)
     APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &transaction_1));
 }
 
-void bma280_spi_init(void)
-{
-    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
-}
+
 
 #endif
 
@@ -227,6 +227,29 @@ int64_t get_timestamp_us()
     uint32_t app_time_ticks = app_timer_cnt_get();
     system_current_time = app_time_ticks * 1000000 / APP_TIMER_CLOCK_FREQ;
     return system_current_time;
+}
+
+
+void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status)
+{
+
+}
+
+void bme680_begin(void)
+{
+    bsec_iot_loop();
+}
+
+void bme680_stop(void)
+{
+
+}
+
+void bma280_spi_init(void)
+{
+    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
+    bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
+    bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
 }
 
 #endif

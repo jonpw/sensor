@@ -122,7 +122,7 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr);
 void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_evt);
 
 //TODO: Preliminary mqtt_begin
-void mqtt_begin(ip_addr_t * ipaddr)
+void mqtt_begin(ip_addr_t * ipaddr, uint16_t addr_size)
 {
     uint32_t err_code;
     APPL_LOG("mqtt_begin: Connecting to %08X%08X%08X%08X", ipaddr->addr[0], ipaddr->addr[1], ipaddr->addr[2], ipaddr->addr[3]);
@@ -131,8 +131,19 @@ void mqtt_begin(ip_addr_t * ipaddr)
         APPL_LOG("Already connecting...")
         return;
     }
-    mqtt_state = STATE_MQTT_CONNECTING;
     err_code = app_mqtt_connect(ipaddr);
+    if (err_code)
+    {
+        app_state_event_data_t state_update;
+        state_update.evt_type = STATE_EVENT_MQTT_CONNECT_FAILED;
+        err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
+
+        mqtt_state = STATE_MQTT_IDLE;
+    }
+    else
+    {
+        mqtt_state = STATE_MQTT_CONNECTING;
+    }
 }
 
 /**@brief Connect to MQTT broker. */
@@ -155,13 +166,13 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr)
     m_app_mqtt_client.p_will_topic.utf_strlen = strlen(m_app_mqtt_client.p_will_topic.p_utf_str);
     m_app_mqtt_client.p_will_message.p_bin_str  = sprintf(m_app_mqtt_client.p_will_message.p_bin_str, "%08X%08X", dev_id_hi, dev_id_lo);
     m_app_mqtt_client.p_will_message.bin_strlen = strlen(m_app_mqtt_client.p_will_message.p_bin_str);*/
-    err_code = mqtt_connect(&m_app_mqtt_client);
     APPL_LOG("connecting u:%s p:%s cid:%s id:%s psk:%s",
                      m_app_mqtt_client.p_user_name->p_utf_str, 
                      m_app_mqtt_client.p_password->p_utf_str, 
                      m_app_mqtt_client.client_id.p_utf_str, 
                      m_app_mqtt_client.p_security_settings->p_psk->p_identity,
-                     m_app_mqtt_client.p_security_settings->p_psk->p_secret_key)
+                     m_app_mqtt_client.p_security_settings->p_psk->p_secret_key);
+    err_code = mqtt_connect(&m_app_mqtt_client);
     APPL_LOG("app_mqtt_connect: mqtt_connect returned %X", err_code);
     return err_code;
 }

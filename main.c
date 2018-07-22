@@ -92,7 +92,7 @@
 #include "mqttapp.h"
 #include "mydns.h"
 #include "nrf_temp.h"
-//#include "app-spi.h"
+#include "app-spi.h"
 
 #include "hvac.h"
 
@@ -132,14 +132,12 @@ void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-
 /**@brief Function for the Event Scheduler initialization.
  */
 static void scheduler_init(void)
 {
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 }
-
 
 /**@brief Function for the LEDs initialization.
  *
@@ -154,7 +152,6 @@ static void leds_init(void)
     m_display_state = LEDS_INACTIVE;
     bsp_board_leds_off();
 }
-
 
 /**@brief Timer callback used for controlling board LEDs to represent application state.
  *
@@ -234,7 +231,7 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
             }
             else
             {
-             bsp_board_led_off(1);       
+             bsp_board_led_off(1);
             }
             
             bsp_board_led_off(2);
@@ -255,20 +252,17 @@ static void blink_timeout_handler(iot_timer_time_in_ms_t wall_clock_value)
     }
 }
 
-void app_sched_pub_temp(void);
-
 static void button_event_handler(uint8_t pin_no, uint8_t button_action)
 {
     uint32_t err_code;
 
-
     if (button_action == APP_BUTTON_PUSH)
     {
-            if (m_app_state == STATE_APP_DNS_LOOKUP)
+            /*if (m_app_state == STATE_APP_DNS_LOOKUP)
             {
                 mqtt_begin(&ipaddr_last_dns);
                 return;
-            }
+            }*/
 
         switch (pin_no)
         {
@@ -330,7 +324,6 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
     }
 }
 
-
 static void button_init(void)
 {
     uint32_t err_code;
@@ -371,6 +364,13 @@ static void system_timer_callback(iot_timer_time_in_ms_t wall_clock_value)
     UNUSED_VARIABLE(mqtt_live());
 }
 
+static void mqtt_timer_callback(void * p_context)
+{
+    UNUSED_VARIABLE(p_context);
+    uint32_t err_code;
+    err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+    APP_ERROR_CHECK(err_code);
+}
 
 /**@brief Function for updating the wall clock of the IoT Timer module.
  *
@@ -383,6 +383,7 @@ static void iot_timer_tick_callback(void * p_context)
     uint32_t err_code = iot_timer_update();
     APP_ERROR_CHECK(err_code);
 }
+
 #if defined(PCA252432)
 void app_sched_pub_temp(void)
 {
@@ -422,8 +423,12 @@ static void timers_init(void)
                                 iot_timer_tick_callback);
 
     APP_ERROR_CHECK(err_code);
-}
 
+    err_code = app_timer_create(&m_mqtt_connect_timer,
+                                APP_TIMER_MODE_SINGLE_SHOT,
+                                mqtt_timer_callback);
+    APP_ERROR_CHECK(err_code);  
+}
 
 /**@brief Function for initializing the IoT Timer. */
 static void iot_timer_init(void)
@@ -469,6 +474,7 @@ static void log_init(void)
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size)
 {
     ip_addr_t * ipaddr = BROKER_MOSQUITTO;
+    ret_code_t err_code;
     if (p_event_data->evt_type == STATE_EVENT_GO)
     {        
         m_app_state = STATE_APP_CONNECTABLE;
@@ -478,12 +484,14 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     {
         m_display_state = LEDS_CONNECTED;
         m_app_state = STATE_APP_DNS_LOOKUP;
-        //mqtt_begin(&ipaddr_last_dns);
+        err_code = app_timer_start(m_mqtt_connect_timer, APP_TIMER_TICKS(3000), NULL);
+        APP_ERROR_CHECK(err_code);
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        mqtt_begin(&ipaddr_last_dns);
+        err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+        APP_ERROR_CHECK(err_code);
         m_app_state = STATE_APP_MQTT_CONNECTING;
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_FAIL)
@@ -494,13 +502,15 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT_FAILED)
     {
         m_display_state = LEDS_MQTT_FAIL;
-        mqtt_begin(&ipaddr_last_dns);
+        err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+        APP_ERROR_CHECK(err_code);
         m_app_state = STATE_APP_MQTT_CONNECTING;
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT)
     {   
         m_display_state = LEDS_ACTIVE_IDLE;
         m_app_state = STATE_APP_ACTIVE_IDLE;
+        app_timer_stop(m_mqtt_connect_timer);
         mqtt_topic_t topic =
         {
             .topic =
@@ -516,7 +526,8 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        mqtt_begin(&ipaddr_last_dns);
+        err_code = app_timer_start(m_mqtt_connect_timer, APP_TIMER_TICKS(3000), NULL);
+        APP_ERROR_CHECK(err_code);
         m_app_state = STATE_APP_FAULT;
     }   
     else if (p_event_data->evt_type == STATE_EVENT_CONNECTION_LOST)
@@ -569,7 +580,7 @@ int main(void)
     button_init();
     //    nrf_temp_init(); // sd memory conflict issue
     #ifdef PCA252432
-//    bma280_spi_init();
+      bma280_spi_init();
     #endif
 
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
@@ -592,14 +603,14 @@ int main(void)
 
     #ifdef PCA662504
     hvac_init();
-    //bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, config_load_fct config_load)
     // 
     #endif
 
 
+
     // Enter main loop.
     for (;;)
-    {      
+    {
         app_sched_execute();
 
         if (NRF_LOG_PROCESS() == false)

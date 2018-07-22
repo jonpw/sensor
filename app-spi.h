@@ -51,6 +51,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 #include "nrf_spi_mngr.h"
+#include "bsec_integration.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4

@@ -116,7 +116,7 @@ extern nrf_tls_preshared_key_t m_preshared_key;
 extern nrf_tls_key_settings_t m_tls_keys;
 
 //TODO: Preliminary mqtt_begin
-void mqtt_begin(ip_addr_t * ipaddr);
+void mqtt_begin(ip_addr_t * ipaddr, uint16_t addr_size);
 
 int mqtt_app_init(void);
 

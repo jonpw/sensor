@@ -167,6 +167,7 @@ typedef enum
 
 APP_TIMER_DEF(m_app_timer);                                                                         /**< Timer instance used for application state machine. */
 APP_TIMER_DEF(m_iot_timer_tick_src_id);                                                             /**< App timer instance used to update the IoT timer wall clock. */
+APP_TIMER_DEF(m_mqtt_connect_timer);
 
 #define APP_ENABLE_LOGS                     1                                                       /**< Enable logs in the application. */
 
