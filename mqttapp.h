@@ -83,7 +83,7 @@ extern uint16_t m_broker_port;       /**< Port number of MQTT Broker being used.
 
 extern char topic_base[32];
 
-#define DEFAULT_BROKER						"archer.local"
+#define DEFAULT_BROKER						"archer"
 #define DEFAULT_BROKER_PORT					8883
 #define DEFAULT_IDENTITY					"testapp123456"
 #define DEFAULT_SHARED_SECRET				{0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x50, 0x53, 0x4b}

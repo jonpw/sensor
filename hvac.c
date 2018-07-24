@@ -56,6 +56,7 @@
 static nrf_drv_pwm_t m_pwm0 = NRF_DRV_PWM_INSTANCE(0); // for data
 static nrf_drv_pwm_t m_pwm1 = NRF_DRV_PWM_INSTANCE(1); // for carrier
 
+#define HVAC_IR 1
 
 nrf_drv_pwm_config_t const config0 =
 {

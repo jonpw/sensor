@@ -77,6 +77,7 @@
 #include "main.h"
 #include "mqttapp.h"
 #include "mydns.h"
+#include "hvac.h"
 
 //char broker_hostname[32] = "broker.hivemq.org";
 char broker_hostname[32] = DEFAULT_BROKER;
@@ -125,6 +126,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
 void mqtt_begin(ip_addr_t * ipaddr, uint16_t addr_size)
 {
     uint32_t err_code;
+    APPL_LOG("mqtt_begin: addr size %i", addr_size);
     APPL_LOG("mqtt_begin: Connecting to %08X%08X%08X%08X", ipaddr->addr[0], ipaddr->addr[1], ipaddr->addr[2], ipaddr->addr[3]);
     if (mqtt_state == STATE_MQTT_CONNECTING)
     {
@@ -325,8 +327,8 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
         }
         case MQTT_EVT_PUBLISH:
         {
-            APPL_LOG (">> Data length 0x%04lX", p_evt->param.publish.message.payload.bin_strlen);
-            APPL_LOG (">> Topic length 0x%04lX", p_evt->param.publish.message.topic.topic.utf_strlen);
+            APPL_LOG (">> Data %s length 0x%04lX", p_evt->param.publish.message.payload.p_bin_str, p_evt->param.publish.message.payload.bin_strlen);
+            APPL_LOG (">> Topic %s length 0x%04lX", p_evt->param.publish.message.topic.topic.p_utf_str, p_evt->param.publish.message.topic.topic.utf_strlen);
 
 /*
             if (p_evt->param.publish.message.payload.bin_strlen == 1)
@@ -353,10 +355,15 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
             //}
 
             // our topics first
+            APPL_LOG("topic base: %s", topic_base);
+                uint8_t * ourtopic;
+                uint8_t ourtopic_len;
+
             if (strstr(p_evt->param.publish.message.topic.topic.p_utf_str, topic_base) == p_evt->param.publish.message.topic.topic.p_utf_str)
             {
-                uint8_t * ourtopic;
                 ourtopic = p_evt->param.publish.message.topic.topic.p_utf_str + strlen(topic_base);
+                ourtopic_len = p_evt->param.publish.message.topic.topic.utf_strlen - strlen(topic_base);
+                APPL_LOG("our topic: %s", ourtopic);
 
             }
             #if defined(PCA252432)
@@ -365,9 +372,9 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 bma280_spi_get();
             }
             #endif
-
+#define HVAC_IR
             #if defined(HVAC_IR)
-            if (strcmp(ourtopic, TOPIC_HVAC_MODE) == 0)
+            if (strncmp(ourtopic, TOPIC_HVAC_MODE, ourtopic_len) == 0)
             {
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "hot") == 0) m_hvac_mode = HVAC_HOT;
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "cold") == 0) m_hvac_mode = HVAC_COLD;
@@ -377,15 +384,15 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 hvac_transmit();
             }
 
-            if (strcmp(ourtopic, TOPIC_HVAC_TEMP) == 0)
+            if (strncmp(ourtopic, TOPIC_HVAC_TEMP, ourtopic_len) == 0)
             {
-                uint8_t hvac_ir_temp = strtoul(p_evt->param.publish.message.payload.p_bin_str);
+                uint8_t hvac_ir_temp = atoi(p_evt->param.publish.message.payload.p_bin_str);
                 if (hvac_ir_temp > 31) hvac_ir_temp = 31;
                 if (hvac_ir_temp < 16) hvac_ir_temp = 16;
                 hvac_transmit();
             }
 
-            if (strcmp(ourtopic, TOPIC_HVAC_FAN_MODE) == 0)
+            if (strncmp(ourtopic, TOPIC_HVAC_FAN_MODE, ourtopic_len) == 0)
             {
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "1") == 0) m_hvac_fanmode = FAN_SPEED_1;
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "2") == 0) m_hvac_fanmode = FAN_SPEED_2;
@@ -397,7 +404,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 hvac_transmit();
             }
 
-            if (strcmp(ourtopic, TOPIC_HVAC_VANNE_MODE) == 0)
+            if (strncmp(ourtopic, TOPIC_HVAC_VANNE_MODE, ourtopic_len) == 0)
             {
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "auto") == 0) m_hvac_vannemode = VANNE_AUTO;
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "1") == 0) m_hvac_vannemode = VANNE_H1;
@@ -409,7 +416,9 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 hvac_transmit();
             }
 
-            if (strcmp(ourtopic, TOPIC_HVAC_POWER) == 0)
+            APPL_LOG("%s : %s : %i", ourtopic, TOPIC_HVAC_POWER, strncmp(ourtopic, TOPIC_HVAC_POWER, ourtopic_len));
+
+            if (strncmp(ourtopic, TOPIC_HVAC_POWER, ourtopic_len) == 0)
             {
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "on") == 0) m_hvac_off = false;
                 if (strcmp(p_evt->param.publish.message.payload.p_bin_str, "off") == 0) m_hvac_off = true;

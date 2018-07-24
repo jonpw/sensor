@@ -368,8 +368,11 @@ static void mqtt_timer_callback(void * p_context)
 {
     UNUSED_VARIABLE(p_context);
     uint32_t err_code;
-    err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+    //app_dns_lookup(broker_hostname);
+    APPL_LOG("mqtt callback: Connecting to %08X%08X%08X%08X", ipaddr_last_dns.addr[0], ipaddr_last_dns.addr[1], ipaddr_last_dns.addr[2], ipaddr_last_dns.addr[3]);
+                err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(ipaddr_last_dns), mqtt_begin);
     APP_ERROR_CHECK(err_code);
+
 }
 
 /**@brief Function for updating the wall clock of the IoT Timer module.
@@ -485,19 +488,21 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_CONNECTED;
         m_app_state = STATE_APP_DNS_LOOKUP;
         err_code = app_timer_start(m_mqtt_connect_timer, APP_TIMER_TICKS(3000), NULL);
-        APP_ERROR_CHECK(err_code);
+        APP_ERROR_CHECK(err_code);       
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_OK)
     {
         m_display_state = LEDS_MQTT_CONNECTING;
-        err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
-        APP_ERROR_CHECK(err_code);
         m_app_state = STATE_APP_MQTT_CONNECTING;
+            err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+    APP_ERROR_CHECK(err_code);
     }
     else if (p_event_data->evt_type == STATE_EVENT_DNS_FAIL)
     {
         m_display_state = LEDS_DNS_FAIL;
         m_app_state = STATE_APP_FAULT;
+                err_code = app_timer_start(m_mqtt_connect_timer, APP_TIMER_TICKS(3000), NULL);
+        APP_ERROR_CHECK(err_code);   
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT_FAILED)
     {
@@ -511,15 +516,15 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         m_display_state = LEDS_ACTIVE_IDLE;
         m_app_state = STATE_APP_ACTIVE_IDLE;
         app_timer_stop(m_mqtt_connect_timer);
-        mqtt_topic_t topic =
-        {
-            .topic =
-            {
-                .p_utf_str  = TOPIC_HVAC,
-                .utf_strlen = strlen(TOPIC_HVAC)
-            },
-            .qos = MQTT_QoS_1_ATLEAST_ONCE
-        };
+        mqtt_topic_t topic;
+        topic.qos = MQTT_QoS_1_ATLEAST_ONCE;
+        char subtopic[32];
+        //topic.topic.utf_strlen = sprintf(subtopic, "%s%s", topic_base, "#");
+        strcpy(subtopic, topic_base);
+        strcat(subtopic, "#");
+        topic.topic.utf_strlen = strlen(subtopic);
+        APPL_LOG("sub to: %s %s %s, %i", topic_base, "#", subtopic, topic.topic.utf_strlen);
+        topic.topic.p_utf_str = subtopic;
         app_mqtt_subscribe(&topic);
         // todo: should we handle initial pubs here?
     }
