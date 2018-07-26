@@ -84,6 +84,16 @@ nrf_spi_mngr_transfer_t bma_transfers[] =
     NRF_SPI_MNGR_TRANSFER(m_master_data_0, sizeof(m_master_data_0), m_master_buffer_rx, sizeof(m_master_buffer_rx))
 };
 
+nrf_spi_mngr_transaction_t bma_init_transaction =
+{
+    .begin_callback      = bma280_init_begin,
+    .end_callback        = bma280_init_end,
+    .p_user_data         = bma_transfers,
+    .p_transfers         = bma_transfers,
+    .number_of_transfers = sizeof(bma_transfers) / sizeof(bma_transfers[0]),
+    .p_required_spi_cfg  = &bma_spi_config
+};
+
 nrf_spi_mngr_transaction_t transaction_1 =
 {
     .begin_callback      = bma280_spi_begin,
@@ -134,19 +144,29 @@ nrf_drv_spi_config_t const bme_spi_config =
     .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
 };
 
-uint8_t       bme_data_tx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};           /**< TX buffer. */
-uint8_t       bme_buffer_rx[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
+uint8_t       bme_data_tx[] = {0x00};           /**< TX buffer. */
+uint8_t       bme_buffer_rx[] = {0x00, 0x00};    /**< RX buffer. */
 
 nrf_spi_mngr_transfer_t bme_transfers[] =
 {
     NRF_SPI_MNGR_TRANSFER(bme_data_tx, sizeof(bme_data_tx), bme_buffer_rx, sizeof(bme_buffer_rx))
 };
 
+nrf_spi_mngr_transaction_t bme_init_transaction =
+{
+    .begin_callback      = bme680_init_begin,
+    .end_callback        = bme680_init_end,
+    .p_user_data         = NULL,
+    .p_transfers         = bme_transfers,
+    .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
+    .p_required_spi_cfg  = &bme_spi_config
+};
+
 nrf_spi_mngr_transaction_t bme_transaction =
 {
     .begin_callback      = NULL,
     .end_callback        = NULL,
-    .p_user_data         = bme_transfers,
+    .p_user_data         = NULL,
     .p_transfers         = bme_transfers,
     .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
     .p_required_spi_cfg  = &bme_spi_config
@@ -213,7 +233,7 @@ int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, ui
  */
 void bme680_sleep(uint32_t t_ms)
 {
-    nrf_delay(t_ms);
+    nrf_delay_ms(t_ms);
 }
 
 /*!
@@ -245,12 +265,35 @@ void bme680_stop(void)
 
 }
 
+void bme680_init_begin(void *p_user_data)
+{
+    APPL_LOG("Begin BME680 detect")
+}
+
+void bme680_init_end(ret_code_t result, void *p_user_data)
+{
+    APPL_LOG("BME680 detect result: %s", nrf_strerror_get(result));
+    APPL_LOG("BME680 detect received: %s", bme_buffer_rx);
+    /*
+    if (bme_buffer_rx[1] == 0x61)
+    {
+        APPL_LOG("BME680 detected OK")
+        bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
+        bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
+    }
+    else
+    {
+        APPL_LOG("BME680 not detected")
+    }*/
+}
+
 void bma280_spi_init(void)
 {
+    APPL_LOG("begin spi init");
     APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
-    bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
-    bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
+    // begin BME680 check
+    bme_data_tx[0] = (0x50 | 0x80);
+    APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_init_transaction));
 }
 
 #endif
-

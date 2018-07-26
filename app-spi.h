@@ -77,6 +77,9 @@ nrf_spi_mngr_transaction_t transaction_1;
 
 void bma280_spi_begin(void *p_user_data);
 void bma280_spi_end(ret_code_t result, void *p_user_data);
+void bme680_init_begin(void *p_user_data);
+void bme680_init_end(ret_code_t result, void *p_user_data);
+
 extern void bma280_spi_get(void);
 
 #endif

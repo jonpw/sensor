@@ -3193,7 +3193,7 @@
 
 
 #ifndef MEMORY_MANAGER_MEDIUM_BLOCK_COUNT
-#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 12
+#define MEMORY_MANAGER_MEDIUM_BLOCK_COUNT 8
 #endif
 
 // <o> MEMORY_MANAGER_MEDIUM_BLOCK_SIZE -  Size of each memory blocks identified as 'medium' block. 
@@ -3207,7 +3207,7 @@
 
 
 #ifndef MEMORY_MANAGER_LARGE_BLOCK_COUNT
-#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 4
+#define MEMORY_MANAGER_LARGE_BLOCK_COUNT 2
 #endif
 
 // <o> MEMORY_MANAGER_LARGE_BLOCK_SIZE -  Size of each memory blocks identified as 'large' block. 
@@ -7316,7 +7316,7 @@
 // <e> NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED - lwip - lwIP stack for nRF5x
 //==========================================================
 #ifndef NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED
-#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 0
+#define NRF_LWIP_DRIVER_CONFIG_LOG_ENABLED 1
 #endif
 // <o> NRF_LWIP_DRIVER_CONFIG_LOG_LEVEL  - Default Severity level
  

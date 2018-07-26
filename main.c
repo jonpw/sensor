@@ -587,7 +587,7 @@ int main(void)
     #ifdef PCA252432
       bma280_spi_init();
     #endif
-
+    bma280_spi_init();
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
     m_app_state = STATE_APP_IDLE;
