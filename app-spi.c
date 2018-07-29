@@ -156,7 +156,7 @@ nrf_spi_mngr_transaction_t bme_init_transaction =
 {
     .begin_callback      = bme680_init_begin,
     .end_callback        = bme680_init_end,
-    .p_user_data         = NULL,
+    .p_user_data         = bme_transfers,
     .p_transfers         = bme_transfers,
     .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
     .p_required_spi_cfg  = &bme_spi_config
@@ -164,9 +164,9 @@ nrf_spi_mngr_transaction_t bme_init_transaction =
 
 nrf_spi_mngr_transaction_t bme_transaction =
 {
-    .begin_callback      = NULL,
-    .end_callback        = NULL,
-    .p_user_data         = NULL,
+    .begin_callback      = bme680_cb_begin,
+    .end_callback        = bme680_cb_end,
+    .p_user_data         = bme_transfers,
     .p_transfers         = bme_transfers,
     .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
     .p_required_spi_cfg  = &bme_spi_config
@@ -265,16 +265,24 @@ void bme680_stop(void)
 
 }
 
+void bme680_cb_begin(void *p_user_data)
+{
+    APPL_LOG("Begin BME680 detect: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
+}
+
+void bme680_cb_end(ret_code_t result, void *p_user_data)
+{
+    APPL_LOG("BME680 detect received: %s %X", nrf_strerror_get(result), (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data[1]);
+}
+
 void bme680_init_begin(void *p_user_data)
 {
-    APPL_LOG("Begin BME680 detect")
+    APPL_LOG("Begin BME680 detect: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
 }
 
 void bme680_init_end(ret_code_t result, void *p_user_data)
 {
-    APPL_LOG("BME680 detect result: %s", nrf_strerror_get(result));
-    APPL_LOG("BME680 detect received: %s", bme_buffer_rx);
-    /*
+    APPL_LOG("BME680 detect received: %s %X", nrf_strerror_get(result), *(uint16_t*)(((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data);
     if (bme_buffer_rx[1] == 0x61)
     {
         APPL_LOG("BME680 detected OK")
@@ -284,13 +292,13 @@ void bme680_init_end(ret_code_t result, void *p_user_data)
     else
     {
         APPL_LOG("BME680 not detected")
-    }*/
+    }
 }
 
 void bma280_spi_init(void)
 {
     APPL_LOG("begin spi init");
-    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bma_spi_config));
+    APP_ERROR_CHECK(nrf_spi_mngr_init(&m_nrf_spi_mngr, &bme_spi_config));
     // begin BME680 check
     bme_data_tx[0] = (0x50 | 0x80);
     APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_init_transaction));

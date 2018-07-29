@@ -95,10 +95,10 @@ extern "C" {
 #define RTS_PIN_NUMBER  18	
 #define HWFC            false
 
-#define SPI_SCK_PIN   	28  // SPI clock GPIO pin number.
-#define SPI_MOSI_PIN  	30  // SPI Master Out Slave In GPIO pin number.
-#define SPI_MISO_PIN  	29  // SPI Master In Slave Out GPIO pin number.
-#define SPI_SS_PIN    	24  // SPI Slave Select GPIO pin number.
+#define SPI_SCK_PIN   	19  // SPI clock GPIO pin number.
+#define SPI_MOSI_PIN  	18  // SPI Master Out Slave In GPIO pin number.
+#define SPI_MISO_PIN  	20  // SPI Master In Slave Out GPIO pin number.
+#define SPI_SS_PIN    	0  // SPI Slave Select GPIO pin number.
 
 #define BMA280_SS_PIN		24
 #define BMA280_INT1		22
@@ -123,6 +123,8 @@ extern "C" {
 
 #define GIO1			26
 #define GIO2			25	
+
+#define HVAC_IR
 
 #define TWI_ADDR_VL53	0x29
 #define TWI_ADDR_BNO055 0x28

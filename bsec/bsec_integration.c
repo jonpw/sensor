@@ -78,6 +78,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "app_timer.h"
+
 #include "bsec_integration.h"
 
 /**********************************************************************************************************************/
@@ -487,6 +489,9 @@ void bsec_iot_init2(sleep_fct sleep_b, get_timestamp_us_fct get_timestamp_us_b, 
 
 void bsec_iot_loop()
 {
+
+    uint32_t err_code;
+
     /* get the timestamp in nanoseconds before calling bsec_sensor_control() */
     time_stamp = get_timestamp_us() * 1000;
 	

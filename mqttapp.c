@@ -372,7 +372,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 bma280_spi_get();
             }
             #endif
-#define HVAC_IR
+
             #if defined(HVAC_IR)
             if (strncmp(ourtopic, TOPIC_HVAC_MODE, ourtopic_len) == 0)
             {

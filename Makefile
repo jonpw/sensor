@@ -89,6 +89,8 @@ SRC_FILES += \
   $(PROJ_DIR)/ndef_file_m.c \
   $(PROJ_DIR)/app-spi.c \
   $(PROJ_DIR)/hvac.c \
+  $(PROJ_DIR)/bsec/bsec_integration.c \
+  $(PROJ_DIR)/BME680_driver/bme680.c \
   $(SDK_ROOT)/external/cJSON/cJSON.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_msg.c \
   $(SDK_ROOT)/components/nfc/ndef/uri/nfc_uri_rec.c \

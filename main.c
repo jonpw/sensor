@@ -585,7 +585,7 @@ int main(void)
     button_init();
     //    nrf_temp_init(); // sd memory conflict issue
     #ifdef PCA252432
-      bma280_spi_init();
+    //  bma280_spi_init();
     #endif
     bma280_spi_init();
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
