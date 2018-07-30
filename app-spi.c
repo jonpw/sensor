@@ -144,8 +144,8 @@ nrf_drv_spi_config_t const bme_spi_config =
     .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
 };
 
-uint8_t       bme_data_tx[] = {0x00};           /**< TX buffer. */
-uint8_t       bme_buffer_rx[] = {0x00, 0x00};    /**< RX buffer. */
+uint8_t       bme_data_tx[] = {0x00, 0x00, 0x00};           /**< TX buffer. */
+uint8_t       bme_buffer_rx[] = {0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
 
 nrf_spi_mngr_transfer_t bme_transfers[] =
 {
@@ -211,17 +211,19 @@ int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, u
  */
 int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len)
 {
-    uint32_t err_code;
-    bme_data_tx[0] = (reg_addr | 0x80);
-    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].tx_length = 1;
-    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].rx_length = data_len+1;
-    err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
-    while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
-    {
+    //uint32_t err_code;
+    //uint8_t * tx_len = &(bme_transaction.p_transfers[0].tx_length);
+    //uint8_t * rx_len = &(bme_transaction.p_transfers[0].rx_length);
+    //bme_data_tx[0] = (reg_addr | 0x80);
+    //*tx_len = 1;
+    //*rx_len = data_len+1;
+    //err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
+    //while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
+    //{
         // nothing
-    }
-    memcpy(bme_buffer_rx+1, reg_data_ptr, data_len);
-    return err_code;
+    //}
+    //memcpy(reg_data_ptr, bme_buffer_rx+1, data_len);
+    //return err_code;
 }
 
 /*!
@@ -267,12 +269,12 @@ void bme680_stop(void)
 
 void bme680_cb_begin(void *p_user_data)
 {
-    APPL_LOG("Begin BME680 detect: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
+    APPL_LOG("BME680 transaction begin: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
 }
 
 void bme680_cb_end(ret_code_t result, void *p_user_data)
 {
-    APPL_LOG("BME680 detect received: %s %X", nrf_strerror_get(result), (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data[1]);
+    APPL_LOG("BME680 transaction received: %s %X", nrf_strerror_get(result), (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data[1]);
 }
 
 void bme680_init_begin(void *p_user_data)
@@ -287,7 +289,7 @@ void bme680_init_end(ret_code_t result, void *p_user_data)
     {
         APPL_LOG("BME680 detected OK")
         bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
-        bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
+        //bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
     }
     else
     {

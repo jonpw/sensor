@@ -195,7 +195,7 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
     
     /* Fixed I2C configuration */
     bme680_g.dev_id = BME680_I2C_ADDR_PRIMARY;
-    bme680_g.intf = BME680_I2C_INTF;
+    bme680_g.intf = BME680_SPI_INTF;
     /* User configurable I2C configuration */
     bme680_g.write = bus_write;
     bme680_g.read = bus_read;
