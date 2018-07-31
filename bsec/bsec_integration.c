@@ -202,7 +202,10 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
     bme680_g.delay_ms = sleep;
     
     /* Initialize BME680 API */
+    bsp_board_led_on(0);
     ret.bme680_status = bme680_init(&bme680_g);
+    bsp_board_led_on(1);
+    
 	if (ret.bme680_status != BME680_OK)
 	{
 		return ret;
@@ -210,6 +213,7 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
     
     /* Initialize BSEC library */
     ret.bsec_status = bsec_init();
+    bsp_board_led_on(2);
     if (ret.bsec_status != BSEC_OK)
     {
         return ret;

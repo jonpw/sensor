@@ -415,6 +415,7 @@ ret_code_t ndef_file_default_message(uint8_t * p_buff, uint32_t * p_size)
 
 uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
 {
+    return 0;
     ret_code_t         err_code;
     uint8_t count;
     fds_find_token_t   ftok;
@@ -449,6 +450,7 @@ uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
 
 uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size)
 {
+    return 0;
     ret_code_t         err_code;
     uint8_t count;
     fds_find_token_t   ftok;

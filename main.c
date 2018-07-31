@@ -611,6 +611,9 @@ int main(void)
     // 
     #endif
 
+        bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
+        //bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
+
 
 
     // Enter main loop.

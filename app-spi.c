@@ -144,8 +144,8 @@ nrf_drv_spi_config_t const bme_spi_config =
     .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
 };
 
-uint8_t       bme_data_tx[] = {0x00, 0x00, 0x00};           /**< TX buffer. */
-uint8_t       bme_buffer_rx[] = {0x00, 0x00, 0x00, 0x00};    /**< RX buffer. */
+uint8_t       bme_data_tx[] = {0x00};           /**< TX buffer. */
+uint8_t       bme_buffer_rx[] = {0x00, 0x00};    /**< RX buffer. */
 
 nrf_spi_mngr_transfer_t bme_transfers[] =
 {
@@ -211,19 +211,20 @@ int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, u
  */
 int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len)
 {
-    //uint32_t err_code;
-    //uint8_t * tx_len = &(bme_transaction.p_transfers[0].tx_length);
-    //uint8_t * rx_len = &(bme_transaction.p_transfers[0].rx_length);
-    //bme_data_tx[0] = (reg_addr | 0x80);
+    uint32_t err_code = BME680_E_COM_FAIL;
+    uint8_t * tx_len = &(bme_transaction.p_transfers[0].tx_length);
+    uint8_t * rx_len = &(bme_transaction.p_transfers[0].rx_length);
+    bme_data_tx[0] = (reg_addr | 0x80);
     //*tx_len = 1;
     //*rx_len = data_len+1;
-    //err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
-    //while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
-    //{
-        // nothing
-    //}
-    //memcpy(reg_data_ptr, bme_buffer_rx+1, data_len);
-    //return err_code;
+    err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
+    while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
+    {
+
+    }
+    memcpy(reg_data_ptr, bme_buffer_rx+1, data_len);
+    //err_code = BME680_E_COM_FAIL;
+    return err_code;
 }
 
 /*!
@@ -288,8 +289,6 @@ void bme680_init_end(ret_code_t result, void *p_user_data)
     if (bme_buffer_rx[1] == 0x61)
     {
         APPL_LOG("BME680 detected OK")
-        bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
-        //bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
     }
     else
     {
