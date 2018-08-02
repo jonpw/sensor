@@ -82,6 +82,8 @@
 
 #include "bsec_integration.h"
 
+#include "main.h"
+
 /**********************************************************************************************************************/
 /* local macro definitions */
 /**********************************************************************************************************************/
@@ -202,9 +204,7 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
     bme680_g.delay_ms = sleep;
     
     /* Initialize BME680 API */
-    bsp_board_led_on(0);
     ret.bme680_status = bme680_init(&bme680_g);
-    bsp_board_led_on(1);
     
 	if (ret.bme680_status != BME680_OK)
 	{
@@ -213,7 +213,6 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
     
     /* Initialize BSEC library */
     ret.bsec_status = bsec_init();
-    bsp_board_led_on(2);
     if (ret.bsec_status != BSEC_OK)
     {
         return ret;
@@ -251,6 +250,7 @@ return_values_init bsec_iot_init(float sample_rate, float temperature_offset, bm
         return ret;
     }
     
+    //APPL_LOG("bsec_iot_init: done");
     return ret;
 }
 
@@ -489,6 +489,7 @@ void bsec_iot_init2(sleep_fct sleep_b, get_timestamp_us_fct get_timestamp_us_b, 
     output_ready = output_ready_b;
     state_save = state_save_b;
     save_intvl = save_intvl_b;
+    //APPL_LOG("bsec_iot_init2: done");
 }
 
 void bsec_iot_loop()
@@ -541,6 +542,7 @@ void bsec_iot_loop()
                                    NULL);
         APP_ERROR_CHECK(err_code);
     }
+    //APPL_LOG("bsec_iot_loop: done");
 
 }
 
