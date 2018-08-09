@@ -258,11 +258,13 @@ void pwm_handler(nrf_drv_pwm_evt_type_t event_type)
     APPL_LOG("pwm evt %X", event_type);
 }
 
-void hvac_init(void)
+uint8_t hvac_init(void)
 {
+    APPL_LOG("hvac_init: begin");
     nrf_gpio_cfg(GIO2, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_NOPULL, NRF_GPIO_PIN_H0D1, NRF_GPIO_PIN_NOSENSE);
     APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm0, &config0, pwm_handler));
     seq_carrier[0] = 13;
     APP_ERROR_CHECK(nrf_drv_pwm_init(&m_pwm1, &config1, NULL));
     //nrf_gpio_cfg(GIO1, NRF_GPIO_PIN_DIR_OUTPUT, NRF_GPIO_PIN_INPUT_CONNECT, NRF_GPIO_PIN_PULLUP, NRF_GPIO_PIN_S0S1, NRF_GPIO_PIN_SENSE_LOW);
+    return NRF_SUCCESS;
 }

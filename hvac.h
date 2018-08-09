@@ -117,6 +117,7 @@ extern int                     m_hvac_temp;           // Example 21  (°c)
 extern HvacFanMode_t             m_hvac_fanmode;        // Example FAN_SPEED_AUTO  HvacMitsubishiFanMode
 extern HvacVanneMode_t           m_hvac_vannemode;      // Example VANNE_AUTO_MOVE  HvacMitsubishiVanneMode
 extern int                     m_hvac_off;                  // Example false
+extern uint8_t  hvac_init();
 
 extern void constructCommand(
       HvacMode_t                  HVAC_Mode,           // Example HVAC_HOT  HvacMitsubishiMode

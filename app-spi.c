@@ -144,13 +144,31 @@ nrf_drv_spi_config_t const bme_spi_config =
     .bit_order      = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST
 };
 
-uint8_t       bme_data_tx[] = {0x00};           /**< TX buffer. */
-uint8_t       bme_buffer_rx[32] = {0x00};    /**< RX buffer. */
+uint8_t       bme_data_tx[BME_BUFFER_LEN];           /**< TX buffer. */
+uint8_t       bme_buffer_rx[BME_BUFFER_LEN];    /**< RX buffer. */
 
 nrf_spi_mngr_transfer_t bme_transfers[] =
 {
     NRF_SPI_MNGR_TRANSFER(bme_data_tx, sizeof(bme_data_tx), bme_buffer_rx, sizeof(bme_buffer_rx))
 };
+
+void bme680_init_begin(void *p_user_data)
+{
+    APPL_LOG("Begin BME680 detect: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
+}
+
+void bme680_init_end(ret_code_t result, void *p_user_data)
+{
+    APPL_LOG("BME680 detect received: %s %s", nrf_strerror_get(result), (uint8_t)(((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data[1]);
+    if (bme_buffer_rx[1] == 0x61)
+    {
+        APPL_LOG("BME680 detected OK")
+    }
+    else
+    {
+        APPL_LOG("BME680 not detected")
+    }
+}
 
 nrf_spi_mngr_transaction_t bme_init_transaction =
 {
@@ -161,6 +179,20 @@ nrf_spi_mngr_transaction_t bme_init_transaction =
     .number_of_transfers = sizeof(bme_transfers) / sizeof(bme_transfers[0]),
     .p_required_spi_cfg  = &bme_spi_config
 };
+
+void bme680_cb_begin(void *p_user_data)
+{
+    //APPL_LOG("BME680 transaction begin: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
+    //uint8_t error_string[] = "bme680_cb_begin";
+    //app_sched_event_put(error_string, sizeof(error_string), log_print);
+}
+
+void bme680_cb_end(ret_code_t result, void *p_user_data)
+{
+    //APPL_LOG("BME680 transaction received: %s %X", nrf_strerror_get(result), (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data[1]);
+    //uint8_t error_string[] = "bme680_cb_end";
+    //app_sched_event_put(error_string, sizeof(error_string), log_print);
+}
 
 nrf_spi_mngr_transaction_t bme_transaction =
 {
@@ -190,12 +222,13 @@ int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, u
     bme_data_tx[0] = reg_addr;
     memcpy(bme_data_tx+1, reg_data_ptr, data_len);
     ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].tx_length = data_len + 1;
-    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].rx_length = data_len + 2;
+    ((nrf_spi_mngr_transfer_t*)bme_transaction.p_transfers)[0].rx_length = data_len + 1;
     err_code = nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_transaction);
     while (!nrf_spi_mngr_is_idle(&m_nrf_spi_mngr))
     {
         // nothing
     }
+    APPL_LOG("bme680_write: write: %X ... for %i bytes", bme_transaction.p_transfers[0].p_tx_data[1], data_len);
     return err_code;
 }
 
@@ -211,22 +244,20 @@ int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, u
  */
 
 
-void bme680_cb_begin(void *p_user_data)
-{
-    //APPL_LOG("BME680 transaction begin: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
-}
-
-void bme680_cb_end(ret_code_t result, void *p_user_data)
-{
-    //APPL_LOG("BME680 transaction received: %s %X", nrf_strerror_get(result), (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_rx_data[1]);
-    APPL_LOG("read done");
-}
 
 int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len)
 {
     uint32_t err_code = BME680_E_COM_FAIL;
     uint8_t read_reg = (reg_addr | 0x80);
-    memset(bme_buffer_rx, 0x00, 32);
+    //uint8_t error_string[] = "bme680 read: setup";
+    //app_sched_event_put(error_string, sizeof(error_string), log_print);
+
+    if (data_len > BME_BUFFER_LEN)
+    {
+        APPL_LOG("bme680_read: buffer too small");
+        return err_code;
+    }
+    memset(bme_buffer_rx, 0x00, BME_BUFFER_LEN);
     nrf_spi_mngr_transfer_t bme_read_transfers[] =
     {
         NRF_SPI_MNGR_TRANSFER(&read_reg, 1, bme_buffer_rx, data_len+1)
@@ -248,7 +279,10 @@ int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, ui
     }
     memcpy(reg_data_ptr, bme_buffer_rx+1, data_len);
     //err_code = BME680_E_COM_FAIL;
-    APPL_LOG("bme680 read: done");
+
+    //uint8_t error_string2 = "bme680 read: done";
+    //app_sched_event_put(error_string2, sizeof(error_string2), log_print);
+    APPL_LOG("bme680_read: read: %X ... for %i bytes", (uint8_t)bme_read_transaction.p_transfers[0].p_rx_data[1], data_len);
     return err_code;
 }
 
@@ -280,7 +314,7 @@ int64_t get_timestamp_us()
 
 void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status)
 {
-
+    APPL_LOG("bsec_data_callback:.");
 }
 
 void bme680_begin(void)
@@ -291,25 +325,6 @@ void bme680_begin(void)
 void bme680_stop(void)
 {
 
-}
-
-
-void bme680_init_begin(void *p_user_data)
-{
-    APPL_LOG("Begin BME680 detect: %X", (((nrf_spi_mngr_transfer_t*)p_user_data)[0]).p_tx_data[0]);
-}
-
-void bme680_init_end(ret_code_t result, void *p_user_data)
-{
-    APPL_LOG("BME680 detect received: %s %X", nrf_strerror_get(result), *(uint8_t*)(((nrf_spi_mngr_transfer_t*)p_user_data)[1]).p_rx_data);
-    if (bme_buffer_rx[1] == 0x61)
-    {
-        APPL_LOG("BME680 detected OK")
-    }
-    else
-    {
-        APPL_LOG("BME680 not detected")
-    }
 }
 
 void bma280_spi_init(void)

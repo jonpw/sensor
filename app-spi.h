@@ -56,8 +56,7 @@
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 #define SPI_MNGR_QUEUE_SIZE 4
 
-extern uint8_t       m_master_data_0[];           /**< TX buffer. */
-extern uint8_t       m_master_buffer_rx[];    /**< RX buffer. */
+#define BME_BUFFER_LEN 32
 
 typedef struct
 {
@@ -69,27 +68,14 @@ typedef struct
 
 extern accdata_t accdata;
 // SPI0 (with transaction manager) initialization.
-nrf_drv_spi_config_t const bma_spi_config;
-
-nrf_spi_mngr_transfer_t const transfers[];
-
-nrf_spi_mngr_transaction_t transaction_1;
-
-nrf_spi_mngr_transfer_t bme_transfers[];
-nrf_spi_mngr_transaction_t bme_init_transaction;
-nrf_spi_mngr_transaction_t bme_transaction;
-int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len);
-int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len);
-void bme680_sleep(uint32_t t_ms);
-int64_t get_timestamp_us();
-void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status);
-void bme680_begin(void);
-void bme680_stop(void);
-void bme680_cb_begin(void *p_user_data);
-void bme680_cb_end(ret_code_t result, void *p_user_data);
-void bme680_init_begin(void *p_user_data);
-void bme680_init_end(ret_code_t result, void *p_user_data);
-void bma280_spi_init(void);
+extern void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status);
+extern int8_t bme680_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len);
+extern int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_ptr, uint16_t data_len);
+extern void bme680_sleep(uint32_t t_ms);
+extern int64_t get_timestamp_us();
+extern void bme680_begin(void);
+extern void bme680_stop(void);
+extern void bma280_spi_init(void);
 
 extern void bma280_spi_get(void);
 

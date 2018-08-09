@@ -187,5 +187,6 @@ APP_TIMER_DEF(m_mqtt_connect_timer);
 
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size);
 extern void app_sched_pub_temp(void);
+extern void log_print(void * p_context);
 
 #endif

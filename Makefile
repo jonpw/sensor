@@ -335,13 +335,13 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/ble/ble_dtm \
   $(PROJ_DIR)/bsec \
- ../BSEC_1.4.6.0_Generic_Release_20180425/algo/bin/Normal_version/gcc/Cortex_M4F \
- ../BSEC_1.4.6.0_Generic_Release_20180425/API \
+  $(PROJ_DIR)/../BSEC_1.4.6.0_Generic_Release_20180425/algo/bin/Normal_version/gcc/Cortex_M4F \
+  $(PROJ_DIR)/../BSEC_1.4.6.0_Generic_Release_20180425/API
 
 # Libraries common to all targets
 LIB_FILES += \
   $(SDK_ROOT)/components/nfc/t4t_lib/nfc_t4t_lib_gcc.a \
-  $(SDK_ROOT)/../BSEC_1.4.6.0_Generic_Release_20180425/algo/bin/Normal_version/gcc/Cortex_M4F/libalgobsec.a \
+  $(SDK_ROOT)/../BSEC_1.4.6.0_Generic_Release_20180425/algo/bin/Normal_version/gcc/Cortex_M4F/libalgobsec.a
 
 # Optimization flags
 OPT = -O3 -g3

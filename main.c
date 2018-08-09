@@ -472,6 +472,11 @@ static void log_init(void)
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
+void log_print(void * p_context)
+{
+    APPL_LOG("lp: %s", (uint8_t *)p_context);
+}
+
 // app_state_update called when events occur that should update the main app state
 // sub-states should be updated before calling this
 void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size)
@@ -577,24 +582,33 @@ int main(void)
 
     // Common initialize.
     log_init();
+    APPL_LOG("! log started !");
     scheduler_init();
+    APPL_LOG("scheduler init");
 
     leds_init();
+    APPL_LOG("leds init");
     timers_init();
+    APPL_LOG("timers init");
     iot_timer_init();
+    APPL_LOG("iot timer init");
     button_init();
+    APPL_LOG("button init");
     //    nrf_temp_init(); // sd memory conflict issue
     #ifdef PCA252432
     //  bma280_spi_init();
     #endif
     bma280_spi_init();
+    APPL_LOG("spi init");
     //memcpy(&m_broker_addr.addr, INITIAL_BROKER_ADDR, sizeof(INITIAL_BROKER_ADDR));
     m_display_state = LEDS_INACTIVE;
     m_app_state = STATE_APP_IDLE;
 
     nfc_main_init();
+    APPL_LOG("nfc init");
 
     net_init();
+    APPL_LOG("net init");
 
     m_app_state = STATE_APP_CONNECTABLE;
     m_display_state = LEDS_CONNECTABLE;
@@ -610,11 +624,12 @@ int main(void)
     hvac_init();
     // 
     #endif
-
+APPL_LOG("bsec_iot_init begin");
         return_values_init err_code32 = bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
         APPL_LOG("bsec_iot_init returned %i", err_code32.bsec_status);
         bsec_iot_init2(bme680_sleep, get_timestamp_us, bsec_data_callback, bsec_file_update, 100);
-        //APPL_LOG("bsec_iot_init2 returned %i", err_code);
+        APPL_LOG("bsec_iot_init2 returned %i", err_code);
+        bme680_begin();
 
 
 

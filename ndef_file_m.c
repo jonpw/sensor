@@ -109,21 +109,21 @@ static void ndef_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 static void bsec_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 {
     // Set up record.
-    m_record.file_id           = FILE_ID;
-    m_record.key               = BSEC_REC_KEY;
-    m_record.data.p_data       = p_buff;
+    bsec_record.file_id           = FILE_ID;
+    bsec_record.key               = BSEC_REC_KEY;
+    bsec_record.data.p_data       = p_buff;
     // max size is BSEC_MAX_STATE_BLOB_SIZE
-    m_record.data.length_words = BYTES_TO_WORDS(size); // Align data length to 4 bytes.
+    bsec_record.data.length_words = BYTES_TO_WORDS(size); // Align data length to 4 bytes.
 }
 
 static void bsec_config_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 {
     // Set up record.
-    m_record.file_id           = FILE_ID;
-    m_record.key               = BSEC_CONFIG_REC_KEY;
-    m_record.data.p_data       = p_buff;
+    bsec_config_record.file_id           = FILE_ID;
+    bsec_config_record.key               = BSEC_CONFIG_REC_KEY;
+    bsec_config_record.data.p_data       = p_buff;
     // max size is BSEC_MAX_STATE_BLOB_SIZE
-    m_record.data.length_words = BYTES_TO_WORDS(size); // Align data length to 4 bytes.
+    bsec_config_record.data.length_words = BYTES_TO_WORDS(size); // Align data length to 4 bytes.
 }
 
 
