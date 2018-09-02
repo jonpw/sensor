@@ -307,7 +307,7 @@ int64_t get_timestamp_us_app()
 {
     int64_t system_current_time = 0;
     uint32_t app_time_ticks = app_timer_cnt_get();
-    APPL_LOG("app_timer: %i", app_time_ticks);
+    //APPL_LOG("app_timer: %i", app_time_ticks);
     system_current_time = (app_time_ticks * 1000);
     return system_current_time;
 }
@@ -315,10 +315,10 @@ int64_t get_timestamp_us_app()
 
 void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status)
 {
-    APPL_LOG("bsec_data_callback: %i", iaq);
+    APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(iaq));
     APPL_LOG("bsec_data_callback: %i", iaq_accuracy);
-    APPL_LOG("bsec_data_callback: %f", temperature);
-    APPL_LOG("bsec_data_callback: %f", humidity);
+    APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(temperature));
+    APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(humidity));
     APPL_LOG("bsec_data_callback: %i", pressure);
     APPL_LOG("bsec_data_callback: %i", raw_temperature);
     APPL_LOG("bsec_data_callback: %i", raw_humidity);
