@@ -303,18 +303,26 @@ void bme680_sleep(uint32_t t_ms)
  *
  * @return          system_current_time    current system timestamp in microseconds
  */
-int64_t get_timestamp_us()
+int64_t get_timestamp_us_app()
 {
     int64_t system_current_time = 0;
     uint32_t app_time_ticks = app_timer_cnt_get();
-    system_current_time = app_time_ticks * 1000000 / APP_TIMER_CLOCK_FREQ;
+    APPL_LOG("app_timer: %i", app_time_ticks);
+    system_current_time = (app_time_ticks * 1000);
     return system_current_time;
 }
 
 
 void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status)
 {
-    APPL_LOG("bsec_data_callback:.");
+    APPL_LOG("bsec_data_callback: %i", iaq);
+    APPL_LOG("bsec_data_callback: %i", iaq_accuracy);
+    APPL_LOG("bsec_data_callback: %f", temperature);
+    APPL_LOG("bsec_data_callback: %f", humidity);
+    APPL_LOG("bsec_data_callback: %i", pressure);
+    APPL_LOG("bsec_data_callback: %i", raw_temperature);
+    APPL_LOG("bsec_data_callback: %i", raw_humidity);
+    APPL_LOG("bsec_data_callback: %i", gas);
 }
 
 void bme680_begin(void)

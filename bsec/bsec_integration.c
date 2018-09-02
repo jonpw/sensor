@@ -499,6 +499,7 @@ void bsec_iot_loop()
 
     /* get the timestamp in nanoseconds before calling bsec_sensor_control() */
     time_stamp = get_timestamp_us() * 1000;
+    APPL_LOG("time: %i", time_stamp);
 	
     /* Retrieve sensor settings to be used in this time instant by calling bsec_sensor_control */
     bsec_sensor_control(time_stamp, &sensor_settings);

@@ -77,8 +77,8 @@ ret_code_t ndef_file_setup(void);
  *          Otherwise, FDS error code.
  */
 ret_code_t ndef_file_update(uint8_t const * p_buff, uint32_t size);
-ret_code_t bsec_file_update(uint8_t const * p_buff, uint32_t size);
-ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size);
+extern ret_code_t bsec_file_update(uint8_t const * p_buff, uint32_t size);
+extern ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size);
 /**
  * @brief   Function for loading NDEF message from the flash file.
  *
@@ -92,8 +92,8 @@ ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size);
  *          Otherwise, FDS error code.
  */
 ret_code_t ndef_file_load(uint8_t * p_buff, uint32_t size);
-uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size);
-uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size);
+extern uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size);
+extern uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size);
 /**
  * @brief  Function for creating the default NDEF message: URL "nordicsemi.com".
  *

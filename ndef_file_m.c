@@ -66,6 +66,8 @@
 NRF_LOG_MODULE_REGISTER();
 
 #define FILE_ID 0x1111                              /**< NDEF message file ID. */
+#define BSEC_FILE_ID 0x1112
+#define BSEC_CONFIG_FILE_ID 0x1113
 #define REC_KEY 0x2222                              /**< NDEF message record KEY. */
 #define BSEC_REC_KEY 0x3333
 #define BSEC_CONFIG_REC_KEY 0x4444
@@ -109,7 +111,7 @@ static void ndef_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 static void bsec_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 {
     // Set up record.
-    bsec_record.file_id           = FILE_ID;
+    bsec_record.file_id           = BSEC_FILE_ID;
     bsec_record.key               = BSEC_REC_KEY;
     bsec_record.data.p_data       = p_buff;
     // max size is BSEC_MAX_STATE_BLOB_SIZE
@@ -119,7 +121,7 @@ static void bsec_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 static void bsec_config_file_prepare_record(uint8_t const * p_buff, uint32_t size)
 {
     // Set up record.
-    bsec_config_record.file_id           = FILE_ID;
+    bsec_config_record.file_id           = BSEC_CONFIG_FILE_ID;
     bsec_config_record.key               = BSEC_CONFIG_REC_KEY;
     bsec_config_record.data.p_data       = p_buff;
     // max size is BSEC_MAX_STATE_BLOB_SIZE
@@ -318,7 +320,7 @@ ret_code_t bsec_file_update(uint8_t const * p_buff, uint32_t size)
     bsec_file_prepare_record(p_buff, size);
 
     // Update FLASH file with new NDEF message.
-    err_code = fds_record_update(&bsec_record_desc, &bsec_record);
+    err_code = fds_record_write(&bsec_record_desc, &bsec_record);
     if (err_code == FDS_ERR_NO_SPACE_IN_FLASH)
     {
         // If there is no space, preserve update request and call Garbage Collector.
@@ -328,6 +330,7 @@ ret_code_t bsec_file_update(uint8_t const * p_buff, uint32_t size)
         NRF_LOG_INFO("FDS has no space left, Garbage Collector triggered!");
         err_code = fds_gc();
     }
+    NRF_LOG_INFO("updated %i bytes to bsec record", size);
     return err_code;
 }
 
@@ -339,7 +342,7 @@ ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size)
     bsec_config_file_prepare_record(p_buff, size);
 
     // Update FLASH file with new NDEF message.
-    err_code = fds_record_update(&bsec_config_record_desc, &bsec_config_record);
+    err_code = fds_record_write(&bsec_config_record_desc, &bsec_config_record);
     if (err_code == FDS_ERR_NO_SPACE_IN_FLASH)
     {
         // If there is no space, preserve update request and call Garbage Collector.
@@ -349,6 +352,7 @@ ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size)
         NRF_LOG_INFO("FDS has no space left, Garbage Collector triggered!");
         err_code = fds_gc();
     }
+    NRF_LOG_INFO("updated %i bytes to bsec config record", size);
     return err_code;
 }
 
