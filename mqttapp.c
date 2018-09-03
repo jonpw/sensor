@@ -73,6 +73,7 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
+#include "nrf_queue.h"
 
 #include "main.h"
 #include "mqttapp.h"
@@ -95,6 +96,10 @@ char mqtt_username[16] = DEFAULT_MQTT_USER;
 char mqtt_password[16] = DEFAULT_MQTT_PASS;
 mqtt_username_t m_mqtt_username = {.p_utf_str = &mqtt_username, .utf_strlen = 0};
 mqtt_password_t m_mqtt_password = {.p_utf_str = &mqtt_password, .utf_strlen = 0};
+
+NRF_QUEUE_DEF(mqtt_simple_msg_t, msg_queue_m, 10, NRF_QUEUE_MODE_NO_OVERFLOW);
+NRF_QUEUE_INTERFACE_DEC(mqtt_simple_msg_t, msg_queue);
+NRF_QUEUE_INTERFACE_DEF(mqtt_simple_msg_t, msg_queue, &msg_queue_m);
 
 char topic_base[32];
 
@@ -179,6 +184,49 @@ static uint8_t app_mqtt_connect(ip_addr_t * ipaddr)
     return err_code;
 }
 
+void app_mqtt_queue(uint8_t * t, uint8_t * m)
+{
+    mqtt_simple_msg_t simple_msg = {
+        .topic = t,
+        .message = m
+    };
+    ret_code_t err_code = msg_queue_push(&simple_msg);
+    APP_ERROR_CHECK(err_code);
+}
+
+void app_mqtt_queue_do()
+{
+    mqtt_simple_msg_t simple_msg;
+    if (msg_queue_pop(&simple_msg) == 0)
+    {
+        app_mqtt_publish_simple(simple_msg.topic, simple_msg.message);
+    }
+}
+
+void app_mqtt_publish_simple(uint8_t * t, uint8_t * m)
+{
+    mqtt_publish_message_t pubmsg;
+    pubmsg.topic.qos = MQTT_QoS_0_AT_MOST_ONCE;
+    APPL_LOG("pub_simp: %s %s", t, m);
+    uint8_t top[64] = "";
+    strncat(top, topic_base, 64);
+    strncat(top, t, 64);
+    pubmsg.topic.topic.p_utf_str = top;
+    pubmsg.topic.topic.utf_strlen = strlen(top);
+    uint8_t msg[16] = "";
+    strncat(msg, m, 16);
+    pubmsg.payload.p_bin_str = m;
+    pubmsg.payload.bin_strlen = strlen(m);
+    app_mqtt_publish(&pubmsg);
+}
+
+void app_mqtt_publish_many(mqtt_simple_msg_t * msgs, uint8_t len)
+{
+    for (int i = 0;i<len;i++)
+    {
+        app_mqtt_publish_simple(msgs[i].topic, msgs[i].message);
+    }
+}
 
 /**@brief Publishes LED state to MQTT broker.
  *
@@ -307,6 +355,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
                 state_update.evt_type   = STATE_EVENT_MQTT_CONNECT;
                 err_code       = app_sched_event_put(&state_update, sizeof(app_state_event_data_t), app_state_update);
                 APP_ERROR_CHECK(err_code);
+                bme680_begin();
             }
             else
             {
@@ -323,6 +372,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
         {
             APPL_LOG (">> MQTT_EVT_PUBACK");
             //TODO: indicate confirmation of transmission?
+            app_mqtt_queue_do();
             break;
         }
         case MQTT_EVT_PUBLISH:

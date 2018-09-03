@@ -81,6 +81,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh_soc.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_nfc.c \
+  $(SDK_ROOT)/components/libraries/queue/nrf_queue.c \
   $(PROJ_DIR)/main.c \
   $(PROJ_DIR)/net.c \
   $(PROJ_DIR)/mqttapp.c \
@@ -240,6 +241,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/drivers_nrf/wdt \
   $(SDK_ROOT)/components/libraries/crc32 \
   $(SDK_ROOT)/components/libraries/fds \
+  $(SDK_ROOT)/components/libraries/queue \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/mouse \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/components/nfc/ndef/uri \

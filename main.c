@@ -512,7 +512,8 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_CONNECT_FAILED)
     {
         m_display_state = LEDS_MQTT_FAIL;
-        err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+        //err_code       = app_sched_event_put(&ipaddr_last_dns, sizeof(&ipaddr_last_dns), mqtt_begin);
+        err_code = app_timer_start(m_mqtt_connect_timer, APP_TIMER_TICKS(3000), NULL);
         APP_ERROR_CHECK(err_code);
         m_app_state = STATE_APP_MQTT_CONNECTING;
     }
@@ -629,7 +630,7 @@ APPL_LOG("bsec_iot_init begin");
         APPL_LOG("bsec_iot_init returned %i", err_code32.bsec_status);
         bsec_iot_init2(bme680_sleep, get_timestamp_us_app, bsec_data_callback, bsec_file_update, 100);
         APPL_LOG("bsec_iot_init2 returned %i", err_code);
-        bme680_begin();
+        //bme680_begin();
 
 
 

@@ -105,6 +105,12 @@ typedef enum
     STATE_MQTT_CONNECTED        // connected and ready
 } mqtt_state_t;
 
+typedef struct
+{
+	uint8_t * topic;
+	uint8_t * message;
+} mqtt_simple_msg_t;
+
 eui64_t                                     eui64_local_iid;                                        /**< Local EUI64 value that is used as the IID for*/
 // TODO: make mqtt client id unique e.g. based on hardware serial # or hash thereof
 extern char                           m_client_id[16];                         /**< Unique MQTT client identifier. */
