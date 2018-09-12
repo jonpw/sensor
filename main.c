@@ -96,6 +96,7 @@
 
 #include "hvac.h"
 
+#include "bsec_integration.h"
 //static iot_interface_t      * mp_interface = NULL;                                                  /**< Pointer to IoT interface if any. */
 static volatile app_state_t   m_app_state = STATE_APP_IDLE;                                         /**< State of application state machine. */
 
@@ -296,7 +297,8 @@ static void button_event_handler(uint8_t pin_no, uint8_t button_action)
             #if defined(PCA252432)
             case BSP_BUTTON_2:
             {
-                hvac_transmit();
+                //hvac_transmit();
+                bsec_iot_loop();
                 /*mqtt_publish_message_t pubmsg;
                 pubmsg.topic.qos = MQTT_QoS_2_EACTLY_ONCE;
                 pubmsg.topic.topic.p_utf_str = strcpy(pubmsg.topic.topic.p_utf_str, m_topic_button_3);
@@ -531,7 +533,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         topic.topic.utf_strlen = strlen(subtopic);
         APPL_LOG("sub to: %s %s %s, %i", topic_base, "#", subtopic, topic.topic.utf_strlen);
         topic.topic.p_utf_str = subtopic;
-        app_mqtt_subscribe(&topic);
+        //app_mqtt_subscribe(&topic);
         // todo: should we handle initial pubs here?
     }
     else if (p_event_data->evt_type == STATE_EVENT_MQTT_DISCONNECT)
@@ -626,9 +628,9 @@ int main(void)
     // 
     #endif
 APPL_LOG("bsec_iot_init begin");
-        return_values_init err_code32 = bsec_iot_init(BSEC_SAMPLE_RATE_LP, 0.0f, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
+        return_values_init err_code32 = bsec_iot_init(BSEC_SAMPLE_RATE_LP, 2.0f, bme680_write, bme680_read, bme680_sleep, bsec_file_load, bsec_config_file_load);
         APPL_LOG("bsec_iot_init returned %i", err_code32.bsec_status);
-        bsec_iot_init2(bme680_sleep, get_timestamp_us_app, bsec_data_callback, bsec_file_update, 100);
+        bsec_iot_init2(bme680_sleep, get_timestamp_us_app, bsec_data_callback, bsec_file_update, 1200);
         APPL_LOG("bsec_iot_init2 returned %i", err_code);
         //bme680_begin();
 

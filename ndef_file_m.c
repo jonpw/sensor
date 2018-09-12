@@ -78,6 +78,7 @@ static const uint8_t m_url[] =                      /**< Default NDEF message: U
 static volatile bool m_fds_ready      = false;      /**< Flag used to indicate that FDS initialization is finished. */
 static volatile bool m_pending_write  = false;      /**< Flag used to preserve write request during Garbage Collector activity. */
 static volatile bool m_pending_update = false;      /**< Flag used to preserve update request during Garbage Collector activity. */
+static volatile m_pending_type_t m_pending_type;
 
 static uint32_t        m_pending_msg_size   = 0;    /**< Pending write/update request data size. */
 static uint8_t const * m_p_pending_msg_buff = NULL; /**< Pending write/update request data pointer. */
@@ -156,6 +157,7 @@ static ret_code_t ndef_file_create(uint8_t const * p_buff, uint32_t size)
         m_pending_write      = true;
         m_pending_msg_size   = size;
         m_p_pending_msg_buff = p_buff;
+        m_pending_type = PENDING_NDEF;
         NRF_LOG_INFO("FDS has no free space left, Garbage Collector triggered!");
         err_code = fds_gc();
     }
@@ -179,6 +181,7 @@ static ret_code_t bsec_file_create(uint8_t const * p_buff, uint32_t size)
         m_pending_write      = true;
         m_pending_msg_size   = size;
         m_p_pending_msg_buff = p_buff;
+        m_pending_type = PENDING_BSEC;
         NRF_LOG_INFO("FDS has no free space left, Garbage Collector triggered!");
         err_code = fds_gc();
     }
@@ -202,6 +205,7 @@ static ret_code_t bsec_config_file_create(uint8_t const * p_buff, uint32_t size)
         m_pending_write      = true;
         m_pending_msg_size   = size;
         m_p_pending_msg_buff = p_buff;
+        m_pending_type = PENDING_BSEC_CONFIG;
         NRF_LOG_INFO("FDS has no free space left, Garbage Collector triggered!");
         err_code = fds_gc();
     }
@@ -250,14 +254,32 @@ static void fds_evt_handler(fds_evt_t const * const p_fds_evt)
             {
                 NRF_LOG_DEBUG("Write pending msg.", p_fds_evt->id, p_fds_evt->result);
                 m_pending_write = false;
-                err_code        = ndef_file_create(m_p_pending_msg_buff, m_pending_msg_size);
+                if (m_pending_type == PENDING_NDEF)
+                {
+                    err_code        = ndef_file_create(m_p_pending_msg_buff, m_pending_msg_size);
+                } else if (m_pending_type == PENDING_BSEC)
+                {
+                    err_code        = bsec_file_create(m_p_pending_msg_buff, m_pending_msg_size);
+                } else if (m_pending_type == PENDING_BSEC_CONFIG)
+                {
+                    err_code        = bsec_config_file_create(m_p_pending_msg_buff, m_pending_msg_size);
+                }
                 APP_ERROR_CHECK(err_code);
             }
             else if (m_pending_update)
             {
                 NRF_LOG_DEBUG("Update pending msg.", p_fds_evt->id, p_fds_evt->result);
                 m_pending_update = false;
-                err_code         = ndef_file_update(m_p_pending_msg_buff, m_pending_msg_size);
+                if (m_pending_type == PENDING_NDEF)
+                {
+                    err_code        = ndef_file_update(m_p_pending_msg_buff, m_pending_msg_size);
+                } else if (m_pending_type == PENDING_BSEC)
+                {
+                    err_code        = bsec_file_update(m_p_pending_msg_buff, m_pending_msg_size);
+                } else if (m_pending_type == PENDING_BSEC_CONFIG)
+                {
+                    err_code        = bsec_config_file_update(m_p_pending_msg_buff, m_pending_msg_size);
+                }
                 APP_ERROR_CHECK(err_code);
             }
             break;
@@ -320,7 +342,7 @@ ret_code_t bsec_file_update(uint8_t const * p_buff, uint32_t size)
     bsec_file_prepare_record(p_buff, size);
 
     // Update FLASH file with new NDEF message.
-    err_code = fds_record_write(&bsec_record_desc, &bsec_record);
+    err_code = fds_record_update(&bsec_record_desc, &bsec_record);
     if (err_code == FDS_ERR_NO_SPACE_IN_FLASH)
     {
         // If there is no space, preserve update request and call Garbage Collector.
@@ -342,7 +364,7 @@ ret_code_t bsec_config_file_update(uint8_t const * p_buff, uint32_t size)
     bsec_config_file_prepare_record(p_buff, size);
 
     // Update FLASH file with new NDEF message.
-    err_code = fds_record_write(&bsec_config_record_desc, &bsec_config_record);
+    err_code = fds_record_update(&bsec_config_record_desc, &bsec_config_record);
     if (err_code == FDS_ERR_NO_SPACE_IN_FLASH)
     {
         // If there is no space, preserve update request and call Garbage Collector.
@@ -419,7 +441,7 @@ ret_code_t ndef_file_default_message(uint8_t * p_buff, uint32_t * p_size)
 
 uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
 {
-    return 0;
+    //return 0;
     ret_code_t         err_code;
     uint8_t count;
     fds_find_token_t   ftok;
@@ -443,6 +465,7 @@ uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
         NRF_LOG_INFO("BSEC file record not found, returning zero bytes.", err_code);
 
         // Create record with default NDEF message.
+        err_code = bsec_file_create(p_buff, size);
         count = 0;
     }
     else
@@ -454,7 +477,7 @@ uint8_t bsec_file_load(uint8_t * p_buff, uint32_t size)
 
 uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size)
 {
-    return 0;
+    //return 0;
     ret_code_t         err_code;
     uint8_t count;
     fds_find_token_t   ftok;
@@ -478,6 +501,7 @@ uint8_t bsec_config_file_load(uint8_t * p_buff, uint32_t size)
         NRF_LOG_INFO("BSEC file record not found, returning zero bytes.", err_code);
 
         // Create record with default NDEF message.
+        err_code = bsec_config_file_create(p_buff, size);
         count = 0;
     }
     else

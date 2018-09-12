@@ -56,6 +56,13 @@
 #include "sdk_errors.h"
 #include "nrf.h"
 
+typedef enum
+{
+	PENDING_NDEF,
+	PENDING_BSEC,
+	PENDING_BSEC_CONFIG
+} m_pending_type_t;
+
 /**
  * @brief   Function for initializing the FDS module.
  *

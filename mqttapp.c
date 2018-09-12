@@ -97,7 +97,7 @@ char mqtt_password[16] = DEFAULT_MQTT_PASS;
 mqtt_username_t m_mqtt_username = {.p_utf_str = &mqtt_username, .utf_strlen = 0};
 mqtt_password_t m_mqtt_password = {.p_utf_str = &mqtt_password, .utf_strlen = 0};
 
-NRF_QUEUE_DEF(mqtt_simple_msg_t, msg_queue_m, 10, NRF_QUEUE_MODE_NO_OVERFLOW);
+NRF_QUEUE_DEF(mqtt_simple_msg_t, msg_queue_m, 24, NRF_QUEUE_MODE_NO_OVERFLOW);
 NRF_QUEUE_INTERFACE_DEC(mqtt_simple_msg_t, msg_queue);
 NRF_QUEUE_INTERFACE_DEF(mqtt_simple_msg_t, msg_queue, &msg_queue_m);
 
@@ -190,8 +190,15 @@ void app_mqtt_queue(uint8_t * t, uint8_t * m)
         .topic = t,
         .message = m
     };
-    ret_code_t err_code = msg_queue_push(&simple_msg);
-    APP_ERROR_CHECK(err_code);
+    if (!msg_queue_is_full())
+    {
+        ret_code_t err_code = msg_queue_push(&simple_msg);
+        APP_ERROR_CHECK(err_code);        
+    }
+    else
+    {
+        APPL_LOG("msg dropped");
+    }
 }
 
 void app_mqtt_queue_do()
@@ -207,7 +214,7 @@ void app_mqtt_publish_simple(uint8_t * t, uint8_t * m)
 {
     mqtt_publish_message_t pubmsg;
     pubmsg.topic.qos = MQTT_QoS_0_AT_MOST_ONCE;
-    APPL_LOG("pub_simp: %s %s", t, m);
+    //APPL_LOG("pub_simp: %s %s", t, m);
     uint8_t top[64] = "";
     strncat(top, topic_base, 64);
     strncat(top, t, 64);
@@ -251,7 +258,7 @@ void app_mqtt_publish(mqtt_publish_message_t * pubmsg)
 
     APPL_LOG("mqtt_publish: %s:%s", pubmsg2.topic.topic.p_utf_str, pubmsg2.payload.p_bin_str);
     err_code = mqtt_publish(&m_app_mqtt_client, &param);
-    APPL_LOG("mqtt_publish result 0x%08lx", err_code);
+    //APPL_LOG("mqtt_publish result 0x%08lx", err_code);
 
     if (err_code == NRF_SUCCESS)
     {
@@ -338,7 +345,7 @@ void app_mqtt_evt_handler(mqtt_client_t * const p_client, const mqtt_evt_t * p_e
     uint32_t err_code;
     app_state_event_data_t state_update;
     char const * p_desc = nrf_strerror_get(p_evt->result);
-    APPL_LOG ("app_mqtt_evt_handler: called with err_code=%X", p_evt->result);
+    //APPL_LOG ("app_mqtt_evt_handler: called with err_code=%X", p_evt->result);
 
 
     switch (p_evt->id)

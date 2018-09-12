@@ -496,6 +496,7 @@ void bsec_iot_loop()
 {
 
     uint32_t err_code;
+    APPL_LOG("bsec_iot_loop: begin");
 
     /* get the timestamp in nanoseconds before calling bsec_sensor_control() */
     time_stamp = get_timestamp_us() * 1000;
@@ -528,10 +529,17 @@ void bsec_iot_loop()
         n_samples = 0;
     }
     
-    
     /* Compute how long we can sleep until we need to call bsec_sensor_control() next */
     /* Time_stamp is converted from microseconds to nanoseconds first and then the difference to milliseconds */
     time_stamp_interval_ms = (sensor_settings.next_call - get_timestamp_us() * 1000) / 1000000;
+    if (time_stamp_interval_ms == 0)
+    {
+        time_stamp_interval_ms = 1000;
+    }
+    if (time_stamp_interval_ms > 5000)
+    {
+        time_stamp_interval_ms = 3000;
+    }
     if (time_stamp_interval_ms > 0)
     {
         err_code = app_timer_create(&m_bsec_timer_tick_src_id,
@@ -543,7 +551,7 @@ void bsec_iot_loop()
                                    NULL);
         APP_ERROR_CHECK(err_code);
     }
-    //APPL_LOG("bsec_iot_loop: done");
+    APPL_LOG("bsec_iot_loop: done, next in %i ms", time_stamp_interval_ms);
 
 }
 

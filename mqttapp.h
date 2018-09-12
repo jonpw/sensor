@@ -129,6 +129,6 @@ int mqtt_app_init(void);
 void app_mqtt_publish(mqtt_publish_message_t * pubmsg);
 void app_mqtt_subscribe(mqtt_topic_t * topic);
 void app_mqtt_unsubscribe(mqtt_topic_t * topic);
-
+extern void app_mqtt_queue_do();
 
 #endif

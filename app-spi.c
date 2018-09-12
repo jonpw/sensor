@@ -52,6 +52,7 @@
 #include "app-spi.h"
 #include "bsec_integration.h"
 #include "ndef_file_m.h"
+#include "app_scheduler.h"
 #include "mqttapp.h"
 
 
@@ -306,13 +307,12 @@ void bme680_sleep(uint32_t t_ms)
  */
 int64_t get_timestamp_us_app()
 {
-    int64_t system_current_time = 0;
-    uint32_t app_time_ticks = app_timer_cnt_get();
-    //APPL_LOG("app_timer: %i", app_time_ticks);
-    system_current_time = (app_time_ticks * 1000);
+    static int64_t system_current_time = 0;
+    //APPL_LOG("diff: %i", app_timer_cnt_diff_compute(app_timer_cnt_get(), system_current_time/1000));
+    system_current_time += (app_timer_cnt_diff_compute(app_timer_cnt_get(), system_current_time/1000) * 1000);
+    APPL_LOG("system current time: %i", system_current_time);
     return system_current_time;
 }
-
 
 void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, float temperature, float humidity, float pressure, float raw_temperature, float raw_humidity, float gas, bsec_library_return_t bsec_status)
 {
@@ -320,31 +320,32 @@ void bsec_data_callback(int64_t timestamp, float iaq, uint8_t iaq_accuracy, floa
     //sprintf(msg[0], NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(iaq));
     snprintf(msg[0], 16, "%f", iaq);
     app_mqtt_queue("iaq", msg[0]);
-    APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(iaq));
+    //APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(iaq));
     snprintf(msg[1], 16, "%i", iaq_accuracy);
     app_mqtt_queue("iaq_accuracy", msg[1]);
-    APPL_LOG("bsec_data_callback: %i", iaq_accuracy);
+    //APPL_LOG("bsec_data_callback: %i", iaq_accuracy);
     //sprintf(msg[2], NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(temperature));
     snprintf(msg[2], 16, "%f", temperature);
     app_mqtt_queue("temperature", msg[2]);
-    APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(temperature));
+    //APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(temperature));
     //sprintf(msg[3], NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(humidity));
     snprintf(msg[3], 16, "%f", humidity);
     app_mqtt_queue("humidity", msg[3]);
-    APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(humidity));
+    //APPL_LOG("bsec_data_callback: " NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(humidity));
     //sprintf(msg[4], NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(pressure));
     snprintf(msg[4], 16, "%f", pressure);
     app_mqtt_queue("pressure", msg[4]);
-    APPL_LOG("bsec_data_callback: %i", pressure);
+    //APPL_LOG("bsec_data_callback: %i", pressure);
     //app_mqtt_publish_simple("raw_temperature", sprintf(msg, NRF_LOG_FLOAT_MARKER, raw_temperature));
-    APPL_LOG("bsec_data_callback: %i", raw_temperature);
+    //APPL_LOG("bsec_data_callback: %i", raw_temperature);
     //app_mqtt_publish_simple("raw_humidity", sprintf(msg, NRF_LOG_FLOAT_MARKER, raw_humidity));
-    APPL_LOG("bsec_data_callback: %i", raw_humidity);
+    //APPL_LOG("bsec_data_callback: %i", raw_humidity);
     //sprintf(msg[5], NRF_LOG_FLOAT_MARKER, NRF_LOG_FLOAT(gas));
     snprintf(msg[5], 16, "%f", gas);
     app_mqtt_queue("gas", msg[5]);
-    APPL_LOG("bsec_data_callback: %i", gas);
-    app_mqtt_queue_do();
+    //APPL_LOG("bsec_data_callback: %i", gas);
+    uint32_t err_code = app_sched_event_put(NULL, 0, app_mqtt_queue_do);
+    APP_ERROR_CHECK(err_code);
 }
 
 void bme680_begin(void)
@@ -364,7 +365,7 @@ void bma280_spi_init(void)
     // begin BME680 check
     bme_data_tx[0] = (0x50 | 0x80);
     APP_ERROR_CHECK(nrf_spi_mngr_schedule(&m_nrf_spi_mngr, &bme_init_transaction));
-    nrf_delay_ms(100);
+    //nrf_delay_ms(100);
 }
 
 #endif
