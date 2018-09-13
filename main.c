@@ -533,6 +533,7 @@ void app_state_update(app_state_event_data_t * p_event_data, uint16_t event_size
         topic.topic.utf_strlen = strlen(subtopic);
         APPL_LOG("sub to: %s %s %s, %i", topic_base, "#", subtopic, topic.topic.utf_strlen);
         topic.topic.p_utf_str = subtopic;
+        bme680_begin();
         //app_mqtt_subscribe(&topic);
         // todo: should we handle initial pubs here?
     }

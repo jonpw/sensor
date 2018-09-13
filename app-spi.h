@@ -74,7 +74,6 @@ extern int8_t bme680_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data_
 extern void bme680_sleep(uint32_t t_ms);
 extern int64_t get_timestamp_us_app();
 extern void bme680_begin(void);
-extern void bme680_stop(void);
 extern void bma280_spi_init(void);
 
 extern void bma280_spi_get(void);

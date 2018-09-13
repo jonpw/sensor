@@ -117,6 +117,7 @@ static uint8_t bsec_state[BSEC_MAX_STATE_BLOB_SIZE];
 static uint8_t work_buffer[BSEC_MAX_STATE_BLOB_SIZE];
 static uint32_t bsec_state_len = 0;
 static uint32_t n_samples = 0;
+static bool m_bsec_stop = false;
     
 static bsec_library_return_t bsec_status = BSEC_OK;
 sleep_fct sleep;
@@ -312,6 +313,12 @@ static void bme680_bsec_trigger_measurement(bsec_bme_settings_t *sensor_settings
     }
 }
 
+void bme680_stop()
+{
+    m_bsec_stop = true;
+}
+
+
 /*!
  * @brief       Read the data from registers and populate the inputs structure to be passed to do_steps function
  *
@@ -495,6 +502,12 @@ void bsec_iot_init2(sleep_fct sleep_b, get_timestamp_us_fct get_timestamp_us_b, 
 void bsec_iot_loop()
 {
 
+    if (m_bsec_stop == true)
+    {
+        m_bsec_stop = false;
+        return;
+    }
+
     uint32_t err_code;
     APPL_LOG("bsec_iot_loop: begin");
 
@@ -535,10 +548,6 @@ void bsec_iot_loop()
     if (time_stamp_interval_ms == 0)
     {
         time_stamp_interval_ms = 1000;
-    }
-    if (time_stamp_interval_ms > 5000)
-    {
-        time_stamp_interval_ms = 3000;
     }
     if (time_stamp_interval_ms > 0)
     {

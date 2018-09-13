@@ -353,11 +353,6 @@ void bme680_begin(void)
     bsec_iot_loop();
 }
 
-void bme680_stop(void)
-{
-
-}
-
 void bma280_spi_init(void)
 {
     APPL_LOG("begin spi init");
